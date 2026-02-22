@@ -3,3 +3,5 @@ output/
 deep_sort/resources/
 *.pyc
 __pycache__/
+TrackEval/data/
+MOT15/
