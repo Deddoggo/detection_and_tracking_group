@@ -5,3 +5,5 @@ deep_sort/resources/
 __pycache__/
 TrackEval/data/
 MOT15/
+*.pt
+*.bin
