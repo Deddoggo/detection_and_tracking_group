@@ -22,19 +22,24 @@ Newer version:
 pip install ultralytics boxmot transformers accelerate timm
 pip install opencv-python numpy scikit-learn
 ```
-### 3. Downloads folder resources and move it in folder deep_sort, you can ignore folder detection and only download networks folder:
-https://drive.google.com/drive/folders/18fKzfqnqhqW3s9zwsCbnVJ5XF2JFeqMp \\
-Download the weights folder for newer yolo, reid, mixste models. Extract the downloaded files and place them inside root of this project: \\
-https://drive.google.com/drive/folders/1KUbfE7mWMYmqWQwFIHN_WlORQy9Dq_cg?usp=sharing \\
-Your directory structure should look like this: \\
-detection_and_tracking_group/ \\
-├── yolo12x.pt \\
-├── osnet_ain_x1_0_msmt17.pt \\
-├── best_epoch_cpn_243f.bin \\
-├── ... (other downloaded weights) \\
-├── yolo_detection_vitpose_draw.py \\
-├── identify_group_social.py \\
-└── README.md \\
+### 3. Download Model Weights
+* Download the folder resources and move it in folder `deep_sort` (you can ignore the detection folder and only download the networks folder):
+  👉 [Link to DeepSORT resources](https://drive.google.com/drive/folders/18fKzfqnqhqW3s9zwsCbnVJ5XF2JFeqMp)
+
+* Download the weights for newer YOLO, ReID, and MixSTE models. Extract the downloaded files and place them directly inside the root of this project:
+  👉 [Link to New Models](https://drive.google.com/drive/folders/1KUbfE7mWMYmqWQwFIHN_WlORQy9Dq_cg?usp=sharing)
+
+Your directory structure should look exactly like this:
+```text
+detection_and_tracking_group/
+├── yolo12x.pt
+├── osnet_ain_x1_0_msmt17.pt
+├── best_epoch_cpn_243f.bin
+├── ... (other downloaded weights)
+├── yolo_detection_vitpose_draw.py
+├── identify_group_social.py
+└── README.md
+```
 ### 4. Run below cmd line to detection human and create folder frames:
 ```
 python detection.py --input_video [Link to your video] --output_folder [Link to your output folder]
