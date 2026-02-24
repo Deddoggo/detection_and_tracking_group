@@ -5,7 +5,11 @@
 conda create -n tracking_env python=3.8
 conda activate tracking_env
 ```
-
+Newer version:
+```
+conda create -n yolo_env python=3.10
+conda activate yolo_env
+```
 ### 2. Install Dependencies
 ```
 pip install -r requirements.txt
@@ -13,9 +17,24 @@ pip install -r requirements.txt
 ```
 pip install git+https://github.com/facebookresearch/detectron2.git@536dc9d527074e3b15df5f6677ffe1f4e104a4ab
 ```
-
+Newer version:
+```
+pip install ultralytics boxmot transformers accelerate timm
+pip install opencv-python numpy scikit-learn
+```
 ### 3. Downloads folder resources and move it in folder deep_sort, you can ignore folder detection and only download networks folder:
 https://drive.google.com/drive/folders/18fKzfqnqhqW3s9zwsCbnVJ5XF2JFeqMp
+Download the weights folder for newer yolo, reid, mixste models. Extract the downloaded files and place them inside root of this project:
+https://drive.google.com/drive/folders/1KUbfE7mWMYmqWQwFIHN_WlORQy9Dq_cg?usp=sharing
+Your directory structure should look like this:
+detection_and_tracking_group/
+├── yolo12x.pt
+├── osnet_ain_x1_0_msmt17.pt
+├── best_epoch_cpn_243f.bin
+└── ...
+├── yolo_detection_vitpose_draw.py
+├── identify_group_social.py
+└── README.md
 ### 4. Run below cmd line to detection human and create folder frames:
 ```
 python detection.py --input_video [Link to your video] --output_folder [Link to your output folder]
