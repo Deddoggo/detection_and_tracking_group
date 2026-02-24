@@ -172,23 +172,10 @@ TUD-Stadtmitte                     962       1156      15        10
 Venice-2                           3995      7141      44        26        
 COMBINED                           33306     39905     595       500  
 
-NHẬN XÉT:
-Chỉ số quan trọng	Detectron2 + DeepSORT (Baseline)	YOLOv12 + DeepOCSORT (Đề xuất)	Sự thay đổi (Lợi ích)
-MOTA (↑)	22.50%	54.67%	🔥 Tăng +32.17%
-IDF1 (↑)	50.72%	63.81%	🚀 Tăng +13.09%
-HOTA (↑)	40.31%	48.41%	⭐ Tăng +8.10%
-IDSW (↓)	705 lần	Chỉ 173 lần	🛡️ Giảm tới 75%
-FP (False Positives) (↓)	22,386 lỗi	Chỉ 5,658 lỗi	🎯 Giảm 75% cảnh báo giả
-
-1. Sức mạnh của YOLOv12 (Thể hiện qua chỉ số MOTA và FP):
-Hệ thống cũ có điểm MOTA rất thấp (22.5%) vì Detectron2 bắt lỗi quá nhiều (tạo ra tới 22.386 False Positives - nhận diện bóng ma/vật thể tĩnh thành người). Khi thay bằng YOLOv12, số lỗi FP giảm đi 4 lần, đẩy điểm MOTA bay thẳng lên 54.67%. Điều này chứng minh YOLOv12 là một Detector cực kỳ chính xác và phù hợp cho môi trường đông đúc.
-
-2. Sự xuất sắc của DeepOCSORT (Thể hiện qua IDSW và IDF1):
-Đây là điểm ăn tiền nhất trong bài của bạn! Nhược điểm chí mạng của Tracking là hiện tượng "nhảy ID" (ID Switch) khi hai người đi lướt qua che khuất nhau.
-
-DeepSORT cũ bị nhảy ID tới 705 lần.
-
-Thuật toán DeepOCSORT của bạn đã xử lý triệt để vấn đề che khuất (Occlusion), kéo số lần nhảy ID xuống chỉ còn 173 lần (một con số cực kỳ ấn tượng trong nghiên cứu MOT). Điều này trực tiếp kéo điểm IDF1 (khả năng duy trì định danh) tăng mạnh 13%.
-
-3. Sự cân bằng hoàn hảo (Thể hiện qua HOTA):
-HOTA là thước đo khắt khe nhất hiện nay. Việc bạn tăng được 8% HOTA trên một tập dataset khó nhằn (camera rung lắc, độ phân giải thấp) như MOT15 là một minh chứng kỹ thuật rất mạnh, đủ tiêu chuẩn để viết thành một bài báo khoa học (paper).
+COMMENTS:
+Key Metric	Detectron2 + DeepSORT (Baseline)	YOLOv12 + DeepOCSORT (Proposed)	Improvement (Benefit)
+MOTA (↑)	22.50%	54.67%	🔥 +32.17% increase
+IDF1 (↑)	50.72%	63.81%	🚀 +13.09% increase
+HOTA (↑)	40.31%	48.41%	⭐ +8.10% increase
+IDSW (↓)	705 times	Only 173 times	🛡️ ~75% reduction
+FP (False Positives) (↓)	22,386 errors	Only 5,658 errors	🎯 75% fewer false alarms
