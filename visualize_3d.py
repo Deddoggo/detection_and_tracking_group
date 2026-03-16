@@ -39,9 +39,9 @@ def plot_3d_skeleton(pose_3d, track_id, frame_id, save_path):
 
     # 3. Làm đẹp đồ thị
     ax.set_title(f"3D Skeleton - Track ID: {track_id} | Frame: {frame_id}", fontsize=15, fontweight='bold')
-    ax.set_xlabel('Trục X (Ngang)')
-    ax.set_ylabel('Trục Z (Chiều sâu)')
-    ax.set_zlabel('Trục Y (Chiều cao)')
+    ax.set_xlabel('X-axis (Width)')
+    ax.set_ylabel('Z-axis (Depth)')
+    ax.set_zlabel('Y-axis (Height)')
     
     # Ép tỷ lệ 3 trục bằng nhau để người không bị lùn/méo
     max_range = np.array([x.max()-x.min(), y.max()-y.min(), z.max()-z.min()]).max() / 2.0

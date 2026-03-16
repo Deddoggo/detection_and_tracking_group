@@ -1,0 +1,40 @@
+# ======================================================================
+# CUSTOM BOOSTTRACK CONFIGURATION (Version 2.0)
+# Tối ưu cho Camera Tĩnh & Chống nhảy ID khi che khuất chéo
+# ======================================================================
+
+det_thresh:
+  default: 0.3
+max_age:
+  default: 60      # Giảm từ 90 xuống 60 (2 giây) để tránh lưu "bóng ma" quá lâu
+min_hits:
+  default: 3
+iou_threshold:
+  default: 0.3
+
+# --- TẮT BÙ TRỪ CHUYỂN ĐỘNG CAMERA CHUYÊN DỤNG CHO CCTV/GÓC CỐ ĐỊNH ---
+use_ecc:
+  default: False   # Cực kỳ quan trọng: Nếu camera không di chuyển, hãy tắt nó đi để giảm nhiễu!
+use_dlo_boost:
+  default: True
+use_duo_boost:
+  default: True
+dlo_boost_coef:
+  default: 0.65
+
+# --- TRỌNG SỐ TOÁN HỌC (CHÌA KHÓA GIẢI QUYẾT VỤ ĐỨA TRẺ) ---
+lambda_iou:
+  default: 0.25    # Giảm từ 0.5 -> 0.25 (Giảm tin tưởng vào vùng chồng chéo)
+lambda_mhd:
+  default: 0.50    # Tăng từ 0.25 -> 0.50 (Bắt buộc tin vào Kalman/Vận tốc nhiều nhất để phân biệt Rõ Đứng Im vs Đang Chạy)
+lambda_shape:
+  default: 0.25
+
+with_reid:
+  default: True
+use_rich_s:
+  default: False
+use_sb:
+  default: False
+use_vt:
+  default: False

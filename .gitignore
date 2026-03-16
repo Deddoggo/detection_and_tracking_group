@@ -6,4 +6,6 @@ __pycache__/
 TrackEval/data/
 MOT15/
 *.pt
-*.bin
+*.binresult/
+*.mp4
+.ipynb_checkpoints/

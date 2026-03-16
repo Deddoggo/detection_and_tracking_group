@@ -8,6 +8,7 @@ from pathlib import Path
 import time
 import json
 import math
+import csv
 from collections import deque
 
 # --- IMPORT BOXMOT ---
@@ -113,11 +114,11 @@ model.to(device_yolo)
 
 vitpose = HFViTPosePredictor(model_name=args.vitpose_model, device=device_yolo)
 
-print(f"Initializing DeepOCSORT Tracker...")
+print("Initializing BoostTrack with CLIP ReID...")
 tracker = create_tracker(
-    tracker_type='deepocsort',
-    tracker_config='custom_deepocsort.yaml',  
-    reid_weights='osnet_ain_x1_0_msmt17.pt',
+    tracker_type='boosttrack',
+    tracker_config='custom_boosttrack.yaml',
+    reid_weights='clip_market1501.pt',  # ĐỔI SANG MÔ HÌNH NÀY
     device=device_boxmot,
     half=True
 )
@@ -136,6 +137,16 @@ track_history = {}
 frame_idx = 0
 groups_status = {}
 max_group_id = -1
+
+csv_data = []
+# DATA EXTRACTION 
+csv_data.append([
+    "Frame", "Person_ID", "Group_ID", 
+    "X_Pixel", "Y_Pixel", 
+    "X_Real_m", "Y_Real_m", 
+    "Pose_Vec_X", "Pose_Vec_Y", 
+    "Motion_Vec_X", "Motion_Vec_Y"
+])
 
 # VISUALIZATION CONFIG
 VISUAL_FONT_SCALE = 0.45 
@@ -254,6 +265,44 @@ while cap.isOpened():
         min_samples=args.min_samples
     )
 
+    # --- RECORD DATA CHO FILE CSV ---
+    for person in cluster_results:
+        tid = person['id_p']
+        id_g = person['id_g']
+        bbox = person['bbox']
+        
+        # Điểm chạm đất pixel (Giữa - dưới của Bounding box)
+        px_x = bbox[0] + bbox[2] / 2
+        px_y = bbox[1] + bbox[3]
+        
+        # Tọa độ thực tế (Mét)
+        real_pos = person.get('real_pos')
+        real_x = real_pos[0] if real_pos is not None else ""
+        real_y = real_pos[1] if real_pos is not None else ""
+        
+        # Hướng nhìn (Pose) và Hướng di chuyển (Motion)
+        pose_x, pose_y = "", ""
+        mot_x, mot_y = "", ""
+        
+        if tid in active_tracks_info:
+            info = active_tracks_info[tid]
+            if info['pose_vec'] is not None:
+                pose_x, pose_y = info['pose_vec']
+            if info['motion_vec'] is not None:
+                mot_x, mot_y = info['motion_vec']
+                
+        # Thêm 1 dòng dữ liệu vào mảng
+        csv_data.append([
+            frame_idx, tid, id_g,
+            round(px_x, 2), round(px_y, 2),
+            round(real_x, 3) if isinstance(real_x, (int, float, np.float32, np.float64)) else real_x,
+            round(real_y, 3) if isinstance(real_y, (int, float, np.float32, np.float64)) else real_y,
+            round(pose_x, 3) if isinstance(pose_x, (int, float, np.float32, np.float64)) else pose_x,
+            round(pose_y, 3) if isinstance(pose_y, (int, float, np.float32, np.float64)) else pose_y,
+            round(mot_x, 3) if isinstance(mot_x, (int, float, np.float32, np.float64)) else mot_x,
+            round(mot_y, 3) if isinstance(mot_y, (int, float, np.float32, np.float64)) else mot_y
+        ])
+
     # --- F. DRAWING ---
     
     # [NHỊP 1]: VẼ LỚP MÀNG MỜ (FIELD OF VIEW)
@@ -361,4 +410,13 @@ while cap.isOpened():
 
 out.release()
 cap.release()
+
+# --- LƯU FILE CSV ---
+csv_path = os.path.join(args.output_folder, 'playground_trajectory_data.csv')
+with open(csv_path, mode='w', newline='') as f:
+    writer = csv.writer(f)
+    writer.writerows(csv_data)
+# --------------------
+
 print(f"\n\nDone! Saved to: {output_path}")
+print(f"Data exported successfully to: {csv_path}")

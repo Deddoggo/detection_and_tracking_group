@@ -52,9 +52,9 @@ def update(num):
         ax.plot([x[i], x[j]], [y[i], y[j]], [z[i], z[j]], c='blue', linewidth=3)
         
     ax.set_title(f"3D Skeleton Demo - MixSTE\nTrack ID: {target_id} | Frame: {frame_id}", fontweight='bold')
-    ax.set_xlabel('Trục X (Ngang)')
-    ax.set_ylabel('Trục Y (Chiều sâu)')
-    ax.set_zlabel('Trục Z (Chiều cao)')
+    ax.set_xlabel('X-axis (Width)')
+    ax.set_ylabel('Y-axis (Depth)')
+    ax.set_zlabel('Z-axis (Height)')
     
     # Khóa cứng tỷ lệ trục (+/- 1 mét) để không bị giật hình
     radius = 1.0 
