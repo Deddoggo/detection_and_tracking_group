@@ -34,7 +34,7 @@ def draw_virtual_grid(image_path, matrix_path):
 
     # 3. Configure grid (Draw grid within which range?)
     # Assume drawing from -10m to 30m (depending on how wide your field is)
-    START_X, END_X = -20, 40 
+    START_X, END_X = -18, 40 
     START_Y, END_Y = -10, 50
     STEP = 2 # Draw one line every 2 meters (to avoid clutter) 
     overlay = img.copy()
@@ -71,11 +71,11 @@ def draw_virtual_grid(image_path, matrix_path):
     cv2.addWeighted(overlay, alpha, img, 1 - alpha, 0, img)
 
     # Lưu kết quả
-    output_file = "grid_visualization.jpg"
+    output_file = "grid_visualization_playground.jpg"
     cv2.imwrite(output_file, img)
     print(f"Grid drawing completed! Open the file {output_file} to view it.")
 
 if __name__ == "__main__":
-    IMG = "playground.png"
-    JSON = "calibration_matrix.json"
+    IMG = "Real_playground.png"
+    JSON = "calibration_matrix_playground.json"
     draw_virtual_grid(IMG, JSON)

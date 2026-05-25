@@ -38,7 +38,7 @@ class CalibrationTool:
         print("\n[SUCCESS] Computed Homography Matrix.")
         return self.matrix
 
-    def validate_warp_headless(self, real_width, real_height, output_filename="validation_result.jpg"):
+    def validate_warp_headless(self, real_width, real_height, output_filename="validation_result_playground.jpg"):
         """Instead of imshow, we imwrite (save image to file) for headless validation"""
         if self.matrix is None: return
 
@@ -60,7 +60,7 @@ class CalibrationTool:
         print(f"\n[SAVED] Validation image saved to: {output_filename}")
         print("Please transfer this file to your personal computer to check if it is rectangular.")
 
-    def save_matrix(self, filename="calibration_matrix.json"):
+    def save_matrix(self, filename="calibration_matrix_playground.json"):
         if self.matrix is not None:
             data = {"homography_matrix": self.matrix.tolist()}
             with open(filename, "w") as f:
@@ -68,7 +68,7 @@ class CalibrationTool:
             print(f"\n[SAVED] Matrix saved to: {filename}")
 
 if __name__ == "__main__":
-    IMG_PATH = "playground.png"
+    IMG_PATH = "Real_playground.png"
     
     if not os.path.exists(IMG_PATH):
         print(f"Error: Cannot find {IMG_PATH}")
@@ -79,18 +79,18 @@ if __name__ == "__main__":
         # For example: These are the assumed coordinates of the 4 legs of the red-roofed gazebo (You must edit these numbers yourself)
         # Order: Top-Left -> Top-Right -> Bottom-Right -> Bottom-Left
         MY_POINTS = [
-            (533, 170),  # Point 1 (x, y)
-            (598, 153),  # Point 2
-            (665, 171),  # Point 3
-            (600, 188)   # Point 4
+            (854, 633),  # Point 1 (x, y)
+            (1007, 553),  # Point 2
+            (1454, 552),  # Point 3
+            (1462, 639)   # Point 4
         ]
         
         # 1. Enter points
         if tool.set_hardcoded_points(MY_POINTS):
             
             # 2. Enter real dimensions (meters) - For example, the gazebo is 4x4m
-            REAL_W = 4.0
-            REAL_H = 4.0
+            REAL_W = 10.42
+            REAL_H = 11.54
             
             # 3. Compute
             tool.compute_homography(REAL_W, REAL_H)
