@@ -120,30 +120,65 @@ for iv in sorted(intervals):
 df_intervals = pd.DataFrame(interval_stats)
 
 # ==========================================
-# METRICS 2: GROUP DURATION & COMPOSITION
+# METRICS 2: GROUP DURATION & COMPOSITION (FIXED)
 # ==========================================
 group_stats = []
 df_valid_groups = df[df['id_g'] != -1]
 
+# Ngưỡng đứt gãy: Nếu nhóm biến mất quá 2 giây (60 frames tại 30FPS), 
+# coi như nhóm đã rã. Lần xuất hiện tiếp theo sẽ tính là một "Session" mới.
+MAX_GAP_FRAMES = int(FPS * 2.0) 
+
 for id_g, g_data in df_valid_groups.groupby('id_g'):
-    first_frame = g_data['frame'].min()
-    last_frame = g_data['frame'].max()
-    duration_sec = (last_frame - first_frame) / FPS
+    # Lấy danh sách các frame mà ID nhóm này xuất hiện, sắp xếp tăng dần
+    unique_frames = sorted(g_data['frame'].unique())
     
-    unique_members = g_data.drop_duplicates(subset=['id_p'])
-    f_count = sum(unique_members['gender'] == 'Female')
-    m_count = sum(unique_members['gender'] == 'Male')
-    size = f_count + m_count
+    # Tách các frame thành các Sessions liên tục
+    sessions = []
+    current_session = [unique_frames[0]]
     
-    group_stats.append({
-        'Group ID': id_g,
-        'Duration (seconds)': round(duration_sec, 1),
-        'Total Size': size,
-        'Female Count': f_count,
-        'Male Count': m_count,
-        'First Frame': first_frame,
-        'Last Frame': last_frame
-    })
+    for i in range(1, len(unique_frames)):
+        # Nếu khoảng cách giữa 2 frame lớn hơn ngưỡng -> Ngắt session
+        if unique_frames[i] - unique_frames[i-1] > MAX_GAP_FRAMES:
+            sessions.append(current_session)
+            current_session = [unique_frames[i]]
+        else:
+            current_session.append(unique_frames[i])
+    sessions.append(current_session) # Add session cuối cùng
+    
+    # Tính toán Metrics cho từng Session thực tế
+    for session_idx, session_frames in enumerate(sessions):
+        first_f = session_frames[0]
+        last_f = session_frames[-1]
+        
+        duration_sec = (last_f - first_f) / FPS
+        
+        # Nếu session chỉ diễn ra trong 1 frame (cùng f_min và f_max)
+        # Bù thêm thời gian của FRAME_STRIDE (mặc định 3 frame ~ 0.1s)
+        if duration_sec == 0:
+            duration_sec = 3 / FPS 
+            
+        # Lọc nhiễu: Bỏ qua các nhóm tồn tại chớp nhoáng dưới 1 giây
+        if duration_sec < 1.0:
+            continue
+            
+        # Lọc data chỉ thuộc về session hiện tại
+        session_data = g_data[g_data['frame'].isin(session_frames)]
+        
+        unique_members = session_data.drop_duplicates(subset=['id_p'])
+        f_count = sum(unique_members['gender'] == 'Female')
+        m_count = sum(unique_members['gender'] == 'Male')
+        size = f_count + m_count
+        
+        group_stats.append({
+            'Group ID': f"{id_g} (Session {session_idx + 1})", # Tách ID theo lần tụ tập
+            'Duration (seconds)': round(duration_sec, 1),
+            'Total Size': size,
+            'Female Count': f_count,
+            'Male Count': m_count,
+            'First Frame': first_f,
+            'Last Frame': last_f
+        })
 
 df_groups = pd.DataFrame(group_stats)
 
