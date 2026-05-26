@@ -7,7 +7,7 @@ from ultralytics import YOLO
 
 # --- 1) Model configuration ---
 MODEL_NAME = "yolo26x.pt"
-DEVICE = "mps" if torch.backends.mps.is_available() else "cpu"
+DEVICE = "cuda:0" if torch.cuda.is_available() else "cpu"
 
 print(f"Loading {MODEL_NAME} on {DEVICE}...")
 model = YOLO(MODEL_NAME)
@@ -15,7 +15,7 @@ model.to(DEVICE)
 print("Model loaded successfully.")
 
 # --- 2) Input / output configuration ---
-INPUT_VIDEO_PATH = "videos/first_5min.mp4"
+INPUT_VIDEO_PATH = "videos/WIN_20260326_10_00_11_Pro.mp4"
 OUTPUT_VIDEO_PATH = "playground_results/output_yolo_detect.mp4"
 OUTPUT_JSON_PATH = "playground_results/detections.json"
 

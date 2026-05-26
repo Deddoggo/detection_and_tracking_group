@@ -6,7 +6,7 @@ import numpy as np
 from tqdm import tqdm
 
 # --- 1) Stitching configuration (relaxed for playground scenes) ---
-INPUT_VIDEO = "videos/playground_video.mp4"
+INPUT_VIDEO = "videos/WIN_20260326_10_00_11_Pro.mp4"
 INPUT_JSON = "playground_results/tracks_bytetrack_only.json"
 OUTPUT_JSON = "playground_results/tracks_stitched.json"
 OUTPUT_VIDEO = "playground_results/output_stitched.mp4"

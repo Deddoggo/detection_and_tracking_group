@@ -5,10 +5,11 @@ from pathlib import Path
 import boxmot
 import numpy as np
 import torch
-from boxmot import create_tracker
+from boxmot.trackers.tracker_zoo import create_tracker
+import boxmot
 
 # --- 1) Input / output configuration ---
-INPUT_VIDEO_PATH = "videos/playground_video.mp4"
+INPUT_VIDEO_PATH = "videos/WIN_20260326_10_00_11_Pro.mp4"
 INPUT_JSON_PATH = "playground_results/detections.json"
 OUTPUT_VIDEO_PATH = "playground_results/output_bytetrack_only.mp4"
 OUTPUT_JSON_PATH = "playground_results/tracks_bytetrack_only.json"
@@ -22,7 +23,7 @@ CONFIG_DIR = Path(boxmot.__file__).parent / "configs"
 print(f"Initializing ByteTrack on {DEVICE}...")
 tracker = create_tracker(
     tracker_type="bytetrack",
-    tracker_config=CONFIG_DIR / "bytetrack.yaml",
+    tracker_config=CONFIG_DIR / "trackers/bytetrack.yaml",
     reid_weights=None,
     device=DEVICE,
     half=True,

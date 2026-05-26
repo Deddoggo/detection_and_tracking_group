@@ -9,3 +9,4 @@ MOT15/
 *.binresult/
 *.mp4
 .ipynb_checkpoints/
+playground_results/*.json

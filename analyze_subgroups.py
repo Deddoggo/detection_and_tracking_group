@@ -5,8 +5,9 @@ import math
 import json
 from collections import deque, Counter
 import torch
-from PIL import Image
-from transformers import AutoProcessor, VitPoseForPoseEstimation, AutoImageProcessor, AutoModelForImageClassification
+
+from transformers import AutoProcessor, VitPoseForPoseEstimation
+from inference import get_model
 
 from identify_group_social import cluster_bboxes_with_ids
 from orientation_utils import get_pose_vector
@@ -14,7 +15,7 @@ from orientation_utils import get_pose_vector
 # =====================================================================
 # CONFIGURATION
 # =====================================================================
-INPUT_VIDEO = "videos/playground_video.mp4"
+INPUT_VIDEO = "videos/WIN_20260326_10_00_11_Pro.mp4"
 INPUT_JSON_CANDIDATES = [
     "playground_results/tracks_stitched.json",
     "playground_results/tracks_bytetrack_only.json",
@@ -24,7 +25,8 @@ OUTPUT_JSON_FINAL = os.path.join(OUTPUT_FOLDER, "final_sociometrics_data.json")
 CALIBRATION_FILE = "calibration_matrix_playground.json"
 
 VITPOSE_MODEL = "usyd-community/vitpose-base-simple"
-GENDER_MODEL = "rizvandwiki/gender-classification"
+GENDER_MODEL = "gender-classification-rz62r/3"
+ROBOFLOW_API_KEY = "1W6S79RDYF5icaq9dh5i"
 
 SCALE_FACTOR = 1.0
 EPSILON = 1.75
@@ -68,45 +70,34 @@ class HFViTPosePredictor:
         except Exception as e:
             return [None] * len(bboxes_xyxy)
 
-class HFGenderPredictor:
-    def __init__(self, model_name=GENDER_MODEL, device='cuda:0'):
-        print(f"Initializing Native Gender Classification ({model_name})...")
+class RoboflowGenderPredictor:
+    def __init__(self, model_id=GENDER_MODEL, api_key=ROBOFLOW_API_KEY):
+        print(f"Initializing Roboflow Gender Classification ({model_id})...")
         try:
-            self.device = device
-            # Instantiate processor/model directly (faster than pipeline wrappers).
-            self.processor = AutoImageProcessor.from_pretrained(model_name)
-            self.model = AutoModelForImageClassification.from_pretrained(model_name).to(self.device)
-            self.model.eval()
-
-            # e.g. {0: 'Female', 1: 'Male'}
-            self.id2label = self.model.config.id2label
-            print("✅ Native Gender Classification initialized successfully.")
+            self.model = get_model(model_id=model_id, api_key=api_key)
+            print("✅ Roboflow Gender Classification initialized successfully.")
         except Exception as e:
-            print(f"❌ Gender Classification initialization error: {e}")
+            print(f"❌ Error Roboflow Model: {e}")
             self.model = None
 
-    def predict(self, crops_pil):
-        if self.model is None or len(crops_pil) == 0:
-            return ["Unknown"] * len(crops_pil)
+    def predict(self, crops_bgr):
+        if self.model is None or len(crops_bgr) == 0:
+            return ["Unknown"] * len(crops_bgr)
         try:
-            # 1) Preprocess and move tensors to the selected device.
-            inputs = self.processor(images=crops_pil, return_tensors="pt").to(self.device)
-
-            # 2) Inference only.
-            with torch.no_grad():
-                outputs = self.model(**inputs)
-
-            # 3) Pick highest-confidence class.
-            logits = outputs.logits
-            predicted_class_idxs = logits.argmax(-1).cpu().tolist()
-
-            # 4) Convert class id to human-readable label.
-            results = [self.id2label[idx] for idx in predicted_class_idxs]
-            return results
+            # Truyền nguyên 1 batch (list các numpy array ảnh BGR) để tận dụng GPU
+            results = self.model.infer(crops_bgr)
+            
+            predictions = []
+            for res in results:
+                if hasattr(res, 'predictions') and len(res.predictions) > 0:
+                    predictions.append(res.predictions[0].class_name)
+                else:
+                    predictions.append("Unknown")
+            return predictions
             
         except Exception as e:
             print(f"⚠️ Gender Prediction Error: {e}")
-            return ["Unknown"] * len(crops_pil)
+            return ["Unknown"] * len(crops_bgr)
 
 # =====================================================================
 # 2) CORE PIPELINE (HEADLESS)
@@ -126,7 +117,7 @@ class SubgroupAnalyzerPipeline:
         self.tracks_data = self._load_tracks_json()
 
         self.vitpose = HFViTPosePredictor(model_name=VITPOSE_MODEL, device=self.device)
-        self.gender_predictor = HFGenderPredictor(model_name=GENDER_MODEL, device=self.device)
+        self.gender_predictor = RoboflowGenderPredictor(model_id=GENDER_MODEL, api_key=ROBOFLOW_API_KEY)
 
     def _load_calibration(self):
         if os.path.exists(CALIBRATION_FILE):
@@ -174,12 +165,13 @@ class SubgroupAnalyzerPipeline:
         for i, (x, y, w, h) in enumerate(boxes_xywh):
             tid = ids[i]
 
-            # Extract person crop from the RGB frame.
+            # Extract person crop from the ORIGINAL BGR frame directly
             x1, y1 = max(0, int(x)), max(0, int(y))
             x2, y2 = min(frame.shape[1], int(x + w)), min(frame.shape[0], int(y + h))
-            crop = frame_rgb[y1:y2, x1:x2]
+            crop = frame[y1:y2, x1:x2]
+            
             if crop.size > 0 and crop.shape[0] > 10 and crop.shape[1] > 10:
-                valid_crops.append(Image.fromarray(crop))
+                valid_crops.append(crop)
                 valid_crop_indices.append(i)
 
         if len(valid_crops) > 0:
@@ -187,7 +179,6 @@ class SubgroupAnalyzerPipeline:
             for idx, pred in zip(valid_crop_indices, gender_preds):
                 tid = ids[idx]
                 if tid not in self.gender_history:
-                    # Keep enough history for stable majority voting.
                     self.gender_history[tid] = deque(maxlen=50) 
                 self.gender_history[tid].append(pred)
                 self.gender_consensus[tid] = Counter(self.gender_history[tid]).most_common(1)[0][0]
@@ -253,9 +244,7 @@ class SubgroupAnalyzerPipeline:
             frame_data = []
             for person in cluster_results:
                 tid = int(person['id_p'])
-
                 real_pos = person.get('real_pos')
-
                 clean_bbox = [float(x) for x in person['bbox']]
 
                 frame_data.append({
