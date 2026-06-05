@@ -84,15 +84,22 @@ class RoboflowGenderPredictor:
         if self.model is None or len(crops_bgr) == 0:
             return ["Unknown"] * len(crops_bgr)
         try:
-            # Truyền nguyên 1 batch (list các numpy array ảnh BGR) để tận dụng GPU
-            results = self.model.infer(crops_bgr)
+            # 1. BẮT BUỘC CHUYỂN MÀU: Đảo BGR của OpenCV về RGB chuẩn của mô hình
+            crops_rgb = [cv2.cvtColor(crop, cv2.COLOR_BGR2RGB) for crop in crops_bgr]
+            
+            # 2. Gọi model infer với mảng ảnh RGB
+            results = self.model.infer(crops_rgb)
             
             predictions = []
             for res in results:
-                if hasattr(res, 'predictions') and len(res.predictions) > 0:
-                    predictions.append(res.predictions[0].class_name)
+                # 3. LẤY KẾT QUẢ ĐÚNG: Sử dụng thuộc tính 'top' thay vì 'predictions[0]'
+                # SDK của Roboflow có thể trả về object (hasattr) hoặc dictionary (isinstance)
+                if hasattr(res, 'top') and res.top:
+                    predictions.append(res.top)
+                elif isinstance(res, dict) and 'top' in res:
+                    predictions.append(res['top'])
                 else:
-                    predictions.append("Unknown")
+                    predictions.append("Unknown") 
             return predictions
             
         except Exception as e:
