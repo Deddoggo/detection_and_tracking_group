@@ -1,0 +1,59 @@
+{
+  "baseline_commit": "2db7aac2fca6f03e1a974b1c46a921ab54330160",
+  "initial_branch": "master",
+  "initial_working_tree": "clean",
+  "source_archive": "source_2db7aac.zip",
+  "archive_sha256": "bc8236c961b8e35b8a6f8fa95198e5c3e33ec7270bc984661886e3c19471f771",
+  "baseline_sha256": {
+    "identify_group.py": "97a5cdf619a86e1cacd93c17fecb9921921017adad20a0f5ca465a8de07646d5",
+    "identify_group_social.py": "44ebe2f2d0fde8a50f40c049031ac37efe764104e7cca45fe720f0d2e2faf035",
+    "eval_result.txt": "dafbf45e744b163d77a7ca2a02f345e956619c4a3f76dee0759e83300cdf6d2b",
+    "detect_yolo.py": "01dd05877f4b92135bac21f6e9d07ba0da79b2cedefd94df80f8b0df13ec436e",
+    "track.py": "35985ac76b5611bc0b014484638f81902abba024563f3318899aca505490a600",
+    "analyze_subgroups.py": "549b4419d71e0453f122784e31e70b096c69025e71604fdd62415b3edbc40b1a",
+    "requirements.txt": "f3ac6a93ab4d607a1de02a56aa620117974726a076405aa338f7edef954aadb1",
+    "calibration_matrix.json": "af384645ae6ac25b7204f5bae135a4d1e4ecb723a3f204e49f9a1d9fabe21002",
+    "calibration_matrix_based_on_roof.json": "2af0355b4f4e131ad7426f133d19c15097abe9d16c2d41aff33b043f0c29aa95",
+    "calibration_matrix_PETS09.json": "9f844e42b1e3abceba0e09b8cbd5f7508ac103a9b4da4055232921a9068c51f0",
+    "calibration_matrix_playground.json": "ceaf249b255158dc9e40d344b568c1c33f9d2650c09aa7c5b6c9977272b165a8",
+    "calibration_matrix_playground_2.json": "253c1c84a3bd8814d2a2b84278c98c843584175913d96b42349c5555b6ced1dd"
+  },
+  "historical_checkpoint_hashes": null,
+  "historical_environment": null,
+  "historical_archived_run_configuration": "unresolved; current source is not historical provenance",
+  "raw_inputs_present": false,
+  "legacy_static_config": {
+    "detect_yolo": {
+      "identifier": "yolo26x.pt",
+      "imgsz": 1280,
+      "confidence": 0.15,
+      "nms_iou": 0.45
+    },
+    "track": {
+      "type": "bytetrack",
+      "config": "installed BoxMOT configs/trackers/bytetrack.yaml (absent)",
+      "post_construction_overrides": {
+        "track_thresh": 0.25,
+        "track_buffer": 90
+      },
+      "effectiveness": "unverified"
+    },
+    "analyzer": {
+      "pose_identifier": "usyd-community/vitpose-base-simple",
+      "calibration": "calibration_matrix_playground.json",
+      "eps": 1.75,
+      "scale": 1,
+      "min_samples": 2,
+      "stride": 3
+    }
+  },
+  "working_tree_unchanged_asset_sha256": {
+    "eval_result.txt": "54fc5c8de33af2d5a7b0c633472e80014b3d91e29ff75959570a18117e489f5b",
+    "calibration_matrix.json": "af384645ae6ac25b7204f5bae135a4d1e4ecb723a3f204e49f9a1d9fabe21002",
+    "calibration_matrix_based_on_roof.json": "2af0355b4f4e131ad7426f133d19c15097abe9d16c2d41aff33b043f0c29aa95",
+    "calibration_matrix_PETS09.json": "0640f16b12b946806df3f8b647541d7ca051a9ef6672e72031001c38e8492a4b",
+    "calibration_matrix_playground.json": "ceaf249b255158dc9e40d344b568c1c33f9d2650c09aa7c5b6c9977272b165a8",
+    "calibration_matrix_playground_2.json": "253c1c84a3bd8814d2a2b84278c98c843584175913d96b42349c5555b6ced1dd"
+  },
+  "line_endings_note": "Git blob hashes differ from clean Windows working-tree hashes where autocrlf applies; archived results have no tracked-content diff."
+}

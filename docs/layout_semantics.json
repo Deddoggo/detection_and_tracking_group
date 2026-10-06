@@ -1,0 +1,38 @@
+{
+  "pipeline/detect_yolo.py": {
+    "before_hash": "ec7394f46d7a36fc4069fa3ca6e7b7b3ca19d4c69fd99e3bd91e74bdb50edb7a",
+    "pipeline": true
+  },
+  "pipeline/track.py": {
+    "before_hash": "e9d289f5ef4963ee10e416e8ab79561f1b3376acdfb05d956f4318be8cda6438",
+    "pipeline": true
+  },
+  "pipeline/stitch_tracks.py": {
+    "before_hash": "e7c4fc9252a06ce3c02086baa87ed458cceec2d56b9f68c8ed91c5129077828a",
+    "pipeline": true
+  },
+  "pipeline/analyze_subgroups.py": {
+    "before_hash": "a7682d434b0c19848a98c386a826d3bf2bca22dbaec87e88d71ffcfbce6a56d1",
+    "pipeline": true
+  },
+  "modules/identify_group.py": {
+    "before_hash": "f14b7077c01269b798583555cf77a4c7a5c6b4d02cd7c7cfadf2538574a0f0e1",
+    "pipeline": false
+  },
+  "modules/identify_group_social.py": {
+    "before_hash": "39f504d4d5c027bfc37dedc9af6ae98349e78bbaedf1e49aa7fc7d44eea38ac5",
+    "pipeline": false
+  },
+  "modules/orientation_utils.py": {
+    "before_hash": "2630d72abdfd234dbd34524e2ade4fdafa2365d3cffae4180e79eb19e5f5a690",
+    "pipeline": false
+  },
+  "modules/orientation_gate.py": {
+    "before_hash": "2cad2d981fc83351b3ec36cd10afaf2e18f19c7a0b3700fcef9e36a7fac59689",
+    "pipeline": false
+  },
+  "modules/group_identity.py": {
+    "before_hash": "609c27a51950e9f3b515034f4ea2da4f37650a8bb40b8d187ac7c0cb9196daaa",
+    "pipeline": false
+  }
+}

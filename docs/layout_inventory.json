@@ -1,0 +1,370 @@
+[
+  {
+    "old": "detect_yolo.py",
+    "new": "pipeline/detect_yolo.py",
+    "bytes": 2949,
+    "sha256_before": "16b511e4b0fce3b0580df9f2fa173c674645aaf606c769a996cf6d8259919b27",
+    "role": "pipeline",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "track.py",
+    "new": "pipeline/track.py",
+    "bytes": 3322,
+    "sha256_before": "6aacc1d25875f318e29e4cd9bb5b708797a6b1b8d04539fc29f83b1f7ce47813",
+    "role": "pipeline",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "stitch_tracks.py",
+    "new": "pipeline/stitch_tracks.py",
+    "bytes": 7067,
+    "sha256_before": "69ad7c85a0a237b26cd51bd7769f2b48ac73b9d9e3b0a43176fbf44e2a640f63",
+    "role": "pipeline",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "analyze_subgroups.py",
+    "new": "pipeline/analyze_subgroups.py",
+    "bytes": 12089,
+    "sha256_before": "c7cb6b664142fc3652f8a6d94c3ccfd2b3b587821f1d87dc1cd92dd5ab01ec50",
+    "role": "pipeline",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "identify_group.py",
+    "new": "modules/identify_group.py",
+    "bytes": 3897,
+    "sha256_before": "f53cb66616d290d702a2c435b63594dd64fe9f7f5e8e53815c476f2ecd7d024c",
+    "role": "modules",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "identify_group_social.py",
+    "new": "modules/identify_group_social.py",
+    "bytes": 6152,
+    "sha256_before": "8519a1881b39bc0ad1a21f5138f39cd049b9f5c966826a4d111b827527414676",
+    "role": "modules",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "orientation_utils.py",
+    "new": "modules/orientation_utils.py",
+    "bytes": 3560,
+    "sha256_before": "546090322997d15fb97219573a1b60b525e9dca6325998a9563cb1f0ec690496",
+    "role": "modules",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "orientation_gate.py",
+    "new": "modules/orientation_gate.py",
+    "bytes": 1463,
+    "sha256_before": "17c722fb96f037efdfa1166d21b35648fc9c058b4f4f60173e65e7897f75669a",
+    "role": "modules",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "group_identity.py",
+    "new": "modules/group_identity.py",
+    "bytes": 2394,
+    "sha256_before": "9b7a5171cdfc28b9c934e3b4e701e683cc878c2d3c08f70b3d241ed00d470396",
+    "role": "modules",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "detection.py",
+    "new": "legacy/detection.py",
+    "bytes": 4202,
+    "sha256_before": "d383011915dfcecc96b6834200afda57353df52ba2559363fc9f8edcf0b92908",
+    "role": "legacy",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "tracking_group.py",
+    "new": "legacy/tracking_group.py",
+    "bytes": 5520,
+    "sha256_before": "dbdbb87b6dd906585f300cacf667173a06bc97ea08974dba4c3768c86d664f35",
+    "role": "legacy",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "yolo_detection.py",
+    "new": "experiments/yolo_detection.py",
+    "bytes": 8209,
+    "sha256_before": "eeadbc1f95fc98edd584a1eb9dce13fd0036a45f5993e919bbf5ea3b5083c76e",
+    "role": "experiments",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "yolo_detection_poseformer.py",
+    "new": "experiments/yolo_detection_poseformer.py",
+    "bytes": 5302,
+    "sha256_before": "295ae1e73f17d3886675e7b959bfe628b463ff842d7e4e0cbbc3293b41cbfe4a",
+    "role": "experiments",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "yolo_detection_vitpose.py",
+    "new": "experiments/yolo_detection_vitpose.py",
+    "bytes": 13476,
+    "sha256_before": "69ceadc54ce16f5db5aff16c27fea15eea87d1bb2f7d89561266fc01cd7c870d",
+    "role": "experiments",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "yolo_detection_vitpose_draw.py",
+    "new": "experiments/yolo_detection_vitpose_draw.py",
+    "bytes": 14270,
+    "sha256_before": "05343b96c073b12f5adbe715506e9d66bd5e67d3c4415b615ad67cc04da97424",
+    "role": "experiments",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "run_mixste_offline.py",
+    "new": "experiments/run_mixste_offline.py",
+    "bytes": 6536,
+    "sha256_before": "d8ff300648306045fb43309be3dfc2f763e869b886014bc0aa4526920e3dac83",
+    "role": "experiments",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "test_clustering.py",
+    "new": "experiments/test_clustering.py",
+    "bytes": 12994,
+    "sha256_before": "49be9af5ce3ba1d81455138e45a88ffa4be09a63b673d76682114a67707d4312",
+    "role": "experiments",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "test_combine_with_pose_estimation.py",
+    "new": "experiments/test_combine_with_pose_estimation.py",
+    "bytes": 8663,
+    "sha256_before": "c18e58822292f1e309bc278ddfa27eb1a1158ac99bde50ca4d68c1cbaf17f4c1",
+    "role": "experiments",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "test_sam3_video.py",
+    "new": "experiments/test_sam3_video.py",
+    "bytes": 2897,
+    "sha256_before": "eac1a799c216e6ed77aaa9c545acdc4129782014bd7ff6774edfebec3de9ca2c",
+    "role": "experiments",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "run_all_detectron2.py",
+    "new": "evaluation/run_all_detectron2.py",
+    "bytes": 1763,
+    "sha256_before": "117fe85f2320cfbcb4c77c373a55a0a2613d2f837763bb8a870e5ccc6f1ab01c",
+    "role": "evaluation",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "run_all_yolov12.py",
+    "new": "evaluation/run_all_yolov12.py",
+    "bytes": 1052,
+    "sha256_before": "434ab32f3190fbbdc3d5214e254a3bfe6724a60ed4696a456e8e4df146737089",
+    "role": "evaluation",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "tracking_yolov12.py",
+    "new": "evaluation/tracking_yolov12.py",
+    "bytes": 2656,
+    "sha256_before": "9c4f5c429eda52369825eac0562e520df3442833f80cee4fcc363acf51dae800",
+    "role": "evaluation",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "eval_tracking_group.py",
+    "new": "evaluation/eval_tracking_group.py",
+    "bytes": 4315,
+    "sha256_before": "845cbfee4d60d43e0d8b7df77d243d4bfcc7dca327c6da4547639e1dcb11578a",
+    "role": "evaluation",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "calibration.py",
+    "new": "tools/calibration.py",
+    "bytes": 6647,
+    "sha256_before": "edbdd50f0edaf41c59bcb8d627fb95daf1ee63a77db847c24e162e803ff5c83a",
+    "role": "tools",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "calibration_headless.py",
+    "new": "tools/calibration_headless.py",
+    "bytes": 3841,
+    "sha256_before": "70efec87eb8542b3f7203c222d73f7e376d3a4c8b445b63e1276f640f1368a45",
+    "role": "tools",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "measure_tool.py",
+    "new": "tools/measure_tool.py",
+    "bytes": 4592,
+    "sha256_before": "aa4fa9a8275989b4dff363421dab30402ba5c22c6a72b1660c9a77b131ebfd14",
+    "role": "tools",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "measure_tool_headless.py",
+    "new": "tools/measure_tool_headless.py",
+    "bytes": 1803,
+    "sha256_before": "6e91a53cbdedd5b59bb04c01bd3377040ef30b3425c33fc9e30a508a03b45414",
+    "role": "tools",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "draw_grid.py",
+    "new": "tools/draw_grid.py",
+    "bytes": 2810,
+    "sha256_before": "d503cc21ee118d3564ed4c8100aedfa9bb94e582f7346798329580e8c120cb94",
+    "role": "tools",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "generate_report.py",
+    "new": "tools/generate_report.py",
+    "bytes": 8585,
+    "sha256_before": "5f17239ab5b2a245e52420f82cde1ea6dfc1d1412c411fba83055eb2d9bb9eb9",
+    "role": "tools",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "render_visuals.py",
+    "new": "tools/render_visuals.py",
+    "bytes": 5925,
+    "sha256_before": "a96ff55447dfc94466000a4867bb07411a36a3d2f89ab90b166dfcecfea40775",
+    "role": "tools",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "draw_3d_orientation.py",
+    "new": "tools/draw_3d_orientation.py",
+    "bytes": 4380,
+    "sha256_before": "bd443c8e26abc6993e09d5d900e1ebd4d722b743cfc088ea38b9a1c74927698d",
+    "role": "tools",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "render_gif.py",
+    "new": "tools/render_gif.py",
+    "bytes": 3002,
+    "sha256_before": "d4ba70876462d5b3dd1d949b7f15e5316e56e5ce5b12aa772960bffe8837e085",
+    "role": "tools",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "visualize_3d.py",
+    "new": "tools/visualize_3d.py",
+    "bytes": 3536,
+    "sha256_before": "713e03e3db1d0c696e18ce7d224d230313d747db0504edb4151b5d97b3fea148",
+    "role": "tools",
+    "compatibility_wrapper": true
+  },
+  {
+    "old": "calibration_matrix.json",
+    "new": "configs/calibration/calibration_matrix.json",
+    "bytes": 170,
+    "sha256_before": "af384645ae6ac25b7204f5bae135a4d1e4ecb723a3f204e49f9a1d9fabe21002",
+    "role": "configs",
+    "compatibility_wrapper": false
+  },
+  {
+    "old": "calibration_matrix_based_on_roof.json",
+    "new": "configs/calibration/calibration_matrix_based_on_roof.json",
+    "bytes": 210,
+    "sha256_before": "2af0355b4f4e131ad7426f133d19c15097abe9d16c2d41aff33b043f0c29aa95",
+    "role": "configs",
+    "compatibility_wrapper": false
+  },
+  {
+    "old": "calibration_matrix_PETS09.json",
+    "new": "configs/calibration/calibration_matrix_PETS09.json",
+    "bytes": 235,
+    "sha256_before": "0640f16b12b946806df3f8b647541d7ca051a9ef6672e72031001c38e8492a4b",
+    "role": "configs",
+    "compatibility_wrapper": false
+  },
+  {
+    "old": "calibration_matrix_playground.json",
+    "new": "configs/calibration/calibration_matrix_playground.json",
+    "bytes": 211,
+    "sha256_before": "ceaf249b255158dc9e40d344b568c1c33f9d2650c09aa7c5b6c9977272b165a8",
+    "role": "configs",
+    "compatibility_wrapper": false
+  },
+  {
+    "old": "calibration_matrix_playground_2.json",
+    "new": "configs/calibration/calibration_matrix_playground_2.json",
+    "bytes": 211,
+    "sha256_before": "253c1c84a3bd8814d2a2b84278c98c843584175913d96b42349c5555b6ced1dd",
+    "role": "configs",
+    "compatibility_wrapper": false
+  },
+  {
+    "old": "custom_boosttrack.yaml",
+    "new": "configs/trackers/custom_boosttrack.yaml",
+    "bytes": 1294,
+    "sha256_before": "0b4617c3332635175f4e237c8605e28f3a6bc31b0ec6fb1f84c460e5e97d349d",
+    "role": "configs",
+    "compatibility_wrapper": false
+  },
+  {
+    "old": "custom_deepocsort.yaml",
+    "new": "configs/trackers/custom_deepocsort.yaml",
+    "bytes": 526,
+    "sha256_before": "ffae4afb53c9a9e68d7871fb23be2383ce5b288780536c935155122905ac88ff",
+    "role": "configs",
+    "compatibility_wrapper": false
+  },
+  {
+    "old": "eval_result.txt",
+    "new": "evaluation/archive/eval_result.txt",
+    "bytes": 17477,
+    "sha256_before": "54fc5c8de33af2d5a7b0c633472e80014b3d91e29ff75959570a18117e489f5b",
+    "role": "evaluation",
+    "compatibility_wrapper": false
+  },
+  {
+    "old": "MixSTE_without_pretrained_weights.txt",
+    "new": "docs/research/MixSTE_without_pretrained_weights.txt",
+    "bytes": 1645,
+    "sha256_before": "ccc2c8c5560f4a40e63edece0f68e06cad2ba228ec2a16c23655dd15465cb40d",
+    "role": "docs",
+    "compatibility_wrapper": false
+  },
+  {
+    "old": "requirements.txt",
+    "new": "legacy/requirements-original.txt",
+    "bytes": 284,
+    "sha256_before": "f4cbc6384e94f04cf6bf62580b088521b7cecf82a41d2676d240ee774be95015",
+    "role": "legacy",
+    "compatibility_wrapper": false
+  },
+  {
+    "old": "playground.png",
+    "new": "assets/reference/playground.png",
+    "bytes": 1719761,
+    "sha256_before": "7bfdb6e36c56e2745ca4e215369ba94f9a0081db5a6e697fecdddd304759d3a9",
+    "role": "assets",
+    "compatibility_wrapper": false
+  },
+  {
+    "old": "Real_playground.png",
+    "new": "assets/reference/Real_playground.png",
+    "bytes": 3136791,
+    "sha256_before": "23739d34cba6d65f9996c52e007fe663041abd4e0ae1f4b385144fb88ebbbb26",
+    "role": "assets",
+    "compatibility_wrapper": false
+  },
+  {
+    "old": "Real_playground_2.png",
+    "new": "assets/reference/Real_playground_2.png",
+    "bytes": 3160500,
+    "sha256_before": "91e32ac0f0b5c810351e20953a2dbeb54c67d0319dd6e38c23a4c4dfbe68b722",
+    "role": "assets",
+    "compatibility_wrapper": false
+  }
+]

@@ -1,13 +1,19 @@
-torch==1.9.0+cu111
-torchvision==0.10.0+cu111
-torchaudio==0.9.0
--f https://download.pytorch.org/whl/torch_stable.html
-matplotlib==3.1.3
-numpy==1.18.5
-opencv_python==4.11.0.86
-scikit_learn==0.23.2
-scipy==1.4.1
-tensorflow==2.3.0
-tf_slim==1.1.0
-Cython==3.0.12
-protobuf==3.20.*
+# Main pipeline dependency inventory, NOT a reproduced version lock.
+# Use confirmed server baseline versions for comparable experiments.
+numpy
+opencv-python
+torch
+ultralytics
+boxmot
+transformers
+accelerate
+timm
+scikit-learn
+tqdm
+inference
+# Reports / visualization:
+pandas
+scipy
+matplotlib
+openpyxl
+# Old environment retained at legacy/requirements-original.txt.

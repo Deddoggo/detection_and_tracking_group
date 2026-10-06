@@ -1,0 +1,9 @@
+{
+  "status": "template; not a historical run or runnable until raw video/checkpoint/YAML are confirmed",
+  "pilot": {"video": null, "start_frame": null, "end_frame_exclusive": null, "scene": null, "session": null},
+  "detector": {"checkpoint": null, "historical_script_identifier": "yolo26x.pt (unverified local weights)", "device": "cpu", "half": false, "imgsz": 1280, "confidence_floor": 0.05, "nms_iou": 0.45, "max_det": 300},
+  "tracker": {"type": "bytetrack", "config_file": null, "device": "cpu", "half": false, "input_confidence": 0.15},
+  "grouping": {"calibration_file": "configs/calibration/calibration_matrix_playground.json", "calibration_source_video": null, "allow_unverified_calibration": false, "coordinate_unit": "calibration units; metric scale unverified", "scale_factor": 1.0, "eps": 1.75, "min_samples": 2, "retention_threshold": 0.5, "orientation_mode": "proximity"},
+  "pose": {"status": "not run by this pilot runner; import cached keypoints/direction if available", "historical_identifier": "usyd-community/vitpose-base-simple", "checkpoint_revision": null},
+  "sweep_thresholds": [0.10, 0.15, 0.20, 0.25]
+}

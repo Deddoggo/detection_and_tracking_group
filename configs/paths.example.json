@@ -1,0 +1,9 @@
+{
+  "video": "videos/WIN_20260326_10_00_11_Pro.mp4",
+  "output_dir": "playground_results",
+  "detector_checkpoint": "models/yolo26x.pt",
+  "calibration": "configs/calibration/calibration_matrix_playground.json",
+  "tracker_config": null,
+  "models_dir": "models",
+  "external_dir": "external"
+}

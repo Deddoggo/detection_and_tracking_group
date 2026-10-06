@@ -1,0 +1,10 @@
+{
+  "status": "pending raw video paths and human inspection; no real clips selected",
+  "author_report": {"raw_video_count": 5, "approximate_minutes": [2, 2, 20, 20, 30], "ground_truth_available": false},
+  "clips": [
+    {"id": "easy", "source_video": null, "start_seconds": null, "end_seconds": null, "target_duration_seconds": 15, "scene": null, "session": null, "selection_reason": "relatively visible people; verify by inspection"},
+    {"id": "occlusion", "source_video": null, "start_seconds": null, "end_seconds": null, "target_duration_seconds": 15, "scene": null, "session": null, "selection_reason": "miss/blur/occlusion; verify by inspection"},
+    {"id": "crossing_fp", "source_video": null, "start_seconds": null, "end_seconds": null, "target_duration_seconds": 15, "scene": null, "session": null, "selection_reason": "crossing or FP/duplicate; verify by inspection"}
+  ],
+  "independence": "clips from the same video are not independent sessions"
+}
