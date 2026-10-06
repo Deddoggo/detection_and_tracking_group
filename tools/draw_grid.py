@@ -78,7 +78,7 @@ def draw_virtual_grid(image_path, matrix_path):
     alpha = 0.6
     cv2.addWeighted(overlay, alpha, img, 1 - alpha, 0, img)
 
-    # Lưu kết quả
+    # Save the result.
     output_file = "grid_visualization_playground.jpg"
     cv2.imwrite(output_file, img)
     print(f"Grid drawing completed! Open the file {output_file} to view it.")

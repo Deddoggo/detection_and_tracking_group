@@ -13,55 +13,53 @@ import torch
 import sys
 import argparse
 
-# Thêm đường dẫn tuyệt đối để import mô hình MixSTE
+# Add the absolute path needed to import the MixSTE model.
 sys.path.append(external_path('MixSTE'))
 from common.model_cross import MixSTE2
 
-# --- CẤU HÌNH ---
+# --- CONFIGURATION ---
 INPUT_PKL = repo_path('./output_offline_2d_poses/PETS09-S2L1_2d_poses.pkl')
 OUTPUT_3D_DIR = repo_path('./output_offline_3d_poses')
 os.makedirs(OUTPUT_3D_DIR, exist_ok=True)
 
-# Khung thời gian tiêu chuẩn của MixSTE để đạt SOTA (thường là 243)
+# Standard MixSTE temporal window for its SOTA configuration (usually 243).
 FRAMES_WINDOW = 243  
 PAD_HALF = FRAMES_WINDOW // 2
 
 def convert_coco_to_h36m(coco_points):
-    """
-    Chuyển đổi 17 điểm chuẩn COCO (ViTPose) sang 17 điểm chuẩn Human3.6M (MixSTE)
-    """
+    """Convert 17 COCO joints (ViTPose) to 17 Human3.6M joints (MixSTE)."""
     h36m = np.zeros((17, 2), dtype=np.float32)
     
-    # 0: Pelvis (Tâm của 2 hông COCO 11 và 12)
+    # 0: Pelvis (midpoint of COCO hips 11 and 12).
     h36m[0] = (coco_points[11] + coco_points[12]) / 2.0
     
-    # Chân phải: 1: R_Hip(12), 2: R_Knee(14), 3: R_Ankle(16)
+    # Right leg: 1: R_Hip(12), 2: R_Knee(14), 3: R_Ankle(16).
     h36m[1], h36m[2], h36m[3] = coco_points[12], coco_points[14], coco_points[16]
     
-    # Chân trái: 4: L_Hip(11), 5: L_Knee(13), 6: L_Ankle(15)
+    # Left leg: 4: L_Hip(11), 5: L_Knee(13), 6: L_Ankle(15).
     h36m[4], h36m[5], h36m[6] = coco_points[11], coco_points[13], coco_points[15]
     
-    # 8: Neck/Thorax (Tâm của 2 vai COCO 5 và 6)
+    # 8: Neck/Thorax (midpoint of COCO shoulders 5 and 6).
     h36m[8] = (coco_points[5] + coco_points[6]) / 2.0
     
-    # 7: Spine (Tâm của Pelvis và Neck)
+    # 7: Spine (midpoint of pelvis and neck).
     h36m[7] = (h36m[0] + h36m[8]) / 2.0
     
-    # 9: Đầu/Mũi (COCO 0)
+    # 9: Head/nose (COCO 0).
     h36m[9] = coco_points[0]
     
-    # 10: Đỉnh đầu (Ước lượng vươn lên từ cổ qua mũi)
+    # 10: Top of head (extrapolated upward from neck through nose).
     h36m[10] = coco_points[0] + (coco_points[0] - h36m[8]) * 0.5 
     
-    # Tay trái: 11: L_Shoulder(5), 12: L_Elbow(7), 13: L_Wrist(9)
+    # Left arm: 11: L_Shoulder(5), 12: L_Elbow(7), 13: L_Wrist(9).
     h36m[11], h36m[12], h36m[13] = coco_points[5], coco_points[7], coco_points[9]
     
-    # Tay phải: 14: R_Shoulder(6), 15: R_Elbow(8), 16: R_Wrist(10)
+    # Right arm: 14: R_Shoulder(6), 15: R_Elbow(8), 16: R_Wrist(10).
     h36m[14], h36m[15], h36m[16] = coco_points[6], coco_points[8], coco_points[10]
     
     return h36m
     
-# --- 1. HÀM CHUẨN BỊ CHUỖI THỜI GIAN (TEMPORAL PADDING) ---
+# --- 1. PREPARE TEMPORAL SEQUENCES (TEMPORAL PADDING) ---
 def prepare_sequence(pose_dict, track_id):
     frames = sorted(list(pose_dict.keys()))
     if len(frames) == 0: return None, None
@@ -77,7 +75,7 @@ def prepare_sequence(pose_dict, track_id):
         seq_2d[idx] = convert_coco_to_h36m(pose_dict[f_id][:, :2])
         valid_mask[idx] = True
         
-    # Nội suy tuyến tính cho các frame bị mất dấu (missed detection)
+    # Linearly interpolate frames with missing detections.
     for i in range(17): 
         for j in range(2): 
             seq_2d[:, i, j] = np.interp(np.arange(total_frames), 
@@ -86,7 +84,7 @@ def prepare_sequence(pose_dict, track_id):
             
     return seq_2d, frames
 
-# --- 2. KHỞI TẠO MÔ HÌNH MIXSTE ---
+# --- 2. INITIALIZE MIXSTE MODEL ---
 print("🚀 Đang khởi tạo kiến trúc MixSTE (243 frames)...")
 model = MixSTE2(
     num_frame=FRAMES_WINDOW, 
@@ -104,31 +102,31 @@ model = MixSTE2(
 if torch.cuda.is_available():
     model = model.cuda()
 
-# [QUAN TRỌNG]: Nạp "tấm bằng đại học" vào mô hình
+# [IMPORTANT]: load pretrained weights into the model.
 print("🧠 Đang nạp Pre-trained Weights (best_epoch_cpn_243f.bin)...")
 checkpoint = torch.load(checkpoint_path('best_epoch_cpn_243f.bin'), map_location='cuda:0', weights_only=False) 
 
-# Lấy dict weights ra
+# Extract the weights dictionary.
 state_dict = checkpoint['model_pos'] if 'model_pos' in checkpoint else checkpoint
 
-# --- ĐOẠN CODE CẠO CHỮ 'module.' ---
+# --- REMOVE THE 'module.' PREFIX ---
 from collections import OrderedDict
 new_state_dict = OrderedDict()
 for k, v in state_dict.items():
-    name = k[7:] if k.startswith('module.') else k # Bỏ 7 ký tự đầu ('module.')
+    name = k[7:] if k.startswith('module.') else k # Remove the first 7 characters ('module.').
     new_state_dict[name] = v
 # -----------------------------------
 
-# Nạp weights đã gọt sạch vào mô hình
+# Load the cleaned weights into the model.
 model.load_state_dict(new_state_dict) 
 model.eval()
 
 def normalize_screen_coordinates(X, w, h):
-    """Chuẩn hóa tọa độ pixel về khoảng [-1, 1] cho mạng nơ-ron"""
+    """Normalize pixel coordinates to [-1, 1] for neural-network input."""
     assert X.shape[-1] == 2
     return X / w * 2 - np.array([1, h / w], dtype=X.dtype)
 
-# --- 3. ĐỌC VÀ XỬ LÝ DỮ LIỆU OFFLINE ---
+# --- 3. LOAD AND PROCESS OFFLINE DATA ---
 print(f"📦 Đang đọc dữ liệu 2D từ: {INPUT_PKL}")
 with open(INPUT_PKL, 'rb') as f:
     offline_data = pickle.load(f)
@@ -141,23 +139,23 @@ with torch.no_grad():
         seq_2d, original_frames = prepare_sequence(pose_dict, track_id)
         if seq_2d is None: continue
             
-        # 1. Điền CHÍNH XÁC độ phân giải video
+        # 1. Specify the EXACT video resolution.
         VIDEO_W, VIDEO_H = 768, 576 
         
-        # 2. Chuẩn hóa về khoảng [-1, 1] để mạng dễ đọc
+        # 2. Normalize to [-1, 1] for the network input.
         seq_2d_norm = normalize_screen_coordinates(seq_2d, VIDEO_W, VIDEO_H)
         
-        # 3. [CHÌA KHÓA QUAN TRỌNG NHẤT]: Trừ đi Hông để dời gốc tọa độ về (0,0)
+        # 3. [KEY STEP]: subtract the hip position to shift the coordinate origin to (0,0).
         pelvis_2d = seq_2d_norm[:, 0:1, :] 
         seq_2d_centered = seq_2d_norm - pelvis_2d
         
         T = seq_2d_centered.shape[0]
         output_3d_data[track_id] = {}
         
-        # 4. Padding 2 đầu cửa sổ
+        # 4. Pad both ends of the window.
         padded_seq = np.pad(seq_2d_centered, ((PAD_HALF, PAD_HALF), (0, 0), (0, 0)), mode='edge')
         
-        # Batching: Ném từng cửa sổ vào MixSTE
+        # Batching: feed each window into MixSTE.
         for i in range(T):
             window = padded_seq[i : i + FRAMES_WINDOW]
             
@@ -173,7 +171,7 @@ with torch.no_grad():
             
         print(f"   + Đã xử lý xong ID {track_id} ({T} frames)")
 
-# --- 4. XUẤT KẾT QUẢ ---
+# --- 4. EXPORT RESULTS ---
 out_file = os.path.join(OUTPUT_3D_DIR, "PETS09-S2L1_3d_poses_MixSTE.pkl")
 with open(out_file, 'wb') as f:
     pickle.dump(output_3d_data, f)

@@ -23,7 +23,7 @@ print("Đang tải JSON data...")
 with open(INPUT_JSON, 'r') as f:
     raw_data = json.load(f)
 
-# 1. Flatten JSON vào list để tạo DataFrame
+# 1. Flatten JSON into a list to create a DataFrame.
 records = []
 for frame_key, persons in raw_data.items():
     frame_idx = int(frame_key.split('_')[1])
@@ -52,7 +52,7 @@ interval_stats = []
 intervals = df['interval_id'].unique()
 
 def get_clean_area(pts):
-    """Tính Convex Hull sau khi loại bỏ 5% điểm xa tâm nhất (outliers)"""
+    """Compute the convex hull after removing the 5% of points farthest from the center (outliers)."""
     if len(pts) < 3: return 0.0
     centroid = np.mean(pts, axis=0)
     distances = np.linalg.norm(pts - centroid, axis=1)
@@ -66,17 +66,17 @@ for iv in sorted(intervals):
     start_sec = iv * INTERVAL_SEC
     end_sec = start_sec + INTERVAL_SEC
     
-    # Số nhóm hình thành (bỏ qua id_g = -1)
+    # Number of formed groups (exclude id_g = -1).
     groups_formed = df_iv[df_iv['id_g'] != -1]['id_g'].nunique()
     
-    # Diện tích chiếm dụng (m2) bằng Convex Hull đã được LỌC NHIỄU
+    # Occupied area (m2) from a NOISE-FILTERED convex hull.
     pts_F = df_iv[df_iv['gender'] == 'Female'][['x', 'y']].to_numpy()
     pts_M = df_iv[df_iv['gender'] == 'Male'][['x', 'y']].to_numpy()
     
     space_F = get_clean_area(pts_F)
     space_M = get_clean_area(pts_M)
     
-    # Khoảng cách gần nhất trung bình (F-M, F-F, M-M, M-F)
+    # Mean nearest-neighbor distances (F-M, F-F, M-M, M-F).
     dist_FF_list, dist_FM_list, dist_MM_list, dist_MF_list = [], [], [], []
     
     for frame, group in df_iv.groupby('frame'):
@@ -95,16 +95,16 @@ for iv in sorted(intervals):
             
         if len(females) > 0 and len(males) > 0:
             dists_fm = distance_matrix(females, males)
-            dist_FM_list.extend(dists_fm.min(axis=1)) # Nữ tìm Nam gần nhất
-            dist_MF_list.extend(dists_fm.min(axis=0)) # Nam tìm Nữ gần nhất
+            dist_FM_list.extend(dists_fm.min(axis=1)) # Find the nearest male for each female.
+            dist_MF_list.extend(dists_fm.min(axis=0)) # Find the nearest female for each male.
 
-    # Tính tổng quãng đường di chuyển (Travel Distances)
+    # Compute total travel distances.
     travel_dist = {'Female': 0.0, 'Male': 0.0}
     for id_p, p_data in df_iv.groupby('id_p'):
         p_data = p_data.sort_values('frame')
         coords = p_data[['x', 'y']].values
         if len(coords) > 1:
-            # Tính khoảng cách dịch chuyển giữa các frame liên tiếp
+            # Compute displacement between consecutive frames.
             dists = np.linalg.norm(coords[1:] - coords[:-1], axis=1)
             gender = p_data['gender'].iloc[0]
             if gender in travel_dist:
@@ -133,44 +133,44 @@ df_intervals = pd.DataFrame(interval_stats)
 group_stats = []
 df_valid_groups = df[df['id_g'] != -1]
 
-# Ngưỡng đứt gãy: Nếu nhóm biến mất quá 2 giây (60 frames tại 30FPS), 
-# coi như nhóm đã rã. Lần xuất hiện tiếp theo sẽ tính là một "Session" mới.
+# Break threshold: if a group disappears for more than 2 seconds (60 frames at 30 FPS),
+# treat it as dissolved. Its next appearance starts a new "Session".
 MAX_GAP_FRAMES = int(FPS * 2.0) 
 
 for id_g, g_data in df_valid_groups.groupby('id_g'):
-    # Lấy danh sách các frame mà ID nhóm này xuất hiện, sắp xếp tăng dần
+    # Get and sort the frames in which this group ID appears.
     unique_frames = sorted(g_data['frame'].unique())
     
-    # Tách các frame thành các Sessions liên tục
+    # Split frames into continuous sessions.
     sessions = []
     current_session = [unique_frames[0]]
     
     for i in range(1, len(unique_frames)):
-        # Nếu khoảng cách giữa 2 frame lớn hơn ngưỡng -> Ngắt session
+        # If the gap between two frames exceeds the threshold, break the session.
         if unique_frames[i] - unique_frames[i-1] > MAX_GAP_FRAMES:
             sessions.append(current_session)
             current_session = [unique_frames[i]]
         else:
             current_session.append(unique_frames[i])
-    sessions.append(current_session) # Add session cuối cùng
+    sessions.append(current_session) # Append the final session.
     
-    # Tính toán Metrics cho từng Session thực tế
+    # Compute metrics for each actual session.
     for session_idx, session_frames in enumerate(sessions):
         first_f = session_frames[0]
         last_f = session_frames[-1]
         
         duration_sec = (last_f - first_f) / FPS
         
-        # Nếu session chỉ diễn ra trong 1 frame (cùng f_min và f_max)
-        # Bù thêm thời gian của FRAME_STRIDE (mặc định 3 frame ~ 0.1s)
+        # If a session appears in only one frame (f_min equals f_max),
+        # add the duration of FRAME_STRIDE (default: 3 frames ~ 0.1 s).
         if duration_sec == 0:
             duration_sec = 3 / FPS 
             
-        # Lọc nhiễu: Bỏ qua các nhóm tồn tại chớp nhoáng dưới 1 giây
+        # Filter noise: exclude groups lasting less than 1 second.
         if duration_sec < 1.0:
             continue
             
-        # Lọc data chỉ thuộc về session hiện tại
+        # Select data belonging to the current session only.
         session_data = g_data[g_data['frame'].isin(session_frames)]
         
         unique_members = session_data.drop_duplicates(subset=['id_p'])
@@ -179,7 +179,7 @@ for id_g, g_data in df_valid_groups.groupby('id_g'):
         size = f_count + m_count
         
         group_stats.append({
-            'Group ID': f"{id_g} (Session {session_idx + 1})", # Tách ID theo lần tụ tập
+            'Group ID': f"{id_g} (Session {session_idx + 1})", # Distinguish IDs by gathering session.
             'Duration (seconds)': round(duration_sec, 1),
             'Total Size': size,
             'Female Count': f_count,
@@ -198,7 +198,7 @@ with pd.ExcelWriter(OUTPUT_EXCEL) as writer:
     df_intervals.to_excel(writer, sheet_name='Interval Data (30s)', index=False)
     df_groups.to_excel(writer, sheet_name='Group Dynamics', index=False)
     
-    # Sheet Meta-data để giải thích cho đối tác
+    # Metadata sheet to explain results to collaborators.
     meta_df = pd.DataFrame([
         {'Variable': 'Group ID', 'Explanation': 'Unique identifier for a social cluster. ID > 0 implies interaction. ID = -1 means the person is isolated.'},
         {'Variable': 'Space Occupied (m2)', 'Explanation': 'Calculated using Convex Hull algorithm over the real-world coordinates.'},

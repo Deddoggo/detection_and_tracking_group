@@ -6,7 +6,7 @@ if __package__ in (None, ""):
 from project_paths import repo_path, checkpoint_path, external_path, output_path, load_paths
 import sys as _dependency_sys
 _dependency_sys.path.insert(0, external_path())
-import pickle # --- THÊM THƯ VIỆN NÀY ĐỂ LƯU DỮ LIỆU OFFLINE ---
+import pickle # --- ADD THIS LIBRARY TO SAVE OFFLINE DATA ---
 import os
 import cv2
 import numpy as np
@@ -28,7 +28,7 @@ try:
 except ImportError:
     print("⚠️ Lỗi: Chưa cài transformers.")
 
-# --- CLASS WRAPPER CHO HUGGING FACE VITPOSE (Giữ nguyên của bạn) ---
+# --- HUGGING FACE VITPOSE WRAPPER (UNCHANGED) ---
 class HFViTPosePredictor:
     def __init__(self, model_name="usyd-community/vitpose-base-simple", device='cuda:0'):
         self.device = device
@@ -67,7 +67,7 @@ parser.add_argument('--calibration_file', type=str, default=repo_path('configs/c
 args = parser.parse_args()
 os.makedirs(args.output_folder, exist_ok=True)
 
-# 1. SETUP THIẾT BỊ
+# 1. DEVICE SETUP
 device_yolo = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 device_boxmot = 0 if torch.cuda.is_available() else 'cpu'
 
@@ -87,8 +87,8 @@ tracker = create_tracker(
 cap = cv2.VideoCapture(args.input_video)
 frame_idx = 0
 
-# --- LOGIC MỚI: TẠO TỪ ĐIỂN LƯU TRỮ 2D POSE OFFLINE ---
-# Cấu trúc: { track_id: { frame_id: np.array(17, 3) } }
+# --- NEW LOGIC: DICTIONARY FOR OFFLINE 2D POSES ---
+# Structure: { track_id: { frame_id: np.array(17, 3) } }.
 offline_2d_pose_data = {}
 
 print(f"Start processing {args.seq_name}...")
@@ -114,7 +114,7 @@ while cap.isOpened():
             bboxes_for_pose.append(trk[:4])
             valid_tracks_list.append(trk)
 
-    # B. Pose Estimation (Trích xuất 2D)
+    # B. Pose estimation (extract 2D poses).
     if len(bboxes_for_pose) > 0:
         pose_results = vitpose.predict(frame_rgb, bboxes_for_pose)
         
@@ -123,12 +123,12 @@ while cap.isOpened():
             kpts = pose_results[i] if i < len(pose_results) else None
             
             if kpts is not None:
-                # --- LOGIC MỚI: LƯU TỌA ĐỘ VÀO TỪ ĐIỂN ---
+                # --- NEW LOGIC: SAVE COORDINATES IN THE DICTIONARY ---
                 if tid not in offline_2d_pose_data:
                     offline_2d_pose_data[tid] = {}
                 offline_2d_pose_data[tid][current_frame_id] = kpts
                 
-                # (Phần vẽ râu ria hoặc DBSCAN của bạn có thể để ở đây nếu muốn giữ lại video demo)
+                # Drawing details or DBSCAN can be placed here to retain a demonstration video.
                 # ...
 
     print(f"Processed frame {current_frame_id}", end='\r')
@@ -136,7 +136,7 @@ while cap.isOpened():
 
 cap.release()
 
-# --- LOGIC MỚI: XUẤT FILE DỮ LIỆU OFFLINE ---
+# --- NEW LOGIC: EXPORT OFFLINE DATA ---
 pose_output_path = os.path.join(args.output_folder, f"{args.seq_name}_2d_poses.pkl")
 with open(pose_output_path, 'wb') as f:
     pickle.dump(offline_2d_pose_data, f)

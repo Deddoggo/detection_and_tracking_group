@@ -23,7 +23,7 @@ from detectron2.data import MetadataCatalog
 
 import time
 
-# Cấu hình Detectron2 với Mask R-CNN
+# Configure Detectron2 with Mask R-CNN.
 cfg = get_cfg()
 # cfg.merge_from_file(model_zoo.get_config_file("COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml"))
 cfg.merge_from_file(model_zoo.get_config_file("COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml"))
@@ -68,12 +68,12 @@ while cap.isOpened():
         break
         
     try:
-        start_time = time.time()  # Bắt đầu đo thời gian
+        start_time = time.time()  # Start timing.
 
         # Run Detectron2 on the frame
         outputs = predictor(frame)
 
-        infer_time = time.time() - start_time  # Kết thúc đo thời gian
+        infer_time = time.time() - start_time  # Stop timing.
         total_infer_time += infer_time
         num_frames += 1
 

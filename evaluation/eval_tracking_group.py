@@ -22,7 +22,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--input_video', type=str, required=True, help='Path to input video file')
 parser.add_argument('--frames_dir', type=str, required=True, help='Directory containing extracted frames')
 parser.add_argument('--seq_name', type=str, required=True, help='Name of the MOT sequence (e.g., ADL-Rundle-6)')
-# Vẫn giữ 2 biến dưới đây để không bị lỗi nếu lệnh gõ trong terminal của bạn lỡ chứa chúng
+# Retain these two variables for compatibility with terminal commands that include them.
 parser.add_argument('--epsilon', type=float, default=50.0, help='DBSCAN epsilon value')
 parser.add_argument('--threshold_overlap', type=float, default=0.7, help='Overlap threshold')
 parser.add_argument('--output_folder', type=str, required=True, help='Path to save the result txt file')
@@ -31,8 +31,8 @@ args = parser.parse_args()
 frames_dir = args.frames_dir
 seq_name = args.seq_name
 
-# Tạo thư mục output và mở file text
-# Gán output_dir từ argument thay vì fix cứng
+# Create the output directory and open the text file.
+# Set output_dir from the argument instead of hardcoding it.
 output_dir = args.output_folder
 os.makedirs(output_dir, exist_ok=True)
 
@@ -55,20 +55,20 @@ frame_files = sorted([f for f in os.listdir(frames_dir) if f.endswith(".jpg")])
 total_frames = len(frame_files)
 
 # ===== TRACKING WITH DEEPSORT =====
-start_time = time.time()  # Bắt đầu đo thời gian xử lý
+start_time = time.time()  # Start timing processing.
 
 for frame_idx, frame_name in enumerate(frame_files):
-    # Vẫn PHẢI đọc ảnh vì DeepSORT cần ảnh để trích xuất đặc trưng ngoại hình (ReID)
+    # Reading the image is still REQUIRED: DeepSORT extracts appearance (ReID) features from it.
     frame = cv2.imread(os.path.join(frames_dir, frame_name))
     current_frame_id = frame_idx + 1
 
-    # Lấy detections của frame hiện tại
+    # Get detections for the current frame.
     frame_dets = detections[detections[:, 0] == current_frame_id]
     bboxes = frame_dets[:, 2:6]  # x, y, w, h
     scores = frame_dets[:, 6]
 
     if len(bboxes) > 0:
-        # Trích xuất đặc trưng ReID
+        # Extract ReID features.
         features = model(frame, bboxes)
         det_objects = [Detection(bbox, score, feat) for bbox, score, feat in zip(bboxes, scores, features)]
 
@@ -78,14 +78,14 @@ for frame_idx, frame_name in enumerate(frame_files):
         indices = preprocessing.non_max_suppression(boxes_nms, 0.8, scores_nms)
         det_objects = [det_objects[i] for i in indices]
 
-        # Cập nhật Tracker
+        # Update the tracker.
         tracker.predict()
         tracker.update(det_objects)
     else:
-        # Nếu frame không có ai, vẫn phải predict để Kalman Filter chạy tiếp
+        # If no person is detected, still call predict to advance the Kalman filter.
         tracker.predict()
 
-    # LẤY KẾT QUẢ TRACKING VÀ GHI VÀO FILE TXT
+    # GET TRACKING RESULTS AND WRITE THE TXT FILE
     for track in tracker.tracks:
         if not track.is_confirmed() or track.time_since_update > 1:
             continue
@@ -93,14 +93,14 @@ for frame_idx, frame_name in enumerate(frame_files):
         bbox = track.to_tlwh()
         track_id = track.track_id
         
-        # Ghi vào file theo chuẩn MOT15: frame, id, x, y, w, h, conf, -1, -1, -1
+        # Write MOT15 format: frame, id, x, y, w, h, conf, -1, -1, -1.
         mot_file.write(f"{current_frame_id},{track_id},{bbox[0]:.2f},{bbox[1]:.2f},{bbox[2]:.2f},{bbox[3]:.2f},1.0,-1,-1,-1\n")
 
     print(f"Tracking frame {current_frame_id}/{total_frames}", end='\r')
 
-end_time = time.time()  # Kết thúc đo thời gian
+end_time = time.time()  # Stop timing.
 
-mot_file.close() # Đóng file sau khi chạy xong
+mot_file.close() # Close the file after processing.
 
 print(f"\n🎉 Tracking completed. Result saved to: {mot_output_path}")
 print(f"Processed {total_frames} frames in {end_time - start_time:.2f} seconds.")

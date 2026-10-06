@@ -94,16 +94,16 @@ def main():
             if self.model is None or len(crops_bgr) == 0:
                 return ["Unknown"] * len(crops_bgr)
             try:
-                # 1. BẮT BUỘC CHUYỂN MÀU: Đảo BGR của OpenCV về RGB chuẩn của mô hình
+                # 1. REQUIRED COLOR CONVERSION: convert OpenCV BGR to the model's RGB input.
                 crops_rgb = [cv2.cvtColor(crop, cv2.COLOR_BGR2RGB) for crop in crops_bgr]
                 
-                # 2. Gọi model infer với mảng ảnh RGB
+                # 2. Run model inference on the RGB image array.
                 results = self.model.infer(crops_rgb)
                 
                 predictions = []
                 for res in results:
-                    # 3. LẤY KẾT QUẢ ĐÚNG: Sử dụng thuộc tính 'top' thay vì 'predictions[0]'
-                    # SDK của Roboflow có thể trả về object (hasattr) hoặc dictionary (isinstance)
+                    # 3. READ THE CORRECT RESULT: use 'top' instead of 'predictions[0]'.
+                    # The Roboflow SDK may return an object (hasattr) or a dictionary (isinstance).
                     if hasattr(res, 'top') and res.top:
                         predictions.append(res.top)
                     elif isinstance(res, dict) and 'top' in res:

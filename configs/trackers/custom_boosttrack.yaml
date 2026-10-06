@@ -1,20 +1,20 @@
 # ======================================================================
 # CUSTOM BOOSTTRACK CONFIGURATION (Version 2.0)
-# Tối ưu cho Camera Tĩnh & Chống nhảy ID khi che khuất chéo
+# Optimized for static cameras and reducing ID switches during crossing occlusions.
 # ======================================================================
 
 det_thresh:
   default: 0.3
 max_age:
-  default: 60      # Giảm từ 90 xuống 60 (2 giây) để tránh lưu "bóng ma" quá lâu
+  default: 60      # Reduced from 90 to 60 (2 seconds) to avoid retaining "ghost" tracks too long.
 min_hits:
   default: 3
 iou_threshold:
   default: 0.3
 
-# --- TẮT BÙ TRỪ CHUYỂN ĐỘNG CAMERA CHUYÊN DỤNG CHO CCTV/GÓC CỐ ĐỊNH ---
+# --- DISABLE CAMERA MOTION COMPENSATION FOR CCTV/FIXED VIEWS ---
 use_ecc:
-  default: False   # Cực kỳ quan trọng: Nếu camera không di chuyển, hãy tắt nó đi để giảm nhiễu!
+  default: False   # Important: disable this for a stationary camera to reduce noise.
 use_dlo_boost:
   default: True
 use_duo_boost:
@@ -22,11 +22,11 @@ use_duo_boost:
 dlo_boost_coef:
   default: 0.65
 
-# --- TRỌNG SỐ TOÁN HỌC (CHÌA KHÓA GIẢI QUYẾT VỤ ĐỨA TRẺ) ---
+# --- MATHEMATICAL WEIGHTS (INTENDED TO ADDRESS THE CHILD-TRACKING CASE) ---
 lambda_iou:
-  default: 0.25    # Giảm từ 0.5 -> 0.25 (Giảm tin tưởng vào vùng chồng chéo)
+  default: 0.25    # Reduced from 0.5 -> 0.25 (less reliance on overlap).
 lambda_mhd:
-  default: 0.50    # Tăng từ 0.25 -> 0.50 (Bắt buộc tin vào Kalman/Vận tốc nhiều nhất để phân biệt Rõ Đứng Im vs Đang Chạy)
+  default: 0.50    # Increased from 0.25 -> 0.50 (prioritize Kalman/velocity to distinguish standing from running).
 lambda_shape:
   default: 0.25
 

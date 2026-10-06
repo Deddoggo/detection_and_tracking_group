@@ -50,30 +50,30 @@ def cluster_bboxes_with_ids(groups_status, bboxes, track_ids, max_group_id,
     if not bboxes:
         return [], {}, max_group_id
     
-    # 1. TÍNH ĐIỂM CHẠM CHÂN (Foot Points)
+    # 1. COMPUTE FOOT POINTS
     points_to_cluster = []
     for (x, y, w, h) in bboxes:
         foot_x = x + w / 2
         foot_y = y + h 
         points_to_cluster.append([foot_x, foot_y])
 
-    # 2. BIẾN ĐỔI TỌA ĐỘ
-    real_world_coords = [] # Lưu tọa độ thực để trả về
+    # 2. TRANSFORM COORDINATES
+    real_world_coords = [] # Store real-world coordinates for the return value.
     
     if homography_matrix is not None and len(points_to_cluster) > 0:
         pts_src = np.array([points_to_cluster], dtype=np.float32)
         pts_dst = cv2.perspectiveTransform(pts_src, homography_matrix)
         X = pts_dst[0] * scale_factor
-        real_world_coords = X # X chính là tọa độ (x_mét, y_mét)
+        real_world_coords = X # X contains the coordinates (x_meters, y_meters).
     else:
         X = np.array(points_to_cluster)
-        real_world_coords = [None] * len(X) # Không có matrix thì không có tọa độ mét
+        real_world_coords = [None] * len(X) # Without a matrix, metric coordinates are unavailable.
 
-    # 3. CHẠY DBSCAN
+    # 3. RUN DBSCAN
     dbscan = DBSCAN(eps=eps, min_samples=min_samples)
     labels = dbscan.fit_predict(X)
 
-    # ... (Phần logic Grouping giữ nguyên) ...
+    # ... (Grouping logic remains unchanged) ...
     cluster_members = defaultdict(list)
     for label, tid in zip(labels, track_ids):
         if label != -1:
@@ -88,12 +88,12 @@ def cluster_bboxes_with_ids(groups_status, bboxes, track_ids, max_group_id,
     idp_to_idg_map = {id_p: id_g for id_g, id_ps in new_group_status.items() for id_p in id_ps}
 
     results = []
-    # Thêm i để lấy tọa độ thực tương ứng từ real_world_coords
+    # Include i to retrieve the corresponding real-world coordinates from real_world_coords.
     for i, (bbox, id_p, id_g) in enumerate(zip(bboxes, track_ids, labels)):
         id_g = idp_to_idg_map.get(id_p, -1)
         color = (128, 128, 128) if id_g == -1 else color_map.get(id_g, (255,255,255))
         
-        # Lấy tọa độ thực của người thứ i
+        # Get the real-world coordinates of person i.
         real_pos = real_world_coords[i] if i < len(real_world_coords) else None
 
         results.append({
@@ -101,7 +101,7 @@ def cluster_bboxes_with_ids(groups_status, bboxes, track_ids, max_group_id,
             'bbox': bbox,
             'id_g': id_g,
             'color': color,
-            'real_pos': real_pos # <--- TRẢ VỀ THÊM CÁI NÀY
+            'real_pos': real_pos # <--- ALSO RETURN THIS FIELD
         })
         
     return results, new_group_status, max_group_id

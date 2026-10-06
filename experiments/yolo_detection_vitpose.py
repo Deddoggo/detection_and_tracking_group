@@ -29,13 +29,13 @@ try:
 except ImportError:
     print("⚠️ Lỗi: Chưa cài transformers. Chạy: pip install --upgrade transformers accelerate timm")
 
-# --- CLASS WRAPPER CHO HUGGING FACE VITPOSE (ĐÃ CẬP NHẬT THEO TÀI LIỆU) ---
+# --- HUGGING FACE VITPOSE WRAPPER (UPDATED FOLLOWING THE DOCUMENTATION) ---
 class HFViTPosePredictor:
     def __init__(self, model_name="usyd-community/vitpose-base-simple", device='cuda:0'):
         print(f"Initializing HF ViTPose ({model_name})...")
         try:
             self.device = device
-            # trust_remote_code=True là bắt buộc cho model ViTPose community
+            # trust_remote_code=True is required for the community ViTPose model.
             self.processor = AutoProcessor.from_pretrained(model_name, trust_remote_code=True)
             self.model = VitPoseForPoseEstimation.from_pretrained(model_name, trust_remote_code=True).to(self.device)
             self.model.eval()
@@ -46,15 +46,13 @@ class HFViTPosePredictor:
             self.model = None
 
     def predict(self, img_rgb, bboxes_xyxy):
-        """
-        img_rgb: Ảnh gốc RGB
-        bboxes_xyxy: List các bbox [x1, y1, x2, y2] từ YOLO
-        """
+        """img_rgb: original RGB image.
+        bboxes_xyxy: list of YOLO bboxes [x1, y1, x2, y2]."""
         if self.model is None or len(bboxes_xyxy) == 0:
             return [None] * len(bboxes_xyxy)
 
         try:
-            # 1. Chuyển đổi Box từ XYXY (YOLO) sang XYWH (COCO) cho ViTPose
+            # 1. Convert boxes from XYXY (YOLO) to XYWH (COCO) for ViTPose.
             boxes_coco = []
             for box in bboxes_xyxy:
                 x1, y1, x2, y2 = box
@@ -62,26 +60,26 @@ class HFViTPosePredictor:
                 h = y2 - y1
                 boxes_coco.append([x1, y1, w, h])
 
-            # 2. Preprocess (Tự động crop & resize)
-            # boxes phải là list của list các box (vì processor hỗ trợ batch nhiều ảnh)
+            # 2. Preprocess (automatic cropping and resizing).
+            # boxes must be a list of box lists because the processor supports image batches.
             inputs = self.processor(img_rgb, boxes=[boxes_coco], return_tensors="pt").to(self.device)
 
             # 3. Inference
             with torch.no_grad():
                 outputs = self.model(**inputs)
 
-            # 4. Post-process (Giải mã Heatmap -> Keypoints)
-            # Trả về list cho từng ảnh, ta lấy ảnh đầu tiên [0]
+            # 4. Post-process (decode heatmaps -> keypoints).
+            # Returns a list for each image; use the first image [0].
             pose_results = self.processor.post_process_pose_estimation(outputs, boxes=[boxes_coco])[0]
             
-            # 5. Format lại output để khớp với logic vẽ hình
+            # 5. Reformat output to match the drawing logic.
             final_keypoints = []
             for res in pose_results:
-                # res là dict: {'keypoints': tensor[17, 2], 'scores': tensor[17]}
+                # res is a dict: {'keypoints': tensor[17, 2], 'scores': tensor[17]}.
                 kpts = res['keypoints'].cpu().numpy()
                 scores = res['scores'].cpu().numpy()
                 
-                # Gom lại thành [17, 3] (x, y, conf)
+                # Combine into [17, 3] (x, y, conf).
                 kpts_with_conf = np.zeros((len(kpts), 3))
                 kpts_with_conf[:, :2] = kpts
                 kpts_with_conf[:, 2] = scores
@@ -96,7 +94,7 @@ class HFViTPosePredictor:
             traceback.print_exc()
             return [None] * len(bboxes_xyxy)
 
-# --- CẤU HÌNH CHUNG ---
+# --- GENERAL CONFIGURATION ---
 REID_MODEL = checkpoint_path('osnet_x1_0_msmt17.pt') 
 
 # --- PARSE ARGUMENTS ---
@@ -106,13 +104,13 @@ parser.add_argument('--output_folder', type=str, required=True)
 parser.add_argument('--calibration_file', type=str, default=repo_path('configs/calibration/calibration_matrix.json'))
 parser.add_argument('--scale_factor', type=float, default=0.35)
 parser.add_argument('--epsilon', type=float, default=1.5)
-parser.add_argument('--min_samples', type=int, default=2) # Fix lỗi DBSCAN
+parser.add_argument('--min_samples', type=int, default=2) # Fix the DBSCAN error.
 parser.add_argument('--vitpose_model', type=str, default='usyd-community/vitpose-base-simple')
 
 args = parser.parse_args()
 os.makedirs(args.output_folder, exist_ok=True)
 
-# 1. SETUP THIẾT BỊ
+# 1. DEVICE SETUP
 if torch.cuda.is_available():
     device_yolo = 'cuda:0'
     device_boxmot = 0
@@ -134,7 +132,7 @@ if os.path.exists(args.calibration_file):
 # 3. LOAD MODELS
 print("Loading YOLO Detection model...")
 try:
-    model = YOLO(checkpoint_path('yolo12x.pt')) # Dùng bản Detection (x) mạnh nhất
+    model = YOLO(checkpoint_path('yolo12x.pt')) # Use the most powerful detection variant (x).
 except:
     model = YOLO(checkpoint_path('yolo26x.pt'))
 model.to(device_yolo)
@@ -145,7 +143,7 @@ vitpose = HFViTPosePredictor(model_name=args.vitpose_model, device=device_yolo)
 print(f"Initializing DeepOCSORT Tracker...")
 tracker = create_tracker(
     tracker_type='deepocsort',
-    tracker_config=None,          # dùng default
+    tracker_config=None,          # Use the default.
     reid_weights=checkpoint_path('osnet_x1_0_msmt17.pt'),
     device=device_boxmot,
     half=True
@@ -173,9 +171,9 @@ ARROW_LENGTH = 30
 ARROW_THICKNESS = 2      
 ARROW_TIP = 0.3         
 
-# Thêm biến lưu trạng thái Pose để làm mượt (Smoothing)
+# Add storage for pose state to support smoothing.
 pose_history_smooth = {} # {track_id: (vx, vy)}
-ALPHA_SMOOTH = 0.7       # Hệ số làm mượt (Càng nhỏ càng mượt nhưng trễ)
+ALPHA_SMOOTH = 0.7       # Smoothing coefficient (smaller is smoother but introduces lag).
 
 print(f"Start processing...")
 
@@ -201,7 +199,7 @@ while cap.isOpened():
     valid_tracks_list = [] 
     bboxes_for_pose = []  
 
-    current_frame_ids = set() # Để dọn dẹp bộ nhớ smoothing
+    current_frame_ids = set() # Used to clean up smoothing state.
 
     if len(tracks) > 0:
         valid_tracks = tracks[tracks[:, 4] != -1]
@@ -213,7 +211,7 @@ while cap.isOpened():
             valid_tracks_list.append(trk)
             current_frame_ids.add(tid)
 
-    # Dọn dẹp id cũ khỏi bộ nhớ smoothing
+    # Remove old IDs from smoothing state.
     pose_history_smooth = {k: v for k, v in pose_history_smooth.items() if k in current_frame_ids}
 
     # D. Pose Estimation & Smoothing
@@ -229,19 +227,19 @@ while cap.isOpened():
             
             kpts = pose_results[i] if i < len(pose_results) else None
             
-            # --- LOGIC MỚI: SMOOTHING POSE VECTOR ---
-            raw_pose_vec = get_pose_vector(kpts, conf_thresh=0.6) # Tăng thresh lên 0.6 cho chắc
+            # --- NEW LOGIC: POSE VECTOR SMOOTHING ---
+            raw_pose_vec = get_pose_vector(kpts, conf_thresh=0.6) # Raise the threshold to 0.6 for more confidence.
             
             final_pose_vec = None
             
             if raw_pose_vec is not None:
                 if tid in pose_history_smooth:
-                    # Công thức EMA: New = alpha * Raw + (1-alpha) * Old
+                    # EMA formula: New = alpha * Raw + (1-alpha) * Old.
                     old_vx, old_vy = pose_history_smooth[tid]
                     new_vx = ALPHA_SMOOTH * raw_pose_vec[0] + (1 - ALPHA_SMOOTH) * old_vx
                     new_vy = ALPHA_SMOOTH * raw_pose_vec[1] + (1 - ALPHA_SMOOTH) * old_vy
                     
-                    # Chuẩn hóa lại
+                    # Normalize again.
                     norm = math.sqrt(new_vx**2 + new_vy**2)
                     if norm > 0:
                         final_pose_vec = (new_vx/norm, new_vy/norm)
@@ -250,7 +248,7 @@ while cap.isOpened():
                     pose_history_smooth[tid] = raw_pose_vec
                     final_pose_vec = raw_pose_vec
             else:
-                # Nếu frame này mất pose (do che khuất), dùng lại hướng cũ nếu có
+                # If pose is missing in this frame (occlusion), reuse the previous direction if available.
                 if tid in pose_history_smooth:
                     final_pose_vec = pose_history_smooth[tid]
 
@@ -260,11 +258,11 @@ while cap.isOpened():
             
             motion_vec = None
             hist = track_history[tid]
-            if len(hist) >= 10: # Tăng lên 10 frame để vector dài và ổn định hơn
+            if len(hist) >= 10: # Increase to 10 frames for a longer, more stable vector.
                 vx = hist[-1][0] - hist[0][0]
                 vy = hist[-1][1] - hist[0][1]
                 norm_v = math.sqrt(vx**2 + vy**2)
-                if norm_v > 5: # Chỉ vẽ nếu di chuyển > 5px
+                if norm_v > 5: # Draw only if displacement > 5 px.
                     motion_vec = (vx/norm_v, vy/norm_v)
 
             active_tracks_info[tid] = {
@@ -321,7 +319,7 @@ while cap.isOpened():
                 p1 = cluster_results[i]
                 p2 = cluster_results[j]
                 pos1, pos2 = p1.get('real_pos'), p2.get('real_pos')
-                # Fix lỗi check array
+                # Fix the array check.
                 if pos1 is not None and pos2 is not None:
                     dist = math.sqrt((pos1[0]-pos2[0])**2 + (pos1[1]-pos2[1])**2)
                     if dist < 3.0:

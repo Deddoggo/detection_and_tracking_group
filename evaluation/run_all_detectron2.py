@@ -10,14 +10,14 @@ import sys
 import os
 import subprocess
 
-# --- CẤU HÌNH ĐƯỜNG DẪN CỦA BẠN TẠI ĐÂY ---
-MOT15_TRAIN_DIR = repo_path('./MOT15/train')               # Đường dẫn tới thư mục train chứa 11 folder
-OUTPUT_TRACKER_DIR = repo_path('./output_detectron2/data') # Thư mục đích chứa các file .txt
-TEMP_FRAMES_DIR = repo_path('./temp_frames')               # Thư mục tạm để lưu ảnh và det.npy của bước 1
+# --- CONFIGURE YOUR PATHS HERE ---
+MOT15_TRAIN_DIR = repo_path('./MOT15/train')               # Path to the training directory containing 11 folders.
+OUTPUT_TRACKER_DIR = repo_path('./output_detectron2/data') # Destination directory for .txt files.
+TEMP_FRAMES_DIR = repo_path('./temp_frames')               # Temporary directory for images and det.npy from step 1.
 
 os.makedirs(OUTPUT_TRACKER_DIR, exist_ok=True)
 
-# Lấy danh sách tên các sequence (ADL-Rundle-6, ETH-Bahnhof,...)
+# Get sequence names (ADL-Rundle-6, ETH-Bahnhof, ...).
 sequences = [d for d in os.listdir(MOT15_TRAIN_DIR) if os.path.isdir(os.path.join(MOT15_TRAIN_DIR, d))]
 
 print(f"🔥 Tìm thấy {len(sequences)} sequences. Bắt đầu chạy hàng loạt...")
@@ -31,7 +31,7 @@ for seq in sequences:
     seq_temp_dir = os.path.join(TEMP_FRAMES_DIR, seq)
     os.makedirs(seq_temp_dir, exist_ok=True)
     
-    # 1. CHẠY DETECTION
+    # 1. RUN DETECTION
     print(f"⏳ Bước 1/2: Chạy Detectron2 cho {seq}...")
     cmd_detect = [
         sys.executable, "-m", "legacy.detection",
@@ -40,7 +40,7 @@ for seq in sequences:
     ]
     subprocess.run(cmd_detect)
     
-    # 2. CHẠY TRACKING
+    # 2. RUN TRACKING
     print(f"⏳ Bước 2/2: Chạy DeepSORT cho {seq}...")
     cmd_track = [
         sys.executable, "-m", "evaluation.eval_tracking_group",

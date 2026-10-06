@@ -24,8 +24,10 @@
     "pipeline": false
   },
   "modules/orientation_utils.py": {
-    "before_hash": "2630d72abdfd234dbd34524e2ade4fdafa2365d3cffae4180e79eb19e5f5a690",
-    "pipeline": false
+    "before_hash": "0e8b02995a56dc6b5902b7de74570428cbb31f40f966c59f49c08eaa2335348e",
+    "pipeline": false,
+    "pre_translation_hash": "2630d72abdfd234dbd34524e2ade4fdafa2365d3cffae4180e79eb19e5f5a690",
+    "reference_update": "English docstrings only; full AST excluding docstrings verified against pre-translation source."
   },
   "modules/orientation_gate.py": {
     "before_hash": "2cad2d981fc83351b3ec36cd10afaf2e18f19c7a0b3700fcef9e36a7fac59689",

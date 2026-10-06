@@ -81,7 +81,7 @@ groups_status = {}  # Store group status
 max_group_id = -1   # Variable to track the highest group ID
 
 import time
-start_time = time.time()  # Bắt đầu đo thời gian xử lý frame
+start_time = time.time()  # Start timing frame processing.
 
 for frame_idx, frame_name in enumerate(frame_files):
     frame = cv2.imread(os.path.join(frames_dir, frame_name))
@@ -155,7 +155,7 @@ for frame_idx, frame_name in enumerate(frame_files):
     out.write(frame)
     print(f"Tracking frame {current_frame_id}/{total_frames}", end='\r')
 
-end_time = time.time()  # Kết thúc đo thời gian xử lý frame
+end_time = time.time()  # Stop timing frame processing.
 
 out.release()
 print("\n🎉 Tracking completed. Video saved at:", output_video)

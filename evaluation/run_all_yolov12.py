@@ -10,9 +10,9 @@ import sys
 import os
 import subprocess
 
-# --- CẤU HÌNH ĐƯỜNG DẪN TẠI ĐÂY ---
+# --- CONFIGURE PATHS HERE ---
 MOT15_TRAIN_DIR = repo_path('./MOT15/train')               
-OUTPUT_TRACKER_DIR = repo_path('./output_yolo/data') # Tạo một ngăn kéo riêng biệt
+OUTPUT_TRACKER_DIR = repo_path('./output_yolo/data') # Create a separate output directory.
 
 os.makedirs(OUTPUT_TRACKER_DIR, exist_ok=True)
 sequences = [d for d in os.listdir(MOT15_TRAIN_DIR) if os.path.isdir(os.path.join(MOT15_TRAIN_DIR, d))]
@@ -24,11 +24,11 @@ for seq in sequences:
     print(f"🚀 ĐANG XỬ LÝ: {seq}")
     print(f"{'='*50}")
     
-    # Định dạng %06d.jpg cho OpenCV đọc
+    # Use %06d.jpg for OpenCV image-sequence input.
     img_dir_pattern = os.path.join(MOT15_TRAIN_DIR, seq, "img1", "%06d.jpg")
     
     cmd = [
-        sys.executable, "-m", "evaluation.tracking_yolov12", # Tên file rút gọn ở trên
+        sys.executable, "-m", "evaluation.tracking_yolov12", # Abbreviated filename defined above.
         "--input_video", img_dir_pattern,
         "--output_folder", OUTPUT_TRACKER_DIR,
         "--seq_name", seq

@@ -63,7 +63,7 @@ class CalibrationTool:
         visual_matrix = np.dot(scale_matrix, self.matrix)
         warped_img = cv2.warpPerspective(self.clone, visual_matrix, (warp_w, warp_h))
         
-        # LƯU ẢNH RA FILE
+        # SAVE THE IMAGE TO A FILE
         cv2.imwrite(output_filename, warped_img)
         print(f"\n[SAVED] Validation image saved to: {output_filename}")
         print("Please transfer this file to your personal computer to check if it is rectangular.")

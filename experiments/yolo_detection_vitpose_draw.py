@@ -91,7 +91,7 @@ parser.add_argument('--vitpose_model', type=str, default='usyd-community/vitpose
 args = parser.parse_args()
 os.makedirs(args.output_folder, exist_ok=True)
 
-# 1. SETUP THIẾT BỊ
+# 1. DEVICE SETUP
 if torch.cuda.is_available():
     device_yolo = 'cuda:0'
     device_boxmot = 0
@@ -124,7 +124,7 @@ print("Initializing BoostTrack with CLIP ReID...")
 tracker = create_tracker(
     tracker_type='boosttrack',
     tracker_config=repo_path('configs/trackers/custom_boosttrack.yaml'),
-    reid_weights=checkpoint_path('clip_market1501.pt'),  # ĐỔI SANG MÔ HÌNH NÀY
+    reid_weights=checkpoint_path('clip_market1501.pt'),  # SWITCH TO THIS MODEL
     device=device_boxmot,
     half=True
 )
@@ -263,11 +263,11 @@ while cap.isOpened():
 
     # --- F. DRAWING ---
     
-    # [NHỊP 1]: VẼ LỚP MÀNG MỜ (FIELD OF VIEW)
+    # [PASS 1]: DRAW THE TRANSLUCENT FIELD OF VIEW
     overlay = frame.copy()
-    ALPHA_FOV = 0.3  # Độ mờ 30%
-    FOV_RADIUS = 75  # Độ vươn xa của tầm nhìn (pixel)
-    FOV_ANGLE = 60   # Góc mở rộng của tầm nhìn (60 độ)
+    ALPHA_FOV = 0.3  # 30% opacity.
+    FOV_RADIUS = 75  # Field-of-view reach (pixels).
+    FOV_ANGLE = 60   # Field-of-view opening angle (60 degrees).
 
     for person in cluster_results:
         tid = person['id_p']
@@ -285,11 +285,11 @@ while cap.isOpened():
                             0, base_angle - FOV_ANGLE/2, base_angle + FOV_ANGLE/2, 
                             color, -1)
 
-    # Trộn lớp overlay vào frame
+    # Blend the overlay into the frame.
     cv2.addWeighted(overlay, ALPHA_FOV, frame, 1 - ALPHA_FOV, 0, frame)
 
 
-    # [NHỊP 2]: VẼ CÁC CHI TIẾT NÉT CỨNG
+    # [PASS 2]: DRAW SHARP DETAILS
     for person in cluster_results:
         bbox = person['bbox']
         color = person['color']
@@ -345,7 +345,7 @@ while cap.isOpened():
                 p1 = cluster_results[i]
                 p2 = cluster_results[j]
                 
-                # Chỉ vẽ khoảng cách giữa 2 người CÙNG NHÓM
+                # Draw distances only between two people in the SAME GROUP.
                 if p1['id_g'] != -1 and p1['id_g'] == p2['id_g']:
                     pos1, pos2 = p1.get('real_pos'), p2.get('real_pos')
                     if pos1 is not None and pos2 is not None:

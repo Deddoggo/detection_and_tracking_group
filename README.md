@@ -44,22 +44,28 @@ See the complete [old → new mapping and inventory](docs/REPOSITORY_LAYOUT.md).
 
 ## Pipeline and data contracts
 
-| Stage | Input | Output in configured output directory |
+| Stage | Input | Output |
 |---|---|---|
 | `pipeline.detect_yolo` | Video + YOLO checkpoint | `detections.json`, visualization |
 | `pipeline.track` | Same video + detections | `tracks_bytetrack_only.json`, visualization |
 | `pipeline.stitch_tracks` | Same video + raw tracks | `tracks_stitched.json` |
+| `tools.calibration_headless` (camera preparation) | Camera frame + four ground-plane correspondences and measured dimensions | Calibration JSON + warped validation image |
 | `pipeline.analyze_subgroups` | Same video + stitched tracks (falls back to raw tracks), calibration, pose models | `final_sociometrics_data.json` |
+
+Pipeline outputs use `output_dir`. Calibration is separate camera/scene preparation,
+not an output of stitching; prepare it before subgroup analysis.
 
 Main JSON keys are **zero-based** `frame_00000`, etc.; bbox is pixel `[x, y, width, height]`.
 Adapters convert to corners internally. Detections carry confidence; tracks carry person `id`
 and bbox, but the current tracking export drops confidence. Stitching rewrites IDs offline.
 Do not mix tracks, pose records or caches across videos/runs or ID mappings.
 
-Subgroup analysis processes every third source frame and retains existing size filtering.
-Group IDs differ from person IDs. Calibration must match the camera, image coordinates and
-ground plane; metric distances require a valid scale. For variable-frame-rate video, retain
-source timestamps: frame index alone does not establish elapsed time.
+Subgroup analysis processes every third source frame and excludes boxes with width < 15 or
+height < 30 pixels. Group continuation uses one-to-one member overlap matching: only one
+eligible child/parent retains an old ID during a split/merge, with no missing-frame group
+persistence. Missing pose can reuse the person's stored smoothed direction; unavailable
+orientation makes pairwise grouping rely on proximity. For variable-frame-rate video,
+retain source timestamps rather than inferring elapsed time from FPS.
 
 ## Dependencies and paths
 
@@ -89,16 +95,71 @@ settings; inspect their constants before running.
 The existing gender-classification component reads `ROBOFLOW_API_KEY` from the environment.
 `.env.example` documents variables; `.env` is **not automatically loaded**. Never commit
 credentials. ViTPose retains its Hugging Face model identifier and may need downloaded/cache
-assets. Existing missing-model/fallback behavior has not been redesigned by this layout task.
+assets. ViTPose initialization/prediction failures yield missing poses; gender failures yield
+`Unknown`. A missing calibration file yields pixel-space grouping, without metric distances;
+a malformed existing calibration JSON raises an error.
+
+### Calibration for a camera/scene
+
+[tools/calibration_headless.py](tools/calibration_headless.py) has **no CLI arguments**.
+Set `IMG_PATH`, `MY_POINTS`, `REAL_W` and `REAL_H` in its `__main__` block. Extract a frame
+from the same camera at analysis resolution, without resizing/cropping, for example:
+
+```bash
+ffmpeg -i videos/YOUR_VIDEO.mp4 -frames:v 1 assets/reference/Real_playground.png
+```
+
+This requires FFmpeg and an existing parent directory. Use a new filename if a reference
+must be preserved, then set `IMG_PATH` to it. Supply four `(x, y)` pixel coordinates in
+`MY_POINTS` corresponding to **top-left, top-right, bottom-right, bottom-left** of a ground
+rectangle. Perspective can make this differ from simply sorting image coordinates.
+`compute_homography` pairs them, in order, with:
+
+```text
+(0, 0), (REAL_W, 0), (REAL_W, REAL_H), (0, REAL_H)
+```
+
+Set width/height from measured or known dimensions of that ground rectangle, in the same
+unit. Use meters for meter coordinates; four image points alone do not establish metric
+scale. Current constants are inherited examples, not verified measurements for a new video.
+The implementation assumes a rectangle; arbitrary ground correspondences require a different
+destination definition rather than forcing that assumption.
+
+Choose distinct, well-spread points on the **playground surface**, avoiding collinear or
+nearly collinear arrangements. Roof corners/elevated objects are not ground points. Gazebo
+references in the source require checking that points are ground contacts. The script checks
+point count but does not validate degeneracy or physical scale. After configuring constants:
+
+```bash
+python -m tools.calibration_headless
+```
+
+By default, `save_matrix()` writes `configs/calibration/calibration_matrix_playground.json`
+with the `homography_matrix` key. `validate_warp_headless()` writes
+`validation_result_playground.jpg` in the working directory, at 100 display pixels per
+destination unit. Defaults overwrite existing files: choose new filenames in those method
+calls for another camera and create the output parent directory. Inspect the warp and point
+correspondences; a rectangular warp alone does not verify metric accuracy.
+
+Set `calibration` in `configs/paths.local.json` to the resulting JSON. This calibration
+script itself does not read the config's `calibration` output setting. Reuse the matrix only
+while camera geometry, image coordinates/resolution and ground plane remain unchanged;
+camera movement or resizing/cropping requires reconsidering it. Calibration accuracy has
+not been measured.
 
 ## Entry points
 
 From the repository root, use the same local config for all stages:
 
-```sh
+```bash
 python -m pipeline.detect_yolo --config configs/paths.local.json
 python -m pipeline.track --config configs/paths.local.json
 python -m pipeline.stitch_tracks --config configs/paths.local.json
+```
+
+Prepare/check calibration as above, then run subgroup analysis:
+
+```bash
 python -m pipeline.analyze_subgroups --config configs/paths.local.json
 ```
 
@@ -113,7 +174,7 @@ can be invoked elsewhere. Main-stage `--help` does not load ML dependencies or m
 
 After subgroup output exists, optional reporting tools are:
 
-```sh
+```bash
 python -m tools.generate_report
 python -m tools.render_visuals
 ```
@@ -142,7 +203,7 @@ baseline/configuration on the annotated development interval.
 
 Lightweight verification (no inference):
 
-```sh
+```bash
 python -m unittest discover -s tests -v
 ```
 

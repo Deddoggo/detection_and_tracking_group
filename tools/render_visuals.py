@@ -17,16 +17,16 @@ INPUT_JSON = output_path('final_sociometrics_data.json')
 OUTPUT_VIDEO = output_path('output_visualized_clean.mp4')
 FRAME_STRIDE = 3
 
-MAX_DRAW_DIST = 4.0 # Ngưỡng vẽ đường nối khoảng cách (mét)
+MAX_DRAW_DIST = 4.0 # Distance threshold for drawing connecting lines (meters).
 CONE_LENGTH = 50
 CONE_ANGLE = 40
 
-# --- THEME TỐI GIẢN (MINIMALIST) ---
-COLOR_MAIN = (200, 200, 200)      # Xám nhạt cho Box
-COLOR_GROUP_LINE = (255, 200, 100) # Xanh Cyan nhạt cho đường nối nhóm
-COLOR_TEXT_F = (220, 150, 220)    # Hồng nhạt cho Nữ
-COLOR_TEXT_M = (150, 200, 220)    # Xanh lơ nhạt cho Nam
-COLOR_CONE = (255, 255, 255)      # Trắng mờ cho nón nhìn
+# --- MINIMALIST THEME ---
+COLOR_MAIN = (200, 200, 200)      # Light gray for boxes.
+COLOR_GROUP_LINE = (255, 200, 100) # Light cyan for group connections.
+COLOR_TEXT_F = (220, 150, 220)    # Light pink for females.
+COLOR_TEXT_M = (150, 200, 220)    # Light blue for males.
+COLOR_CONE = (255, 255, 255)      # Translucent white for view cones.
 
 def interpolate_bbox(bbox1, bbox2, alpha):
     return [b1 + (b2 - b1) * alpha for b1, b2 in zip(bbox1, bbox2)]
@@ -65,7 +65,7 @@ for frame_idx in range(total_frames):
         persons_to_draw = frames_data[key_start]
 
     # ==========================================
-    # LỚP 1: NÓN NHÌN MỜ (VIEW CONE)
+    # LAYER 1: TRANSLUCENT VIEW CONES
     # ==========================================
     overlay = frame.copy()
     for p in persons_to_draw:
@@ -84,18 +84,18 @@ for frame_idx in range(total_frames):
                    int(head_y + CONE_LENGTH * math.sin(angle + half_fov)))
             
             pts = np.array([pt1, pt2, pt3], np.int32)
-            # Vẽ nón bằng màu trắng mờ
+            # Draw cones in translucent white.
             cv2.fillPoly(overlay, [pts], COLOR_CONE)
 
-    # Trộn lớp overlay với frame gốc, chỉ giữ 20% độ sáng (rất mờ và tinh tế)
+    # Blend the overlay with the original frame at 20% brightness (subtle and faint).
     cv2.addWeighted(overlay, 0.2, frame, 0.8, 0, frame)
 
     # ==========================================
-    # LỚP 2: ĐƯỜNG NỐI & BOUNDING BOX
+    # LAYER 2: CONNECTING LINES & BOUNDING BOXES
     # ==========================================
     num_people = len(persons_to_draw)
     
-    # 2.1 Vẽ đường nối khoảng cách trước (để nó chìm dưới text)
+    # 2.1 Draw distance connections first, underneath the text.
     for i in range(num_people):
         for j in range(i + 1, num_people):
             p1, p2 = persons_to_draw[i], persons_to_draw[j]
@@ -103,7 +103,7 @@ for frame_idx in range(total_frames):
             
             if pos1 and pos2:
                 dist = math.sqrt((pos1[0]-pos2[0])**2 + (pos1[1]-pos2[1])**2)
-                # Chỉ vẽ nét đứt/mờ cho người CÙNG NHÓM
+                # Draw faint/dashed connections only between people in the SAME GROUP.
                 if p1['id_g'] != -1 and p1['id_g'] == p2['id_g']:
                     c1 = (int(p1['bbox'][0] + p1['bbox'][2]/2), int(p1['bbox'][1] + p1['bbox'][3]/2))
                     c2 = (int(p2['bbox'][0] + p2['bbox'][2]/2), int(p2['bbox'][1] + p2['bbox'][3]/2))
@@ -115,17 +115,17 @@ for frame_idx in range(total_frames):
                     cv2.putText(frame, dist_text, (mid[0]-10, mid[1]-2), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0,0,0), 2)
                     cv2.putText(frame, dist_text, (mid[0]-10, mid[1]-2), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255,255,255), 1)
 
-    # 2.2 Vẽ Bounding Box và Thông tin Cực Gọn
+    # 2.2 Draw bounding boxes and compact information.
     for p in persons_to_draw:
         x, y, w, h = map(int, p['bbox'])
         tid, id_g = p['id_p'], p['id_g']
         gender = str(p.get('gender', '?')).capitalize() 
         gender_char = "F" if gender == 'Female' else "M" if gender == 'Male' else "?"
         
-        # Hộp đơn sắc mỏng
+        # Thin monochrome boxes.
         cv2.rectangle(frame, (x, y), (x + w, y + h), COLOR_MAIN, 1)
         
-        # Text định danh
+        # Identification text.
         text = f"{tid}-G{id_g} {gender_char}" if id_g != -1 else f"{tid} {gender_char}"
         text_color = COLOR_TEXT_F if gender == 'Female' else COLOR_TEXT_M if gender == 'Male' else COLOR_MAIN
         
