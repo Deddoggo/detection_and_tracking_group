@@ -1,55 +1,72 @@
-# C2 bounded validation handoff
+# C2 acceptance handoff — observation engineering complete
 
-The ViTPose+ clarification is implemented and the authorized five-frame CUDA test passed. **C3, the 600-sample export and H2/H3/H4 have not begun.** This establishes bounded execution and observation integrity, not scientific accuracy or full benchmark readiness.
+**C2 observation-cache engineering is complete.** Curated tracked observation/replay commits are ready for integration into master with explicit geometry/workspace limitations. No merge is authorized or performed here. Trusted metric grouping is not complete. C3/H2/H3/H4 remain unstarted.
 
-## Fixed Hugging Face workflow
+## Artifacts to retain
 
-Only `usyd-community/vitpose-plus-base` is used. `AutoProcessor.from_pretrained()` and `VitPoseForPoseEstimation.from_pretrained()` receive that exact model ID and the same immutable revision. Hugging Face automatically downloads/caches weights. No manually prepared checkpoint directory or alternative model option is required or supported.
+Root: `.local/c2/full_acceptance_20261109/` (ignored local outputs; source data/model weights are not committed).
 
-Default loading resolves `main` once through the Hub API. For exact reproduction, pass the executed full revision **`92be54d7a29e42fad47b6e2ca01dd9e685a61e0d`**. Each forward uses COCO human-pose `dataset_index=0`. Architecture/joint ordering and artifact hashes are recorded in `observations.v1` provenance.
+| Artifact | Identity/purpose |
+|---|---|
+| observations/manifest.json | observations.v1 complete, 600 source samples; SHA256 fda85542696711cd50567a20be216ef4d903416423cf4c0b8cec3eb4bcf67366 |
+| observations/frames.jsonl | 23,734 retained records, 23,426 actual poses; SHA256 7a8efcbc164f6980409e8b3d57a250365152ca44188a3bf463366601a66975b6 |
+| observations/inference_metrics.json | All crop/ID/expert/shape/timing records and CUDA allocator peaks; manifest-hashed |
+| replay_a/, replay_b/ | Complete neural-free image diagnostics; prediction SHA256 49235da70d967a40b2f18ddb7ad8256e0de307eacf6ae7c16cea1d85bcabda6f |
+| calibration.existing-H.v1.json | Additive unverified manifest referencing unchanged existing H; not permission for metric use |
+| cache_validation.json, replay_validation.json, regression_validation.json | Full acceptance receipts |
+| export_execution.json, export.log, C1.log, C2.log, workspace_layout.log | Execution/exit/time evidence |
+| docs/c2_full_acceptance.json | Consolidated portable evidence, acceptance A-G and preservation/source/model provenance |
 
-## Executed bounded command
+The old smoke cache `.local/c2/vitpose_plus_20261109/observations_verified/` remains immutable evidence. Its arrays match the five-frame prefix of the full cache exactly; optional extra metadata in the new full cache preserves z_order and track provenance without invalidating old v1 records.
 
-Run from the repository root using the existing environment. Use a **new** output directory if repeating; the completed cache below already exists and will be refused as an output destination.
+## Exact full-export command (already executed)
+
+Use the existing paper-research interpreter from the repository root. The output below already exists and is intentionally refused if reused; choose a new output path for an explicitly authorized repetition.
 
 ```powershell
-$py = 'C:\Users\trant\miniconda3\envs\paper-research\python.exe'
+$py = 'C:/Users/trant/miniconda3/envs/paper-research/python.exe'
 & $py -u -B analyze_subgroups.py cache `
   --video 'WIN_20260303_10_09_56_PRO_GT_First60s/WIN_20260303_10_09_56_Pro.mp4' `
   --xml 'WIN_20260303_10_09_56_PRO_GT_First60s/annotations.xml' `
   --alignment '.local/c2/alignment_20261109/alignment.reviewed.json' `
   --revision 92be54d7a29e42fad47b6e2ca01dd9e685a61e0d `
-  --start 0 --end 13 --stride 3 --max-pose-frames 5 --pose-batch-size 1 `
-  --device cuda:0 --output '.local/c2/vitpose_plus_20261109/observations_verified'
+  --start 0 --end 1800 --stride 3 --max-pose-frames 600 --pose-batch-size 1 `
+  --device cuda:0 --output '.local/c2/full_acceptance_20261109/observations'
 ```
 
-Frames 0,3,6,9,12 yielded 213 finite COCO17 pose arrays and 5 explicit tiny-box exclusions among 218 retained records. Person IDs/boxes/attributes/source PTS match the XML/alignment. Raw model scores are retained without clipping. XML identities are oracle inputs; this is not detector/tracker evaluation or complete subgroup GT.
+Only usyd-community/vitpose-plus-base is supported. Hugging Face from_pretrained loads model/processor directly by ID at the same SHA and reuses standard cached weights. No manual checkpoint loader or environment installation is required. This is an oracle-box/oracle-identity path, not end-to-end detection/tracking performance.
 
-Artifacts:
+## Reproduce artifact validation and replay
 
-- `observations_verified/manifest.json`, `frames.jsonl`: complete observations.v1 cache with exact model revision and model/processor/weights hashes.
-- `observations_verified/inference_metrics.json`: every crop/person call, shapes, dataset index, timing and CUDA allocator peaks.
-- `.local/c2/vitpose_plus_20261109/smoke_validation.complete.json`: assertion-based validation and repeatable replay results.
-- `pose_overlays/frame_00000.jpg`, `frame_00012.jpg`: inspected original-video overlays; 0.6 is a display threshold only.
-- `docs/c2_vitpose_plus_validation.json`: portable current evidence; `docs/c2_validation.json` remains prior structural evidence.
-
-The cache is reusable without neural inference. For example, with a new output path:
+The export wall-time receipt was produced by the isolated execute_export.py wrapper. It records argv, exit status, start/end UTC and whole-process elapsed time. Validation reads source/cache artifacts without changing them:
 
 ```powershell
+& $py -B tests/validate_c2_full.py `
+  --cache '.local/c2/full_acceptance_20261109/observations' `
+  --video 'WIN_20260303_10_09_56_PRO_GT_First60s/WIN_20260303_10_09_56_Pro.mp4' `
+  --xml 'WIN_20260303_10_09_56_PRO_GT_First60s/annotations.xml' `
+  --alignment '.local/c2/alignment_20261109/alignment.reviewed.json' `
+  --execution '.local/c2/full_acceptance_20261109/export_execution.json' `
+  --output '.local/c2/validation_NEW.json'
 & $py -B analyze_subgroups.py replay `
-  --cache '.local/c2/vitpose_plus_20261109/observations_verified' `
+  --cache '.local/c2/full_acceptance_20261109/observations' `
   --geometry-mode image-space-diagnostic --eps 50 --close-distance 10 `
   --output '.local/c2/replay_NEW_RUN'
+& $py -B tests/run_c1.py
+& $py -B tests/run_c2.py
+& $py -B tests/check_active_layout.py
 ```
 
-These pixel settings are engineering diagnostics, not tuned research thresholds. Two actual cache replay runs produced identical predictions and left raw observations unchanged. Predicted group IDs are pre-annotations, never GT. `unreviewed` references remain unknown; excluded persons have null predictions and eligible clustering noise has -1.
+The executed two-run wrapper execute_replays.py adds import guards, times each CPU process and compares complete predictions and raw-cache hashes. Its record is replay_validation.json. The pixel thresholds above are diagnostics, not physical or optimized subgroup parameters. Predictions are pre-annotations; incomplete unreviewed references remain unknown. Do not derive ground truth or Setti F1 from these predictions/partial labels.
 
-## Remaining requirements and scope
+## Remaining geometry input
 
-1. **Metric calibration evidence:** existing homographies were preserved. Before metric replay, verify their actual-video correspondence, physical measurements/units and camera provenance, then validate a calibration.v1 manifest. Raw CUDA caching is already independent of this verification.
-2. **Repository layout:** untracked `draw_grid.py`, present before this clarification, causes one existing root-layout check to fail. It was not edited, staged or deleted. Core C1/C2 tests pass; do not describe all repository checks as green.
-3. **Future scientific evaluation:** incomplete G1–G9 labels are not complete subgroup GT. No pose/group accuracy or benchmark gain follows from finite arrays or visual spot checks. Many distant/occluded joints have low scores.
+H generation is already done. The actual available export is calibration_matrix_playground.json, numerically valid and source-compatible. If a distinct homography_matrix.json was intended, provide its actual path; it was not found in the searched locations. Do not regenerate or replace H merely to change its filename.
 
-No environment repair is needed for the executed case: paper-research's installed CUDA PyTorch/Transformers ran ViTPose+ successfully. No packages were changed and Vast.ai was not contacted. The failed early attempts remain distinguishable from the successful cache. Do not run the full 600-sample export without separate authorization.
+For trusted metric replay, provide the existing measurement record or confirmation identifying the four actual coplanar ground landmarks at the coded image coordinates, their 10.42x11.54 dimensions/units, measurement verifier and accepted physical-error tolerance. The paper's measurement statement is retained as a claim. Once that evidence is reviewed, the additive calibration manifest can be completed and a bounded metric replay run separately. Do not set verified=true solely because the matrix is finite or its source image matches the camera.
 
-Other preserved limits: cache export starts at source frame 0; other video timing/order assumptions require explicit validation. Existing legacy renderer/report scripts consume their original JSON format, not C2 replay JSONL. The B0 absolute-cosine predicate, DBSCAN chaining, heading heuristic and C1 association are unchanged.
+## Integration and local utility treatment
+
+The existing workspace layout guard remains red because draw_grid.py is a root-level untracked, user-owned visualization tool. No active script imports it. It was neither executed, edited, deleted nor force-added, and the allowlist was unchanged. A clean tracked implementation snapshot passed all three layout tests. With separate owner authorization, a non-active tools/calibration location is an appropriate future home; no relocation happened in C2.
+
+Integrate only curated C2 commits, excluding the pre-existing calibration/image changes and grid utility. No automatic merge or further work follows this handoff. The full cache and repeatable CPU replay are accepted engineering artifacts; physical metric validity and scientific grouping accuracy remain separate. Existing legacy renderer/report JSON interfaces are unchanged; public adapters/benchmarks and new research methods belong to subsequent authorized work.

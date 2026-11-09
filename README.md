@@ -1,6 +1,6 @@
 # Active monocular-video subgroup pipeline
 
-The canonical master integrates the clean active pipeline and selected C1 correctness repairs. C2 is implemented on `codex/c2-observation-cache`; the five-frame ViTPose+ CUDA pose-cache validation is complete; trusted metric calibration remains pending. Predictions are pre-annotations, not subgroup ground truth.
+The canonical master integrates the clean active pipeline and selected C1 correctness repairs. C2 is implemented on `codex/c2-observation-cache`; the full 600-sample ViTPose+ observation export and deterministic CPU replay are accepted; trusted metric calibration remains blocked. Predictions are pre-annotations, not subgroup ground truth.
 
 ## Active path
 
@@ -34,7 +34,7 @@ Metric grouping requires verified `calibration.v1` evidence matching the source 
 
 - [C2 implementation and complete change inventory](docs/C2_IMPLEMENTATION_SUMMARY.md)
 - [C2 executed validation and reproduction commands](docs/C2_VALIDATION_REPORT.md)
-- [Verified smoke workflow and pending calibration evidence](docs/C2_HANDOFF_TO_C3.md)
-- Current smoke evidence: `docs/c2_vitpose_plus_validation.json`; prior structural evidence: `docs/c2_validation.json`. Raw smoke observations, profiling and overlays: `.local/c2/vitpose_plus_20261109/`. Local alignment images and full PTS remain under `.local/c2/`.
+- [Full accepted workflow and remaining calibration evidence](docs/C2_HANDOFF_TO_C3.md)
+- Current full acceptance: `docs/c2_full_acceptance.json`; prior smoke/structural evidence is retained. Full raw cache, metrics and replay: `.local/c2/full_acceptance_20261109/`. The working-tree layout failure from user-owned draw_grid.py is documented separately from the passing tracked-snapshot layout checks.
 
 Original broad master remains under `archive/pre-cleanup-master`. User datasets, annotations, checkpoints and existing calibration edits are preserved. C2 does not establish model accuracy, complete subgroup GT or benchmark readiness; C3/H2/H3/H4 have not begun.

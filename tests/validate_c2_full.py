@@ -26,6 +26,17 @@ def validate_full(cache, video, xml, alignment, execution):
     assert m['pose_model']['model_id'] == 'usyd-community/vitpose-plus-base'
     assert m['pose_model']['resolved_revision'] == '92be54d7a29e42fad47b6e2ca01dd9e685a61e0d'
     assert m['pose_model']['dataset_index'] == 0
+    smoke_manifest,smoke_rows = read_cache(ROOT/'.local/c2/vitpose_plus_20261109/observations_verified')
+    assert m['pose_model']['files_sha256'] == smoke_manifest['pose_model']['files_sha256'], 'model artifacts differ from reviewed smoke'
+    prefix_coordinate_delta,prefix_score_delta = 0.,0.
+    for current,previous in zip(rows,smoke_rows):
+        assert current['source_frame'] == previous['source_frame']
+        for p,q in zip(current['persons'],previous['persons']):
+            assert p['person_id'] == q['person_id'] and p['bbox_xywh'] == q['bbox_xywh']
+            if p['pose_status'] == q['pose_status'] == 'ok':
+                for a,b in zip(p['keypoints_xy_score'],q['keypoints_xy_score']):
+                    prefix_coordinate_delta = max(prefix_coordinate_delta,abs(a[0]-b[0]),abs(a[1]-b[1]))
+                    prefix_score_delta = max(prefix_score_delta,abs(a[2]-b[2]))
     assert m['video_sha256'] == file_sha256(video) == timing['video_sha256']
     assert m['input_sha256'] == meta['source_sha256'] == timing['annotation_metadata']['source_sha256']
     assert m['alignment_sha256'] == file_sha256(alignment)
@@ -40,6 +51,7 @@ def validate_full(cache, video, xml, alignment, execution):
     min_score,max_score = float('inf'),float('-inf')
     low_scores = 0
     for row in rows:
+        assert json.loads(json.dumps(row,allow_nan=False)) == row, 'raw JSON value round-trip changed observations'
         frame = row['source_frame']
         assert row['pts_ticks'] == timing['pts_ticks'][frame], 'source PTS mismatch'
         people = reference[frame]
@@ -82,9 +94,13 @@ def validate_full(cache, video, xml, alignment, execution):
     wall = run['wall_seconds']
     files = {p.name:{'bytes':p.stat().st_size,'sha256':file_sha256(p)} for p in cache.iterdir() if p.is_file()}
     return {'schema':'c2-full-cache-acceptance.v1','status':'PASS','cache':str(cache.resolve()),
-        'frames':len(rows),'source_range':[0,1800],'stride':3,'accounting':dict(counts),
+        'frames':len(rows),'source_range':[0,1800],'stride':3,'json_value_roundtrip_verified':True,
+        'accounting':dict(counts),
         'exclusions':dict(exclusions),'social_group_reference_counts':dict(groups),
-        'model':m['pose_model'],'environment':m['provenance'],'device':m['device'],
+        'model':m['pose_model'],'model_artifacts_match_reviewed_smoke':True,
+        'smoke_prefix_comparison':{'max_coordinate_delta_pixels':prefix_coordinate_delta,
+                                   'max_score_delta':prefix_score_delta},
+        'environment':m['provenance'],'device':m['device'],
         'artifacts':files,'total_cache_file_bytes':sum(f['bytes'] for f in files.values()),
         'source_sha256':{'video':m['video_sha256'],'xml':m['input_sha256']},
         'score_diagnostics':{'range':[min_score,max_score],'scores_below_0_6':low_scores,

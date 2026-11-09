@@ -1,100 +1,91 @@
-# C2 validation report — ViTPose+ Base clarification
+# C2 final validation report
 
-2026-11-09. Current evidence: `c2_vitpose_plus_validation.json`. Prior C2 structural evidence remains in `c2_validation.json`; it predates this model clarification.
+2026-11-09 (Europe/Paris). **Executed full-run evidence**, not an extrapolation from the smoke test. Complete machine record: `c2_full_acceptance.json`. Prior records `c2_validation.json` and `c2_vitpose_plus_validation.json` remain historical evidence.
 
-## Environment and single model
+## Configuration and provenance
 
-All execution used `C:\Users\trant\miniconda3\envs\paper-research\python.exe`, Python 3.13.0. PyTorch 2.15.0+cu134, CUDA 13.4, Transformers 5.22.2; local RTX 3060 Laptop GPU. NumPy 2.5.4, OpenCV distribution 4.11.0.86/runtime 4.11.0, sklearn 1.9.1. No package installation, downgrade or upgrade was performed.
+Interpreter: `C:/Users/trant/miniconda3/envs/paper-research/python.exe`; Python 3.13.0, PyTorch 2.15.0+cu134, CUDA 13.4, Transformers 5.22.2, RTX 3060 Laptop GPU. NumPy 2.5.4, OpenCV distribution 4.11.0.86/runtime 4.11.0, sklearn 1.9.1. Versions were checked against the start snapshot; no packages were installed/changed.
 
-Only `usyd-community/vitpose-plus-base` is supported. Model and processor load directly using `from_pretrained(model_id, revision=resolved_sha)`, allowing standard Hugging Face automatic download/cache. There is no local-checkpoint mode or alternative model selector.
+Only `usyd-community/vitpose-plus-base` was loaded via Hugging Face from_pretrained, revision `92be54d7a29e42fad47b6e2ca01dd9e685a61e0d`, standard HF cache, FP32, COCO human-pose dataset_index=0, batch size 1, cuda:0. Its config/processor/weights hashes match the reviewed smoke model. Weight SHA256: `640225e4a9dd544239f1da0ae36af865a6e76e21e5f33a12656aa7b77fa5a5fa`. No separate local-checkpoint loader or unrelated model was used.
 
-Executed immutable revision: **`92be54d7a29e42fad47b6e2ca01dd9e685a61e0d`**. The first resolution used Hub `main`; both loads are pinned to its full SHA. The final run explicitly reused this SHA. Manifest artifacts are SHA256-hashed: config, processor config and weights. The cached weights hash is `640225e4a9dd544239f1da0ae36af865a6e76e21e5f33a12656aa7b77fa5a5fa`.
+Video SHA256: `fa1044aa1f3c9d413bdd608d39f8545c593b34457f5ecb6dc80a28beb62cb119`. XML SHA256: `67addc127c07d98c17d0c160dc03d5f4025e5926dfb4d2d786aa901af37f7f08`. Reviewed alignment: `.local/c2/alignment_20261109/alignment.reviewed.json`; current hashes/dimensions/declared ranges were checked. The export itself verified decoder PTS and 1920x1080 dimensions throughout all 1,800 decoded source frames. Scheduled indices are exactly range(0,1800,3); no fixed FPS or observation-index substitution was used.
 
-The installed model signature/backbone explicitly support `dataset_index`. Every real call used a CUDA int64 tensor `[0]`, selecting the COCO human-pose expert. The six-expert/192-part-feature configuration, COCO17 label names and returned label order 0–16 were checked. This matches the [official HF ViTPose+ dataset-index documentation](https://huggingface.co/docs/transformers/model_doc/vitpose#notes) and [pinned model configuration](https://huggingface.co/usyd-community/vitpose-plus-base/blob/92be54d7a29e42fad47b6e2ca01dd9e685a61e0d/config.json). Successful native CUDA forwards establish compatibility for this bounded case.
+The export began before the metadata commit, so its immutable provenance records the parent HEAD plus exact executed source hashes. Those hashes were checked against the committed implementation; this detail is explicit in machine evidence rather than silently rewriting the observation manifest.
 
-## Executed CUDA smoke
+## Person and frame acceptance
 
-Raw cache: `.local/c2/vitpose_plus_20261109/observations_verified/`.
+| Check | Expected | Observed |
+|---|---|---|
+| Scheduled records | 600, source 0 through 1797 by 3 | PASS, exact sequence and source PTS |
+| Input XML records | Preserve every explicit sampled person, including exclusions | 23,734 |
+| Eligible / successful / missing eligible | Complete actual inference, with strict failure handling | 23,426 / 23,426 / 0 |
+| Exclusions | Original policy, retained records and reasons | 308: 296 tiny_bbox, 12 outside |
+| Occluded reference observations | Preserve original flags | 5,316 |
+| Source person/box/reference association | Exact equality to XML | PASS, all 23,734 records |
+| Extra metadata | Preserve z_order, source/label/track ID strings | PASS; optional extension, not a schema migration |
+| Raw output | 17x3 finite COCO17 xy/score per eligible person | PASS, all 23,426 outputs |
+| Model expert/input/heatmap | dataset [0], [1,3,256,192], [1,17,64,48] | PASS for all 23,426 logged calls |
+| Raw JSON round-trip | No numeric/reference value changes | PASS on every frame |
+| Model/cached artifacts | Pinned identity and checksums | PASS; matches reviewed smoke model hashes |
+| Completeness/hashes | Complete state only after all expected rows | PASS; partial reader rejection also captured during export |
+| Existing smoke preservation | Read-only evidence | PASS; all file hashes unchanged; prefix keypoint/score difference = 0 |
 
-| Source frame | PTS seconds | XML records retained | Pose arrays | Explicit tiny-box exclusions | Missing eligible poses |
-|---|---:|---:|---:|---:|---:|
-| 0 | 0.000000000 | 43 | 42 | 1 | 0 |
-| 3 | 0.112066667 | 43 | 42 | 1 | 0 |
-| 6 | 0.239966667 | 44 | 43 | 1 | 0 |
-| 9 | 0.368000000 | 44 | 43 | 1 | 0 |
-| 12 | 0.464166667 | 44 | 43 | 1 | 0 |
-| Total | | 218 | 213 | 5 | 0 |
+Original social_group values are unchanged: unreviewed 22,077; G1 28; G2 1,200; G3 211; G4 102; G5 4; G6 34; G7 8; G8 14; G9 56. These are unfinished reference attributes, not a complete positive/negative subgroup ground truth. No Setti F1 or subgroup accuracy was computed.
 
-Each of the 213 calls used batch size 1, `cuda:0`, FP32, input `[1,3,256,192]`, heatmaps `[1,17,64,48]` and final xy/score array `[17,3]`. Arrays were finite. Each single-person input was associated with exactly one output, and all source IDs, original float boxes, reference flags/attributes and source PTS were checked against the XML/alignment. No detection/tracking inference was used.
+Scores are raw model outputs, not calibrated probabilities. All joint scores are retained. Pose failures are not converted to plausible missing data: the strict predictor aborts and an interrupted export remains incomplete. The existing HF postprocessor bbox metadata caveat remains documented; source XML ROIs and explicit batch-size-1 call linkage determine person association.
 
-Native postprocessing tests confirm that corresponding crops preserve their distinct source-pixel offsets and order. Pose overlays at frames 0 and 12 were visually inspected: confident visible joints broadly follow the intended people. This is not exhaustive identity or keypoint accuracy validation. The HF postprocessor's returned `bbox` field is not used for assignment: in installed Transformers 5.22.2 it is assembled from crop center/scale metadata rather than the original pixel ROI. Original XML boxes remain authoritative and unchanged.
-
-Raw scores ranged 0.0168633–0.9917663; **1,955 of 3,621 scores were below 0.6**. All scores/joints were retained. Low confidence is not silently treated as a missing person or calibrated uncertainty. The five real exclusions exercise the existing tiny-box policy; separate regressions cover absent poses, empty frames and outside intervals. Gender inference and ground-plane projection were not run in raw cache mode.
-
-### Timing and memory
+## Performance and resources — single measured full run
 
 | Measurement | Observed |
 |---|---:|
-| Final cache-hit model initialization, including artifact hashing | 12.654 s |
-| Sequential decode + 213 pose calls + raw export preparation | 12.059 s |
-| Sum of synchronized forward wall times | 7.926 s |
-| Mean / median synchronized forward per person | 37.212 / 34.405 ms |
-| Mean preprocessing + forward + postprocessing per person | 54.722 ms |
-| First complete person call, no warm-up discarded | 345.323 ms |
-| Peak model-load allocated bytes | 501,608,960 |
-| Peak inference allocated bytes | 518,845,440 (494.81 MiB) |
-| Peak inference reserved bytes | 589,299,712 (562.00 MiB) |
+| Cached model initialization, including artifact hashing | 10.264 s |
+| Whole subprocess wall time, including imports/startup/finalization | 996.155 s |
+| Decode/inference/raw export stage | 977.403 s |
+| Video decoding within the stage | 9.193 s |
+| Observation construction/schema/write calls within the stage | 2.365 s |
+| Total synchronized model-forward time | 677.355 s |
+| Mean / median forward per person | 28.915 / 26.966 ms |
+| Mean / median full person call (preprocess+forward+postprocess) | 41.148 / 38.898 ms |
+| Cumulative preprocessing / postprocessing | 212.339 / 74.228 s |
+| Effective persons/s, processing stage / including startup | 23.968 / 23.516 |
+| Effective source frames/s, stage / including startup | 1.842 / 1.807 |
+| Effective sampled frames/s, stage / including startup | 0.614 / 0.602 |
+| Peak CUDA allocated | 518,845,440 bytes (494.81 MiB) |
+| Peak CUDA reserved | 589,299,712 bytes (562.00 MiB) |
+| Total cache file lengths | 55,844,896 bytes (53.26 MiB), excluding filesystem metadata |
+| Full CPU replay A / B, including loading/validation/output | 9.895 / 9.891 s |
 
-Times are one bounded run, not a benchmark or throughput claim. Forward times include dispatch/synchronization. Memory is the PyTorch allocator, excluding driver/context/other-process use. Initial download duration was not measured; the successful final run used HF-cached weights. No OOM occurred at batch size 1. Full per-call measurements and person/crop linkage are in `inference_metrics.json`, hashed by the observation manifest.
+Forward execution is the largest measured component; preprocessing is also material. Decode and record-writing time are small relative to forward time in this run. No optimization/retuning was attempted. Times include dispatch/synchronization and were measured during an audit with lightweight concurrent diagnostics; this single run is not a robust performance benchmark. PyTorch allocator peaks exclude driver/context and other-process memory. There was no OOM and no reason to request Vast.ai.
 
-### Preserved failure evidence
+## Replay validation
 
-The first initialization attempt downloaded/loaded the model but stopped at an audit check that relied on the removed private config `_commit_hash`. The code now pins the public loading revision and hashes the pinned cached artifacts. A second attempt stopped at an incorrect assumption that the processor's returned bbox equaled the source ROI. Its cache remains explicitly incomplete under `observations/`; no failed partial cache was relabeled complete or overwritten. The final `observations_verified/` run passed all checks. No package changes were needed.
+Both complete runs use the same recorded recipe: image-space-diagnostic, eps=50 pixels, close_distance=10 pixels, B0-original predicate, alpha=0.7, confidence threshold=0.6, min_samples=2, overlap threshold=0.5, state reset at cache start. Values are diagnostics, not optimized social-group parameters.
 
-## Regression and replay results
+- Runs: `.local/c2/full_acceptance_20261109/replay_a/` and `replay_b/`.
+- Prediction SHA256 (both): `49235da70d967a40b2f18ddb7ad8256e0de307eacf6ae7c16cea1d85bcabda6f`.
+- Every source frame, PTS, person ID, bbox and eligibility/exclusion state checked; complete byte equality also verifies group IDs, heading values and heading freshness/missingness agree.
+- Subprocess import guards blocked torch, transformers, ultralytics, boxmot, inference, huggingface_hub and timm throughout each run. No neural model construction/import/download occurred.
+- All original cache file hashes were identical before/after replay. unreviewed remains only an unknown reference attribute, never a negative membership input.
 
-| Check | Actual result |
-|---|---|
-| C1 regression suite | **56 PASS / 1 SKIP**; optional Excel skip because openpyxl is absent. Native sklearn tests execute. |
-| C2 regression suite | **30 PASS**, including fixed Hub ID/revision loading, explicit dataset index per crop, COCO17 config validation, native crop postprocessing, missingness, cache round-trip and real-cache association/replay. |
-| Root layout checks | **2 PASS / 1 FAIL**: pre-existing untracked `draw_grid.py` is outside the allowlist. Preserved without execution/modification; the guard was not weakened. |
-| Actual five-frame cache replay | Two native CPU runs produced identical prediction hashes; original cache hashes unchanged. |
-| Metric calibration | NOT VERIFIED; remains fail-closed. No existing H was modified or used by raw inference. |
+## Existing H: separate validation levels
 
-Actual replay used explicit image-space diagnostic settings `eps=50 pixels`, `close_distance=10 pixels` solely to test repeatability. No accuracy or physical interpretation is claimed. Neural-free replay remains protected by a subprocess import-guard regression. C1 grouping and group-ID logic remain unchanged.
+Actual exported file: `calibration_matrix_playground.json`, nested homography_matrix key, finite 3x3 H, rank 3, determinant -0.0004466068444. Exact requested filename homography_matrix.json was not found in the searched roots; a matrix does exist and was not regenerated or replaced.
 
-Reproduce regressions:
+| Level | Result | Evidence |
+|---|---|---|
+| 1 Numerical | PASS | Nonsingular/finite; 23,722 visible sampled bbox footpoints project finitely; maximum error reproducing source-declared correspondences 8.53e-8 destination units. |
+| 2 Source-video compatibility | PASS with limited provenance | Referenced image and target video both 1920x1080; source-code points reproduce H; static top-of-image registration against reviewed frame 0 yields 1,223 inliers, near-identity affine and median displacement 0 pixels. Original JSON has no explicit video-hash binding; the additive manifest labels its derived binding. |
+| 3 Physical metric validity | BLOCKED | Draft section 3.4 declares directly measured 10.42x11.54 m dimensions, but the four physical landmark identities, measurement confirmation/record and accepted physical tolerance/verifier are not established. |
 
-```powershell
-$py = 'C:\Users\trant\miniconda3\envs\paper-research\python.exe'
-& $py -B tests/run_c1.py
-& $py -B tests/run_c2.py
-& $py -B tests/check_active_layout.py
-```
+The draft statement is recorded with its file hash in calibration_validation.json; it is not silently promoted to independently verified scale. `.local/c2/full_acceptance_20261109/calibration.existing-H.v1.json` preserves H numerically, references original files/hashes and declares verified=false. The metric contract rejected it with 'unverified metric calibration'. No metric grouping replay was labeled successful. Image registration above was a source-compatibility diagnostic, not a new ground calibration.
 
-Real-cache-only tests skip if the local smoke artifact is absent; they never download weights or rerun inference. See `C2_HANDOFF_TO_C3.md` for the exact bounded inference command.
+## Regressions and hygiene after full replay
 
-## Real data evidence
+- C1: **56 PASS / 1 optional Excel SKIP** (openpyxl absent), 57 methods. Native sklearn chain/split tests executed; explicitly substituted C1 cases remain labeled in their receipts.
+- C2: **31 PASS**, including optional old-cache compatibility, z_order preservation, raw schema/round-trip/missingness, geometry rejection, neural-free replay and model/expert contracts.
+- Full artifact acceptance command: PASS on all 600 real records and all 23,426 actual pose calls.
+- Actual workspace layout: **2 PASS / 1 FAIL**, solely the preserved untracked draw_grid.py outside the unchanged root allowlist.
+- Isolated git-archive snapshot of the tracked implementation: **3 PASS** under the exact same layout test. It excludes user-owned untracked/uncommitted work and does not repair/delete that work.
+- User inputs/images/matrices/scripts, source video/XML, old smoke artifacts and package versions were verified unchanged. Master/archive refs were not moved; no merge was run.
 
-Source: `WIN_20260303_10_09_56_PRO_GT_First60s/WIN_20260303_10_09_56_Pro.mp4`.
-
-- Video SHA256: `fa1044aa1f3c9d413bdd608d39f8545c593b34457f5ecb6dc80a28beb62cb119`.
-- XML SHA256: `67addc127c07d98c17d0c160dc03d5f4025e5926dfb4d2d786aa901af37f7f08`.
-- 1920x1080, 2,956 frames; time base 1/30000; variable PTS increments. No fixed-30-FPS assumption.
-- XML: CVAT 1.1 job 4549037, 76 persons, declared frames 0–2955.
-- First 1,800 frames: 71,157 visible person boxes, including 66,223 `unreviewed` and 4,934 assigned G1–G9 attribute values. These remain partial, unfinished reference annotations.
-- Source frame 1799 is at 65.18396666666666 seconds. `[0,1800)` is a frame interval, not literal 60 seconds.
-- Decoding verified all first 1,800 frame positions/PTS. Overlays were generated for 0,1,3,30,300,319,334,899,900,1799. Frames 0,334,1799 were visually inspected: broad person-box correspondence and no obvious global offset/resizing error. Individual box precision, identity continuity and group correctness are not certified.
-
-Local timing/review evidence: `.local/c2/alignment_20261109/alignment.json` and the separately created `alignment.reviewed.json`. The latter retains all source PTS and records the limited visual review. Neither changes the XML/video.
-
-Reproduce alignment into a **new** output directory:
-
-```powershell
-& $py -B analyze_subgroups.py validate-data `
-  --video 'WIN_20260303_10_09_56_PRO_GT_First60s/WIN_20260303_10_09_56_Pro.mp4' `
-  --xml 'WIN_20260303_10_09_56_PRO_GT_First60s/annotations.xml' `
-  --end 1800 --output '.local/c2/alignment_NEW_RUN'
-```
-
-Review newly generated overlays and record a separate reviewed alignment file before real cache export. No full-video pose/grouping inference or public benchmark was run.
+See C2_HANDOFF_TO_C3.md for exact commands and remaining inputs. Complete logs/receipts are under `.local/c2/full_acceptance_20261109/`; no prior run or report artifact was overwritten. Existing primary reports were updated as requested.

@@ -1,0 +1,1129 @@
+{
+  "schema": "c2-final-acceptance.v1",
+  "date_europe_paris": "2026-11-09",
+  "branch": "codex/c2-observation-cache",
+  "starting_head": "0e29b47c51b19841aea97ba28cb8cc5a695aeced",
+  "source_implementation_commit": "3cac838ec1aab4c04f1b6bc96469fd2aa8c3239e",
+  "inference_source_note": "Run began before the metadata commit; inference manifest records its parent HEAD and exact executed source hashes, verified unchanged after execution.",
+  "acceptance": {
+    "A": {
+      "status": "PASS",
+      "meaning": "data alignment, all 600 source samples, original XML provenance and extra flags preserved"
+    },
+    "B": {
+      "status": "PASS",
+      "meaning": "23,426 real successful poses; raw COCO17 retained; zero missing eligible or silent inference errors"
+    },
+    "C": {
+      "status": "PASS",
+      "meaning": "observations.v1 complete, all hashes/person accounting/JSON value round-trips verified"
+    },
+    "D": {
+      "status": "PASS",
+      "meaning": "two full guarded CPU replays have identical predictions; raw cache immutable"
+    },
+    "E": {
+      "status": "BLOCKED",
+      "meaning": "trusted metric validity blocked; existing H numerical validity and source compatibility pass; exact requested filename not located"
+    },
+    "F": {
+      "status": "PASS",
+      "meaning": "C1/C2 pass; local layout failure transparently documented as allowed by acceptance policy; tracked snapshot passes"
+    },
+    "G": {
+      "status": "PASS",
+      "meaning": "source/model/environment/configuration/commands/paths recorded; no unsupported scientific claims"
+    }
+  },
+  "observation_cache_engineering_complete": true,
+  "trusted_metric_grouping_complete": false,
+  "ready_for_master_integration": "YES for curated tracked C2 observation/replay changes, with documented geometry/workspace limitations; no merge performed",
+  "full_cache": {
+    "schema": "c2-full-cache-acceptance.v1",
+    "status": "PASS",
+    "cache": "C:\\Users\\trant\\detection_and_tracking_group\\.local\\c2\\full_acceptance_20261109\\observations",
+    "frames": 600,
+    "source_range": [
+      0,
+      1800
+    ],
+    "stride": 3,
+    "json_value_roundtrip_verified": true,
+    "accounting": {
+      "input_records": 23734,
+      "eligible": 23426,
+      "outside": 12,
+      "occluded": 5316,
+      "successful": 23426,
+      "missing_eligible": 0,
+      "excluded": 308
+    },
+    "exclusions": {
+      "tiny_bbox": 296,
+      "outside": 12
+    },
+    "social_group_reference_counts": {
+      "unreviewed": 22077,
+      "G3": 211,
+      "G4": 102,
+      "G1": 28,
+      "G2": 1200,
+      "G8": 14,
+      "G5": 4,
+      "G7": 8,
+      "G9": 56,
+      "G6": 34
+    },
+    "model": {
+      "model_id": "usyd-community/vitpose-plus-base",
+      "resolved_revision": "92be54d7a29e42fad47b6e2ca01dd9e685a61e0d",
+      "implementation": "transformers.VitPoseForPoseEstimation",
+      "dataset_index": 0,
+      "dataset": "COCO human pose",
+      "joint_order": "COCO17",
+      "configured_joint_labels": {
+        "0": "Nose",
+        "1": "L_Eye",
+        "2": "R_Eye",
+        "3": "L_Ear",
+        "4": "R_Ear",
+        "5": "L_Shoulder",
+        "6": "R_Shoulder",
+        "7": "L_Elbow",
+        "8": "R_Elbow",
+        "9": "L_Wrist",
+        "10": "R_Wrist",
+        "11": "L_Hip",
+        "12": "R_Hip",
+        "13": "L_Knee",
+        "14": "R_Knee",
+        "15": "L_Ankle",
+        "16": "R_Ankle"
+      },
+      "num_experts": 6,
+      "files_sha256": {
+        "config.json": "eeba7e43cd075dd9e24355b5533a128d5abc51d609784b9deb6c8646e07641d5",
+        "preprocessor_config.json": "9b11cadc98c30b968a70cc1658ce1fbd74b721b0f21402a2ff8bc1dc9d1474a0",
+        "model.safetensors": "640225e4a9dd544239f1da0ae36af865a6e76e21e5f33a12656aa7b77fa5a5fa"
+      },
+      "loading": "from_pretrained(model_id, revision=resolved_sha)",
+      "processor_class": "VitPoseImageProcessor",
+      "dtype": "torch.float32"
+    },
+    "model_artifacts_match_reviewed_smoke": true,
+    "smoke_prefix_comparison": {
+      "max_coordinate_delta_pixels": 0.0,
+      "max_score_delta": 0.0
+    },
+    "environment": {
+      "conda_environment": "paper-research",
+      "sys_executable": "C:\\Users\\trant\\miniconda3\\envs\\paper-research\\python.exe",
+      "python": "3.13.0 | packaged by Anaconda, Inc. | (main, Oct  7 2024, 21:21:52) [MSC v.1929 64 bit (AMD64)]",
+      "packages": {
+        "torch": "2.15.0+cu134",
+        "transformers": "5.22.2",
+        "numpy": "2.5.4",
+        "opencv-python": "4.11.0.86",
+        "scikit-learn": "1.9.1"
+      },
+      "git_commit": "0e29b47c51b19841aea97ba28cb8cc5a695aeced",
+      "source_sha256": {
+        "analyze_subgroups.py": "28059b6ff54411848153f927c147b8c0fbf4ca52766a61a45ff0aa37ad2316ea",
+        "c2_pipeline.py": "516b3235afbb6b2163b737ff6a0e6a654a19c92fa85c3b92186287a7f1b8501f",
+        "annotation_io.py": "60fc646acd79b747d4bca4f9c61864f6b101b4d8f39550af5c96865e8e78a60e",
+        "observation_cache.py": "3758b464014773c6302a36870c4454cd1bde7c4b8d290a165e332a27a48ac279",
+        "orientation_utils.py": "5934d5d4813834ca15e5912ac45e907bb5cbcc1232681ba1dfab42ff2b6a098a",
+        "grouping_contracts.py": "0c4f1853d2e7fa82830b52b8d38209d837b86760457f3a3f23d9c820bd98d97c",
+        "identify_group_social.py": "42ddd33685efdd27c1785bf49f709636fddcff1f972a66903d3d4bcd6a9836f8",
+        "orientation_gate.py": "2d4cfa3addc60997daec3c602a8247635111db17a9938f51d122f02e058647f9",
+        "group_identity.py": "6e493a3a4151950672858ad1db8041417b73e34a357fc977675a99ef92d041c4"
+      }
+    },
+    "device": {
+      "requested": "cuda:0",
+      "cuda_available": true,
+      "torch_cuda": "13.4"
+    },
+    "artifacts": {
+      "frames.jsonl": {
+        "bytes": 32886377,
+        "sha256": "7a8efcbc164f6980409e8b3d57a250365152ca44188a3bf463366601a66975b6"
+      },
+      "inference_metrics.json": {
+        "bytes": 22954191,
+        "sha256": "999a2613131e9ce27abcb923aa87ef63522edd725d8e97f2baeb5fafb3743c72"
+      },
+      "manifest.json": {
+        "bytes": 4328,
+        "sha256": "fda85542696711cd50567a20be216ef4d903416423cf4c0b8cec3eb4bcf67366"
+      }
+    },
+    "total_cache_file_bytes": 55844896,
+    "source_sha256": {
+      "video": "fa1044aa1f3c9d413bdd608d39f8545c593b34457f5ecb6dc80a28beb62cb119",
+      "xml": "67addc127c07d98c17d0c160dc03d5f4025e5926dfb4d2d786aa901af37f7f08"
+    },
+    "score_diagnostics": {
+      "range": [
+        0.002183633390814066,
+        1.032530426979065
+      ],
+      "scores_below_0_6": 205626,
+      "scores_are_calibrated_probabilities": false
+    },
+    "performance": {
+      "model_initialization_seconds": 10.263586599961855,
+      "process_wall_seconds": 996.1546337999753,
+      "decoding_and_export_stage_seconds": 977.4031980999862,
+      "decode_seconds": 9.192619599518366,
+      "observation_write_seconds": 2.364569600147661,
+      "model_forward_seconds_total": 677.3545149985002,
+      "forward_seconds_mean": 0.028914646759946223,
+      "forward_seconds_median": 0.026966449979227036,
+      "person_call_seconds_mean": 0.04114753036782663,
+      "person_call_seconds_median": 0.038898250000784174,
+      "preprocess_seconds_total": 212.33937479992164,
+      "postprocess_seconds_total": 74.22815659828484,
+      "persons_per_second_processing_stage": 23.96759090367082,
+      "source_frames_per_second_processing_stage": 1.8416146002991327,
+      "sampled_frames_per_second_processing_stage": 0.6138715334330442,
+      "persons_per_second_including_startup": 23.516429282307456,
+      "source_frames_per_second_including_startup": 1.806948378218792,
+      "sampled_frames_per_second_including_startup": 0.6023161260729307,
+      "cuda_memory": {
+        "model_load_peak_allocated_bytes": 501608960,
+        "after_model_load_allocated_bytes": 501608960,
+        "after_model_load_reserved_bytes": 559939584,
+        "inference_peak_allocated_bytes": 518845440,
+        "inference_peak_reserved_bytes": 589299712
+      },
+      "scope": "single measured oracle-box/oracle-identity run, not a robust benchmark"
+    }
+  },
+  "export_execution": {
+    "argv": [
+      "C:\\Users\\trant\\miniconda3\\envs\\paper-research\\python.exe",
+      "-u",
+      "-B",
+      "analyze_subgroups.py",
+      "cache",
+      "--video",
+      "WIN_20260303_10_09_56_PRO_GT_First60s/WIN_20260303_10_09_56_Pro.mp4",
+      "--xml",
+      "WIN_20260303_10_09_56_PRO_GT_First60s/annotations.xml",
+      "--alignment",
+      ".local/c2/alignment_20261109/alignment.reviewed.json",
+      "--revision",
+      "92be54d7a29e42fad47b6e2ca01dd9e685a61e0d",
+      "--start",
+      "0",
+      "--end",
+      "1800",
+      "--stride",
+      "3",
+      "--max-pose-frames",
+      "600",
+      "--pose-batch-size",
+      "1",
+      "--device",
+      "cuda:0",
+      "--output",
+      "C:\\Users\\trant\\detection_and_tracking_group\\.local\\c2\\full_acceptance_20261109\\observations"
+    ],
+    "started_utc": "2026-11-09T22:10:57.610382+00:00",
+    "finished_utc": "2026-11-09T22:27:33.766618+00:00",
+    "wall_seconds": 996.1546337999753,
+    "exit_code": 0
+  },
+  "full_replay": {
+    "status": "PASS",
+    "runs": [
+      {
+        "output": "C:\\Users\\trant\\detection_and_tracking_group\\.local\\c2\\full_acceptance_20261109\\replay_a",
+        "wall_seconds": 9.89475490001496,
+        "exit_code": 0,
+        "guarded_modules": [
+          "torch",
+          "transformers",
+          "ultralytics",
+          "boxmot",
+          "inference",
+          "huggingface_hub",
+          "timm"
+        ]
+      },
+      {
+        "output": "C:\\Users\\trant\\detection_and_tracking_group\\.local\\c2\\full_acceptance_20261109\\replay_b",
+        "wall_seconds": 9.891041399969254,
+        "exit_code": 0,
+        "guarded_modules": [
+          "torch",
+          "transformers",
+          "ultralytics",
+          "boxmot",
+          "inference",
+          "huggingface_hub",
+          "timm"
+        ]
+      }
+    ],
+    "prediction_content_sha256": "49235da70d967a40b2f18ddb7ad8256e0de307eacf6ae7c16cea1d85bcabda6f",
+    "prediction_bytes_identical": true,
+    "frames": 600,
+    "source_pts_person_ids_eligibility_preserved": true,
+    "derived_heading_group_ids_and_missingness_identical": "verified by complete prediction-byte equality",
+    "cache_hashes_before": {
+      "frames.jsonl": "7a8efcbc164f6980409e8b3d57a250365152ca44188a3bf463366601a66975b6",
+      "inference_metrics.json": "999a2613131e9ce27abcb923aa87ef63522edd725d8e97f2baeb5fafb3743c72",
+      "manifest.json": "fda85542696711cd50567a20be216ef4d903416423cf4c0b8cec3eb4bcf67366"
+    },
+    "cache_hashes_after": {
+      "frames.jsonl": "7a8efcbc164f6980409e8b3d57a250365152ca44188a3bf463366601a66975b6",
+      "inference_metrics.json": "999a2613131e9ce27abcb923aa87ef63522edd725d8e97f2baeb5fafb3743c72",
+      "manifest.json": "fda85542696711cd50567a20be216ef4d903416423cf4c0b8cec3eb4bcf67366"
+    },
+    "cache_immutable": true,
+    "recipe": {
+      "geometry_mode": "image-space-diagnostic",
+      "eps": 50.0,
+      "close_distance": 10.0,
+      "orientation_mode": "B0-original",
+      "alpha": 0.7,
+      "confidence_threshold": 0.6,
+      "min_samples": 2,
+      "threshold_overlap": 0.5,
+      "state_initialization": "reset_at_cache_start"
+    },
+    "interpretation": "pixel-space engineering diagnostic, not metric/social grouping accuracy"
+  },
+  "calibration": {
+    "requested_filename": "homography_matrix.json",
+    "requested_exact_filename_found": false,
+    "searched_roots": [
+      "repository including ignored calibration/audit output directories",
+      "C:/Users/trant/Downloads",
+      "C:/Users/trant/Desktop",
+      "C:/Users/trant/Documents",
+      "configured visualization workspace"
+    ],
+    "actual_existing_matrix_file": "C:\\Users\\trant\\detection_and_tracking_group\\calibration_matrix_playground.json",
+    "matrix": [
+      [
+        -0.005251555619201967,
+        0.05861111182145056,
+        -29.36472968922022
+      ],
+      [
+        -0.011842959075642067,
+        -0.02578708830986581,
+        27.766581614718685
+      ],
+      [
+        -0.00015844562800541097,
+        -0.002306154788245617,
+        1.0
+      ]
+    ],
+    "rank": 3,
+    "determinant": -0.00044660684443182226,
+    "condition_number": 90620.03060520225,
+    "level1": {
+      "status": "PASS",
+      "visible_sampled_footpoints_projected": 23722,
+      "all_projected_values_finite": true,
+      "declared_correspondence_max_error": 8.529921573332711e-08
+    },
+    "level2": {
+      "status": "PASS",
+      "basis": "source code references this image and its declared correspondences reproduce this H; static scene is compatible with target frame 0",
+      "registration": {
+        "static_region": "top 410 image rows; original reference versus reviewed source-frame-0 overlay",
+        "reference_dimensions": [
+          1920,
+          1080
+        ],
+        "good_matches": 1271,
+        "inliers": 1223,
+        "diagnostic_affine_image_to_image": [
+          [
+            0.9999633180853489,
+            -1.966507949713881e-05,
+            0.03932956939997692
+          ],
+          [
+            1.966507949713881e-05,
+            0.9999633180853489,
+            0.007895455193523634
+          ]
+        ],
+        "median_inlier_displacement_pixels": 0.0,
+        "meaning": "image registration diagnostic only; not a newly generated ground homography"
+      },
+      "original_matrix_export_explicit_video_binding": false
+    },
+    "level3": {
+      "status": "BLOCKED",
+      "missing": [
+        "confirmation/record of the declared direct measurements beyond the draft statement",
+        "identification of the four selected coplanar ground landmarks in the actual reference image",
+        "measurement verifier and accepted physical-error tolerance"
+      ],
+      "note": "homography already exists; generation/recalibration is not requested"
+    },
+    "metric_replay": {
+      "status": "BLOCKED",
+      "expected_contract_rejection": "unverified metric calibration"
+    },
+    "additive_manifest": ".local\\c2\\full_acceptance_20261109\\calibration.existing-H.v1.json",
+    "original_numerical_values_preserved": true,
+    "additive_manifest_sha256": "7f96bae6e723b92942bd679c7c3f341365c04357edd79c77cbbc4e51a9c95bb9",
+    "documented_physical_claim": {
+      "path": "C:\\Users\\trant\\Downloads\\SCIA Paper Publication\\research_assessment_2026-11-08\\evidence\\samplepaper.txt",
+      "sha256": "e795de5e74cee944c1c949decbb514ac6d1134f304e29bc2119ff1401ede1e9d",
+      "lines": [
+        328,
+        332
+      ],
+      "claim": "Draft section 3.4 describes directly measured coplanar reference points and a 10.42 m by 11.54 m rectangle.",
+      "verification_status": "documented author claim; field point identities, measurement record/confirmation and physical error tolerance not independently established"
+    }
+  },
+  "calibration_manifest": {
+    "schema": "calibration.v1",
+    "calibration_id": "existing-playground-H-unverified-physical-scale",
+    "verified": false,
+    "verified_by": null,
+    "units": "m",
+    "units_status": "declared by calibration_headless.py; physical scale NOT VERIFIED",
+    "video_sha256": "fa1044aa1f3c9d413bdd608d39f8545c593b34457f5ecb6dc80a28beb62cb119",
+    "width": 1920,
+    "height": 1080,
+    "source_dimension_basis": "referenced Real_playground.png decoded dimensions",
+    "homography_matrix": [
+      [
+        -0.005251555619201967,
+        0.05861111182145056,
+        -29.36472968922022
+      ],
+      [
+        -0.011842959075642067,
+        -0.02578708830986581,
+        27.766581614718685
+      ],
+      [
+        -0.00015844562800541097,
+        -0.002306154788245617,
+        1.0
+      ]
+    ],
+    "homography_sha256": "811a924be10cc3e214d69ee80d8524bcc1e2f4b40c28741ab0e2a05fed3c53a8",
+    "source_matrix_file": "C:\\Users\\trant\\detection_and_tracking_group\\calibration_matrix_playground.json",
+    "source_matrix_file_sha256": "cc9c644dffa43cffc647f4e02dec34e46a24003bcf7e9c2164d0def983463d90",
+    "source_image": {
+      "path": "C:\\Users\\trant\\detection_and_tracking_group\\Real_playground.png",
+      "sha256": "6d923bf2661599c6850c83dae97c666e6a3f54cc6bbc87952583f06b2c8b23d4"
+    },
+    "correspondences": [
+      {
+        "image_xy": [
+          1049.0,
+          595.0
+        ],
+        "ground_xy": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "image_xy": [
+          1184.0,
+          533.0
+        ],
+        "ground_xy": [
+          10.42,
+          0.0
+        ]
+      },
+      {
+        "image_xy": [
+          1666.0,
+          554.0
+        ],
+        "ground_xy": [
+          10.42,
+          11.54
+        ]
+      },
+      {
+        "image_xy": [
+          1674.0,
+          651.0
+        ],
+        "ground_xy": [
+          0.0,
+          11.54
+        ]
+      }
+    ],
+    "correspondence_provenance": {
+      "file": "calibration_headless.py",
+      "sha256": "db69e7deda0da47849ecf4b95f5a0d86aa2a4f32d1738c7d606bf172e67352a2",
+      "variables": [
+        "MY_POINTS",
+        "REAL_W",
+        "REAL_H"
+      ],
+      "status": "program declarations recovered statically; no independent survey evidence"
+    },
+    "correspondence_tolerance_m": null,
+    "measurement_evidence": {
+      "path": "C:\\Users\\trant\\Downloads\\SCIA Paper Publication\\research_assessment_2026-11-08\\evidence\\samplepaper.txt",
+      "sha256": "e795de5e74cee944c1c949decbb514ac6d1134f304e29bc2119ff1401ede1e9d",
+      "lines": [
+        328,
+        332
+      ],
+      "claim": "Draft section 3.4 describes directly measured coplanar reference points and a 10.42 m by 11.54 m rectangle.",
+      "verification_status": "documented author claim; field point identities, measurement record/confirmation and physical error tolerance not independently established"
+    },
+    "source_video_compatibility": "supported by dimensions, referenced source image, near-identity static-scene registration; no explicit source-video hash in original export",
+    "video_binding_basis": "C2 source-image dimensions and inspected static-scene registration; not a declaration from the original matrix export"
+  },
+  "regression": {
+    "suites": [
+      {
+        "suite": "C1",
+        "argv": [
+          "C:\\Users\\trant\\miniconda3\\envs\\paper-research\\python.exe",
+          "-B",
+          "tests/run_c1.py"
+        ],
+        "wall_seconds": 4.240792600030545,
+        "exit_code": 0,
+        "log": "C:\\Users\\trant\\detection_and_tracking_group\\.local\\c2\\full_acceptance_20261109\\C1.log",
+        "evidence": "C:\\Users\\trant\\detection_and_tracking_group\\.local\\c1_validation\\run_20261109T222921_614306Z.json",
+        "tests_run": 57,
+        "records": [
+          {
+            "test_id": "c1_cases.Contracts.test_bad_bboxes_and_ids",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Contracts.test_bad_calibration_and_lengths",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Contracts.test_lists_and_numpy",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.GroupState.test_E1_empty_previous",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.GroupState.test_E2_empty_intervals",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.GroupState.test_E3_all_noise",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.GroupState.test_E4_disappearance",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.GroupState.test_E5_new_run",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.GroupState.test_E6_split_empty_new",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.GroupState.test_S1_continuation",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.GroupState.test_S2_split",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.GroupState.test_S3_merge",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.GroupState.test_S4_unrelated",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.GroupState.test_S5_global_ties",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.GroupState.test_S6_permutation",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.GroupState.test_asymmetric_coverage_not_iou",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.GroupState.test_ineligible_edges_and_max",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.GroupState.test_invalid_partition",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.GroupState.test_invalid_policy",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.GroupingProduction.test_S7_noise_retained_and_empty_lifecycle",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+          },
+          {
+            "test_id": "c1_cases.GroupingProduction.test_b0_valid_matrix_equivalence",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+          },
+          {
+            "test_id": "c1_cases.GroupingProduction.test_full_modes_invoke_predicates",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+          },
+          {
+            "test_id": "c1_cases.GroupingProduction.test_horizon_rejected",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+          },
+          {
+            "test_id": "c1_cases.GroupingProduction.test_invalid_inputs_never_become_edges",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+          },
+          {
+            "test_id": "c1_cases.GroupingProduction.test_split_real_entrypoints",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+          },
+          {
+            "test_id": "c1_cases.NativeGrouping.test_native_chain",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native sklearn + NumPy/OpenCV production module; no substitutes"
+          },
+          {
+            "test_id": "c1_cases.NativeGrouping.test_native_split_and_noise",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native sklearn + NumPy/OpenCV production module; no substitutes"
+          },
+          {
+            "test_id": "c1_cases.Orientation.test_analytical_boundaries",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Orientation.test_angular_sweep",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Orientation.test_controls_and_configured_modes",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Orientation.test_distance_boundaries",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Orientation.test_invalid_directions",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Orientation.test_keypoints_validation",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Orientation.test_missing_and_zero",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Orientation.test_original_thresholds_strict",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Orientation.test_postprocess_zero_and_nonmutation",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Orientation.test_random_sweep",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Preservation.test_active_helper_imports_and_calls",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Preservation.test_b0_hashes",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Preservation.test_no_legacy_changes_in_active_patch",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Reports.test_area_known_and_degenerate",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Reports.test_empty_report",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Reports.test_explicit_empty_frame_breaks_session",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Reports.test_explicit_timebase_required",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Reports.test_interval_half_open_and_clipping",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Reports.test_json_cli_and_nonoverwrite",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Reports.test_missing_frames_no_duration_bridge",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Reports.test_missing_timestamp_no_fallback",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Reports.test_moving_group_not_pooled_area",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Reports.test_native_excel_export",
+            "status": "SKIP",
+            "detail": "native pandas/openpyxl unavailable; no substitute writer",
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Reports.test_nonuniform_area_time_weighting",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Reports.test_single_sample_zero_duration",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Reports.test_source_fps_variants",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Reports.test_split_merge_not_formation_events",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Reports.test_time_gap_breaks_nominal_adjacency",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Reports.test_timestamps_priority_nonuniform",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          },
+          {
+            "test_id": "c1_cases.Reports.test_unknowns_and_missing_geometry_retained",
+            "status": "PASS",
+            "detail": null,
+            "dependency_mode": "native production helpers; no substitute"
+          }
+        ],
+        "counts": {
+          "PASS": 56,
+          "SKIP": 1,
+          "FAIL": 0,
+          "ERROR": 0
+        }
+      },
+      {
+        "suite": "C2",
+        "argv": [
+          "C:\\Users\\trant\\miniconda3\\envs\\paper-research\\python.exe",
+          "-B",
+          "tests/run_c2.py"
+        ],
+        "wall_seconds": 25.10609499999555,
+        "exit_code": 0,
+        "log": "C:\\Users\\trant\\detection_and_tracking_group\\.local\\c2\\full_acceptance_20261109\\C2.log",
+        "evidence": "C:\\Users\\trant\\detection_and_tracking_group\\.local\\c2\\tests_20261109T222945_848480Z.json",
+        "tests_run": 31,
+        "records": [
+          {
+            "test": "test_c2.AnnotationTests.test_bad_xml_rejected",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.AnnotationTests.test_decoder_rejects_wrong_pts",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.AnnotationTests.test_extra_cvat_metadata_retained_without_changing_old_v1_records",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.AnnotationTests.test_fractional_boxes_flags_not_modified",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.AnnotationTests.test_outside_interval_no_interpolation",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.AnnotationTests.test_partial_social_labels_preserved",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.AnnotationTests.test_real_xml_identity_and_coverage",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.GeometryTests.test_image_mode_requires_explicit_pixel_policy",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.GeometryTests.test_metric_missing_unverified_and_wrong_video_rejected",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.GeometryTests.test_native_chain_and_split_preserve_c1",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.GeometryTests.test_synthetic_metric_identity_and_projection",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.RealSmokeCacheTests.test_real_cache_replay_repeatability_and_immutability",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.RealSmokeCacheTests.test_real_smoke_frames_and_person_keypoint_association",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.ReplayTests.test_cache_replay_matches_same_raw_live_boundary",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.ReplayTests.test_cli_replay_does_not_import_neural_modules",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.ReplayTests.test_empty_frame_clears_heading_and_preserves_maximum",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.ReplayTests.test_repeatability_exclusions_and_observation_immutability",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.ReplayTests.test_replay_matches_original_live_ema_and_grouping_with_controlled_poses",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.ReplayTests.test_replay_rejects_frame_reordering",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.SchemaTests.test_empty_frame_is_valid",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.SchemaTests.test_excluded_and_missing_persons_retained",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.SchemaTests.test_incomplete_missing_order_and_tamper_rejected",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.SchemaTests.test_invalid_manifest_and_joint_order",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.SchemaTests.test_mismatched_pose_person_count_rejected",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.SchemaTests.test_raw_heatmap_score_not_clipped_or_treated_as_probability",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.SchemaTests.test_revision_rejects_mutable_or_local_checkpoint_inputs",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.SchemaTests.test_roundtrip_raw_scores_and_unreviewed",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.SchemaTests.test_shape_nonfinite_duplicate_and_pts_errors",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.SchemaTests.test_vitpose_plus_config_requires_coco17_and_six_experts",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.ViTPosePlusBoundaryTests.test_fixed_hub_model_pinned_processor_and_dataset_index_per_person",
+            "status": "PASS"
+          },
+          {
+            "test": "test_c2.ViTPosePlusBoundaryTests.test_native_postprocess_preserves_roi_order_and_source_pixel_offsets",
+            "status": "PASS"
+          }
+        ],
+        "counts": {
+          "PASS": 31,
+          "SKIP": 0,
+          "FAIL": 0,
+          "ERROR": 0
+        }
+      },
+      {
+        "suite": "workspace_layout",
+        "argv": [
+          "C:\\Users\\trant\\miniconda3\\envs\\paper-research\\python.exe",
+          "-B",
+          "tests/check_active_layout.py"
+        ],
+        "wall_seconds": 0.1835272999596782,
+        "exit_code": 1,
+        "log": "C:\\Users\\trant\\detection_and_tracking_group\\.local\\c2\\full_acceptance_20261109\\workspace_layout.log",
+        "evidence": null,
+        "stdout": "",
+        "stderr": "test_active_sources_compile_without_import_side_effects (__main__.ActiveLayout.test_active_sources_compile_without_import_side_effects) ... ok\ntest_required_calibration_resources (__main__.ActiveLayout.test_required_calibration_resources) ... ok\ntest_root_source_boundary_and_local_imports (__main__.ActiveLayout.test_root_source_boundary_and_local_imports) ... FAIL\n\n======================================================================\nFAIL: test_root_source_boundary_and_local_imports (__main__.ActiveLayout.test_root_source_boundary_and_local_imports)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"C:\\Users\\trant\\detection_and_tracking_group\\tests\\check_active_layout.py\", line 22, in test_root_source_boundary_and_local_imports\n    self.assertLessEqual({p.name for p in ROOT.glob('*.py')}, ACTIVE | HELPERS)\n    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {'grouping_contracts.py', 'track.py', 'stitch_tracks.py', 'c2_pipeline.py', 'detect_yolo.py', 'analyze_subgroups.py', 'calibration_headless.py', 'observation_cache.py', 'draw_grid.py', 'report_metrics.py', 'generate_report.py', 'identify_group_social.py', 'render_visuals.py', 'orientation_gate.py', 'orientation_utils.py', 'annotation_io.py', 'group_identity.py'} not less than or equal to {'grouping_contracts.py', 'track.py', 'stitch_tracks.py', 'analyze_subgroups.py', 'detect_yolo.py', 'observation_cache.py', 'calibration_headless.py', 'c2_pipeline.py', 'report_metrics.py', 'identify_group_social.py', 'generate_report.py', 'render_visuals.py', 'orientation_utils.py', 'orientation_gate.py', 'annotation_io.py', 'group_identity.py'}\n\n----------------------------------------------------------------------\nRan 3 tests in 0.016s\n\nFAILED (failures=1)\n"
+      }
+    ],
+    "core_suites_pass": true,
+    "workspace_layout_separate": true
+  },
+  "tracked_layout": {
+    "commit": "3cac838ec1aab4c04f1b6bc96469fd2aa8c3239e",
+    "command": [
+      "C:\\Users\\trant\\miniconda3\\envs\\paper-research\\python.exe",
+      "-B",
+      ".local\\c2\\full_acceptance_20261109\\tracked_checkout\\tests\\check_active_layout.py"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": "test_active_sources_compile_without_import_side_effects (__main__.ActiveLayout.test_active_sources_compile_without_import_side_effects) ... ok\ntest_required_calibration_resources (__main__.ActiveLayout.test_required_calibration_resources) ... ok\ntest_root_source_boundary_and_local_imports (__main__.ActiveLayout.test_root_source_boundary_and_local_imports) ... ok\n\n----------------------------------------------------------------------\nRan 3 tests in 0.192s\n\nOK\n",
+    "scope": "unchanged layout test on an isolated git-archive snapshot; actual workspace check remains separate"
+  },
+  "layout_role": {
+    "file": "C:\\Users\\trant\\detection_and_tracking_group\\draw_grid.py",
+    "sha256": "cde4d1c546333d4d88b247ac28601be71e760b5138f01fcfc3a10a99226afad6",
+    "tracked": false,
+    "role": "standalone user-owned ground-grid visualization utility; no active-pipeline import/reference found",
+    "inputs": [
+      "Real_playground.png",
+      "calibration_matrix_playground.json"
+    ],
+    "side_effects_if_executed": [
+      "writes grid_visualization_playground.jpg",
+      "opens an OpenCV window when SHOW_WINDOW=True"
+    ],
+    "executed": false,
+    "modified_or_deleted": false,
+    "allowlist_changed": false,
+    "proposed_treatment": "preserve here for this task; with separate owner authorization, place under a non-active tools/calibration directory and document it as an offline utility; do not add to active imports",
+    "tracked_snapshot_layout_result": {
+      "commit": "3cac838ec1aab4c04f1b6bc96469fd2aa8c3239e",
+      "command": [
+        "C:\\Users\\trant\\miniconda3\\envs\\paper-research\\python.exe",
+        "-B",
+        ".local\\c2\\full_acceptance_20261109\\tracked_checkout\\tests\\check_active_layout.py"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "test_active_sources_compile_without_import_side_effects (__main__.ActiveLayout.test_active_sources_compile_without_import_side_effects) ... ok\ntest_required_calibration_resources (__main__.ActiveLayout.test_required_calibration_resources) ... ok\ntest_root_source_boundary_and_local_imports (__main__.ActiveLayout.test_root_source_boundary_and_local_imports) ... ok\n\n----------------------------------------------------------------------\nRan 3 tests in 0.192s\n\nOK\n",
+      "scope": "unchanged layout test on an isolated git-archive snapshot; actual workspace check remains separate"
+    }
+  },
+  "partial_guard": {
+    "status": "PASS",
+    "in_progress_rows": 116,
+    "observed_rejection": "incomplete cache or source hash mismatch"
+  },
+  "preservation": {
+    "starting_head": "0e29b47c51b19841aea97ba28cb8cc5a695aeced",
+    "user_paths": {
+      "Real_playground.png": "6d923bf2661599c6850c83dae97c666e6a3f54cc6bbc87952583f06b2c8b23d4",
+      "Real_playground_2.png": null,
+      "calibration_headless.py": "db69e7deda0da47849ecf4b95f5a0d86aa2a4f32d1738c7d606bf172e67352a2",
+      "calibration_matrix.json": null,
+      "calibration_matrix_PETS09.json": null,
+      "calibration_matrix_based_on_roof.json": null,
+      "calibration_matrix_playground.json": "cc9c644dffa43cffc647f4e02dec34e46a24003bcf7e9c2164d0def983463d90",
+      "calibration_matrix_playground_2.json": null,
+      "draw_grid.py": "cde4d1c546333d4d88b247ac28601be71e760b5138f01fcfc3a10a99226afad6"
+    },
+    "smoke_files": {
+      ".local\\c2\\vitpose_plus_20261109\\observations_verified\\frames.jsonl": "a4ee22c90e5bd087e9d0ca49cb86f5fbea052cb7d92513de70581c158a2fad45",
+      ".local\\c2\\vitpose_plus_20261109\\observations_verified\\inference_metrics.json": "e5a6e04aa1116f7e13cb27ec0324b787e6370e932e12c279ce4493f239bf5ca0",
+      ".local\\c2\\vitpose_plus_20261109\\observations_verified\\manifest.json": "597fce30b7764d28d3be9d0b18173da143876dc4dcfb0ace0c38158bd9f1ffa8"
+    },
+    "inputs": {
+      "WIN_20260303_10_09_56_PRO_GT_First60s/WIN_20260303_10_09_56_Pro.mp4": "fa1044aa1f3c9d413bdd608d39f8545c593b34457f5ecb6dc80a28beb62cb119",
+      "WIN_20260303_10_09_56_PRO_GT_First60s/annotations.xml": "67addc127c07d98c17d0c160dc03d5f4025e5926dfb4d2d786aa901af37f7f08",
+      ".local/c2/alignment_20261109/alignment.reviewed.json": "3222aac855dc2aec568f9f6b88313a0faa83d584b9164ca2c4f19bbc9b3fc854"
+    },
+    "packages": {
+      "torch": "2.15.0+cu134",
+      "transformers": "5.22.2",
+      "numpy": "2.5.4",
+      "opencv-python": "4.11.0.86",
+      "scikit-learn": "1.9.1"
+    }
+  },
+  "all_user_inputs_and_smoke_preserved": true,
+  "environment_packages_unchanged": true,
+  "root_artifacts": "C:\\Users\\trant\\detection_and_tracking_group\\.local\\c2\\full_acceptance_20261109",
+  "source_changes_this_phase": [
+    "annotation_io.py",
+    "c2_pipeline.py",
+    "observation_cache.py",
+    "tests/test_c2.py",
+    "tests/validate_c2_full.py",
+    "README.md",
+    "docs/C2_IMPLEMENTATION_SUMMARY.md",
+    "docs/C2_VALIDATION_REPORT.md",
+    "docs/C2_HANDOFF_TO_C3.md",
+    "docs/c2_full_acceptance.json"
+  ],
+  "not_started": [
+    "C3",
+    "H2",
+    "H3",
+    "H4",
+    "public benchmarks",
+    "Setti group F1",
+    "Vast.ai",
+    "master merge"
+  ],
+  "remaining_user_inputs": [
+    "Existing field measurement record/confirmation identifying the four coplanar landmarks, 10.42 x 11.54 dimensions/units, verifier and accepted tolerance for metric verification.",
+    "If a different homography_matrix.json is intended, provide its path; the located exported H is calibration_matrix_playground.json.",
+    "Separate authorization for any master merge or relocation of the preserved user grid utility."
+  ],
+  "validator_source_sha256": "32e14880687cc951538fdce3ffe95acb98595d59cc33f69ff3f52538dd422227"
+}

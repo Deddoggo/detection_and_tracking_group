@@ -1,74 +1,57 @@
-# C2 implementation summary
+# C2 final implementation and acceptance
 
-2026-11-09. Branch: `codex/c2-observation-cache`. Implementation commits: `ed28f32` (core), `45b1d2d` (replay lineage).
-Model clarification implementation commit: `650f722`. Current model clarification: only `usyd-community/vitpose-plus-base` is supported. See `c2_vitpose_plus_validation.json` for the executed CUDA smoke and regressions; the initial implementation commits above predate this clarification.
+2026-11-09 (Europe/Paris). Branch: `codex/c2-observation-cache`. Starting HEAD: `0e29b47c51b19841aea97ba28cb8cc5a695aeced`. Core metadata/instrumentation commit: `3cac838`. Current complete evidence: `c2_full_acceptance.json`; prior structural/smoke evidence remains unchanged.
 
-Starting master: `6c641d74de5269c53ea80d0069567d05b546a398`.
+**C2 observation-cache engineering is complete. Trusted metric grouping remains BLOCKED.** Curated tracked C2 changes are ready for master integration with the documented limitations; no merge was performed. C3/H2/H3/H4, public benchmarking, model training and Setti F1 were not started.
 
-## Actual completion
+## Acceptance matrix
 
-| Phase | Status | Evidence / remaining boundary |
+| Criterion | Status | Executed evidence |
 |---|---|---|
-| C2.1 XML/video alignment | CONFIRMED for `[0,1800)` | All 1,800 frames decoded sequentially; every decoded timestamp matched packet PTS. XML coverage/flags/partial groups tested. Three sampled overlays visually inspected. This is not exhaustive annotation validation. |
-| C2.2 geometry contracts | Implemented and synthetically tested | Metric mode rejects absent/unverified/mismatched provenance. Actual physical calibration remains pending user measurements. |
-| C2.3 observations.v1 | CONFIRMED bounded CUDA export | Raw keypoints/scores, boxes, IDs, PTS and missingness round-trip. Real CUDA export CONFIRMED on frames 0,3,6,9,12: 213 eligible poses, 5 explicit tiny-box exclusions; observations.v1 saved. |
-| C2.4 grouping-only replay | CONFIRMED controlled and real-cache replay | Native sklearn; replay imports no neural modules. Retained live analyzer EMA/groups agree with replay on controlled test poses. The real five-frame pose cache also replayed twice with identical predictions in explicit image-space diagnostic mode. |
-| C2.5 validation | Bounded CUDA smoke and regressions complete | C2: 30 PASS. C1: 56 PASS, one optional Excel SKIP. Layout: 2 PASS / 1 FAIL because pre-existing untracked draw_grid.py lies outside the allowlist; it was preserved. |
+| A Data | PASS | Existing reviewed alignment rechecked against current video/XML hashes. Exactly 600 records at source indices range(0,1800,3); original PTS/person/reference metadata retained. |
+| B Pose | PASS | 23,426 real ViTPose+ CUDA poses, 0 missing eligible poses; raw COCO17/score arrays finite; strict model failures cannot become successful missing records. |
+| C Cache | PASS | observations.v1 complete; all frame/payload/metrics hashes, person counts, reference values and JSON value round-trips validated. |
+| D Replay | PASS | Two full guarded CPU replays have identical complete prediction content; raw cache hashes unchanged. |
+| E Geometry | BLOCKED for trusted metric use | Existing H has Level 1 numerical validity and Level 2 source compatibility; Level 3 physical verification remains incomplete. Metric rejection tested. |
+| F Regression | PASS under documented-layout policy | 56 C1 PASS / 1 optional Excel SKIP; 31 C2 PASS. Workspace layout: 2 PASS / 1 FAIL from preserved untracked draw_grid.py; isolated tracked snapshot: 3 PASS. |
+| G Reproducibility | PASS | Pinned model/artifact hashes, source hashes, effective configuration, environment, commands and output identities recorded. No unsupported accuracy claim. |
 
-Bounded model inference succeeded. No subgroup/pose accuracy, benchmark gain, complete subgroup GT or full-video pose export is claimed.
+## Full artifacts
 
-## Architecture and contracts
+- Cache: `.local/c2/full_acceptance_20261109/observations/`, schema `observations.v1`, state `complete`, 600 scheduled records.
+- Manifest SHA256: `fda85542696711cd50567a20be216ef4d903416423cf4c0b8cec3eb4bcf67366`.
+- Raw JSONL SHA256: `7a8efcbc164f6980409e8b3d57a250365152ca44188a3bf463366601a66975b6`.
+- Replays: `.local/c2/full_acceptance_20261109/replay_a/` and `replay_b/`.
+- Both prediction SHA256 values: `49235da70d967a40b2f18ddb7ad8256e0de307eacf6ae7c16cea1d85bcabda6f`.
+- Existing five-frame smoke cache was hashed before/after and preserved. For its five frames, the full cache has exactly zero maximum coordinate and score difference.
 
-`analyze_subgroups.py::main` dispatches `validate-data`, `cache` and `replay`.
-`c2_pipeline.py::observation_frame` (line 55) is the raw export boundary, before heading extraction, EMA, projection and grouping.
+This is an **oracle-box/oracle-identity observation path**. No YOLO, BoxMOT or ReID execution is included in its performance or validation.
 
-- `annotation_io.py::read_cvat` (line 18) reads explicit CVAT 1.1 person boxes. It does not interpolate absent/outside intervals. Attributes, including `G1`-`G9` and `unreviewed`, are retained verbatim.
-- `annotation_io.py::probe_video` / `verify_decode` (lines 71 / 97) retain rational source PTS. Reordered/B-frame streams are rejected rather than given a speculative packet/frame map.
-- `observation_cache.py::validate_manifest`, `validate_frame`, `CacheWriter`, `read_cache` define `observations.v1`. JSON manifest + scheduled-frame JSONL; original-resolution pixel xywh and COCO17 xy/score; new run directory only; incomplete-state protection, payload hashes, ordering/count validation.
-- Raw scores are finite heatmap scores, not probabilities. They are neither clipped nor converted to calibrated uncertainty. XML boxes have null detection confidence.
-- Outside and tiny persons remain in cache records, with exclusion reasons. Eligible persons with missing poses remain explicit. Unsampled frames are represented by the manifest's source range/stride, not fabricated pose rows.
-- Raw keypoints are authoritative. Raw image heading, smoothed heading, stale age, projected heading and positions are derived during replay with a recorded recipe. Changing these derivations does not require pose inference.
-- `grouping_contracts.py::geometry_contract` (line 63) separates `metric`, `image-space-diagnostic` and `legacy-b0`. Metric metadata must match video hash/dimensions and H hash, name units/verifier/measurements, and reproduce supplied correspondences within an explicit tolerance. This validates assertions and algebra, not the truth of physical measurements.
-- `grouping_contracts.py::project_geometry` (line 114) shares the existing float32 footpoint/10-pixel endpoint projection. B0 predicate, DBSCAN and C1 association are preserved. Image diagnostics explicitly use image headings and pixel thresholds.
-- `c2_pipeline.py::GroupingReplay` resets state at cache start and requires consecutive scheduled source frames. It preserves the live EMA, stale-heading fallback, disappearance reset and C1 ID allocation. Predicted group `-1` means clustering noise; excluded persons have null predictions. Neither is derived from `unreviewed` references.
-- `cache` requires explicit video/XML/alignment/output; optional `--revision` accepts only an exact HF commit SHA. Gender inference is disabled. Model and processor load directly by the fixed HF model ID, pinned to resolved commit `92be54d7a29e42fad47b6e2ca01dd9e685a61e0d` in the executed smoke. Hub-cached artifacts are hashed for provenance; no local-checkpoint selector exists. Failed inference stops export and leaves partial cache incomplete.
-- `replay` reads and validates the entire cache before stateful processing. It writes a separate immutable run containing predictions and provenance. No H2/H3/H4 was implemented.
-
-## Changed files and purpose
+## Minimal changes in this final phase
 
 | File | Purpose |
 |---|---|
-| `analyze_subgroups.py` | C2 command dispatch, lazy neural imports, fixed-model pinned HF cache predictor with explicit COCO expert and timing/shape audits; explicit live tracks/B0 compatibility. |
-| `annotation_io.py` (new) | CVAT parsing, source PTS, bounded decode verification and review overlays. |
-| `observation_cache.py` (new) | Versioned raw schema, exclusive writer and validated reader. |
-| `c2_pipeline.py` (new) | Minimal command orchestration, observation boundary, Hub model provenance, performance capture and replay state. |
-| `grouping_contracts.py` | Geometry/unit/provenance contracts and shared original projection. |
-| `identify_group_social.py` | Enforce geometry contracts and use shared projection; preserve clustering/association. |
-| `orientation_gate.py` | Explicit close-distance units; original default 0.5 and B0 comparisons preserved. |
-| `tests/c1_cases.py` | Explicit B0 compatibility in historical cases, immutable scope baseline, preload native OpenCV before module substitution. |
-| `tests/check_active_layout.py` | Allow the three directly used C2 helpers. |
-| `tests/test_c2.py` (new) | 30 tests, including real XML/cache replay, native postprocessing, fixed Hub loading and explicit COCO dataset-index dispatch. |
-| `tests/run_c2.py` (new) | paper-research-only runner and timestamped machine evidence. |
-| `config/calibration.v1.example.json` (new) | Explicitly unverified template; no fabricated matrix or measurements. |
-| `README.md` | Correct integrated C1 state and current C2 commands/environment. |
-| `docs/C2_IMPLEMENTATION_SUMMARY.md` | This milestone/change inventory. |
-| `docs/C2_VALIDATION_REPORT.md` | Executed evidence and reproduction commands. |
-| `docs/C2_HANDOFF_TO_C3.md` | Remaining prerequisites and scope boundary. |
-| `docs/c2_validation.json` | Preserved prior structural evidence. |
-| `docs/c2_vitpose_plus_validation.json` | Current exact model revision, CUDA smoke, timings/memory, replay and regression evidence. |
+| `annotation_io.py::read_cvat` | Preserve additional raw box attributes (z_order) and original track metadata; no interpolation/preprocessing changes. |
+| `c2_pipeline.py::observation_frame` / `export_cache` | Carry optional extra reference metadata into observations.v1; measure decode and record-writing time separately. |
+| `observation_cache.py::validate_frame` | Validate optional raw metadata while retaining compatibility with the untouched old smoke cache. |
+| `tests/test_c2.py` | Add a regression for preservation of extra CVAT metadata. |
+| `tests/validate_c2_full.py` | Repeatable full-artifact acceptance: all scheduled frames, exact XML/PTS/person association, finite shape/schema, model/artifact identity, metrics/calls and accounting. |
+| `README.md` | Point to full acceptance and current limitations. |
+| Three existing C2 Markdown reports | Replace pending-full-export status with executed full-run evidence and scoped closure. |
+| `docs/c2_full_acceptance.json` | Current machine-readable acceptance, metrics, geometry/replay/test receipts and preservation manifest. |
 
-The original orientation heuristic and group-ID helper are unchanged. Detection, tracking, optional stitching, visualization and reporting implementations were not changed. C2 JSONL is not directly consumed by the old visualization/report scripts; their legacy JSON interface remains separate.
+No orientation heuristic, B0 predicate, DBSCAN method/parameters, C1 association, model architecture, detector/tracker/ReID, renderer or reporter was changed. The only raw-record extension retains existing reference metadata; the schema remains observations.v1 and old caches still validate.
 
-## Preserved pre-existing work
+## Existing H integration
 
-Master was not clean on arrival. These pre-existing changes/deletions were carried onto the feature branch, never staged or committed by C2:
+The located exported matrix is `calibration_matrix_playground.json` (nested key `homography_matrix`). A distinct file named `homography_matrix.json` was not found in the repository/ignored outputs, Downloads, Desktop, Documents or configured visualization workspace. This filename discrepancy does not mean H generation is pending.
 
-`Real_playground.png`, `Real_playground_2.png`, `calibration_headless.py`, `calibration_matrix.json`, `calibration_matrix_PETS09.json`, `calibration_matrix_based_on_roof.json`, `calibration_matrix_playground.json`, `calibration_matrix_playground_2.json`.
+The additive manifest `.local/c2/full_acceptance_20261109/calibration.existing-H.v1.json` references and copies the existing numerical H unchanged, binds the target video with an explicit image-registration basis, retains source hashes and declared correspondences, and remains `verified=false`. The original matrix/image/script files were never changed or staged.
 
-The existing data and user calibration edits were not overwritten or restored. The original master/archive refs were not moved. Generated alignment/evidence files are isolated under ignored `.local/c2/`; no historical outputs were overwritten.
+Level 1: PASS (rank 3, finite/nonsingular, 23,722 visible sampled footpoints project finitely). Level 2: PASS with documented scope (1920x1080 reference/video, source-code correspondences reproduce H, static-scene registration has 1,223 inliers and near-identity transform). Level 3: BLOCKED: the draft declares direct 10.42x11.54 m measurements, but point identities/measurement confirmation and accepted physical-error tolerance are not established. No metric grouping run was represented as verified.
 
-## ViTPose+ clarification changes
+## User work and repository boundary
 
-This follow-up modifies only `analyze_subgroups.py`, `c2_pipeline.py`, `tests/test_c2.py`, README and the three existing C2 documents, and adds `docs/c2_vitpose_plus_validation.json`. All homographies and existing user edits remain untouched. The additional pre-existing untracked `draw_grid.py` was neither executed nor modified; it explains the current root-layout check failure. No Conda packages changed. The full 600-sample export and Vast/H2/H3/H4/C3 were not started.
+Preserved pre-existing changes/deletions: `Real_playground.png`, `Real_playground_2.png`, `calibration_headless.py`, `calibration_matrix.json`, `calibration_matrix_PETS09.json`, `calibration_matrix_based_on_roof.json`, `calibration_matrix_playground.json`, `calibration_matrix_playground_2.json`; also the untracked `draw_grid.py`. All initial content hashes/absence states and video/XML/smoke hashes were verified unchanged. No package operations or archive/master ref changes occurred.
 
-The explicitly requested pose-model change is identified by new observation provenance; comparisons against earlier model outputs require controlled evaluation. Grouping rules and C1 identity behavior remain unchanged.
+The grid script is a standalone, main-guarded visualization utility using the existing image/H; it writes a grid image and can open a GUI. It was inspected statically, never run or modified, and is not imported by the nine active scripts. The source-boundary allowlist was not weakened. Any relocation to a non-active tools/calibration directory requires separate owner authorization.
