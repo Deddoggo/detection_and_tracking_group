@@ -74,6 +74,15 @@ class AnnotationTests(unittest.TestCase):
         self.assertEqual(sum(p['attributes']['social_group']=='unreviewed' for p in people),66223)
         self.assertEqual({p['attributes']['social_group'] for p in people},{'unreviewed',*[f'G{i}' for i in range(1,10)]})
 
+    def test_extra_cvat_metadata_retained_without_changing_old_v1_records(self):
+        if not self.path.exists():self.skipTest('local XML absent')
+        p=self.frames[0][0]
+        self.assertEqual(p['box_metadata'],{'z_order':'0'})
+        row=observation_frame(0,0,'1/30000',[p],[keypoints()] if p['bbox_xywh'][2]>=15 and p['bbox_xywh'][3]>=30 and not p['outside'] else [])
+        self.assertEqual(row['persons'][0]['reference']['box_metadata'],p['box_metadata'])
+        self.assertEqual(row['persons'][0]['reference']['track_metadata'],p['track_metadata'])
+        validate_frame(row,manifest())
+
     def test_fractional_boxes_flags_not_modified(self):
         p=person();p['occluded']=True;p['keyframe']=False;p['bbox_xywh'][0]=10.125;p['attributes']['social_group']='G9'
         original=copy.deepcopy(p)

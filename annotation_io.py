@@ -61,8 +61,11 @@ def read_cvat(path):
                     raise ValueError('CVAT flags must be 0 or 1')
                 flags[key] = value == '1'
             attrs = {a.attrib['name']: a.text or '' for a in box.findall('attribute')}
+            extra = {k:v for k,v in box.attrib.items() if k not in
+                     ('frame','xtl','ytl','xbr','ybr','outside','occluded','keyframe')}
             frames.setdefault(f, []).append({'person_id': tid, 'bbox_xywh': [x1, y1, x2-x1, y2-y1],
-                                             **flags, 'attributes': attrs})
+                                             **flags, 'attributes': attrs, 'box_metadata':extra,
+                                             'track_metadata':dict(track.attrib)})
     for people in frames.values():
         people.sort(key=lambda p: p['person_id'])
     return metadata, frames

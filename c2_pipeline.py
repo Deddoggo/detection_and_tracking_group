@@ -69,7 +69,8 @@ def observation_frame(index, ticks, time_base, people, pose_results):
             'pose_status':'excluded' if reason else 'ok' if kpts is not None else 'missing',
             'missing_reason':reason or ('pose_unavailable' if kpts is None else None),
             'keypoints_xy_score':kpts,
-            'reference':{k:person[k] for k in ('outside','occluded','keyframe','attributes')}})
+            'reference':{k:person[k] for k in ('outside','occluded','keyframe','attributes','box_metadata','track_metadata')
+                         if k in person}})
     return {'source_frame':index,'pts_ticks':ticks,'timestamp_seconds':pts_seconds(ticks,time_base),
             'decode_status':'ok','persons':persons}
 
@@ -114,6 +115,8 @@ def export_cache(args):
                   'after_model_load_reserved_bytes':torch.cuda.memory_reserved(args.device)}
         torch.cuda.reset_peak_memory_stats(args.device)
     calls = []
+    decode_seconds = 0.0
+    record_write_seconds = 0.0
     inference_start = time.perf_counter()
     manifest = {'schema':SCHEMA,'joint_order':COCO17,'video_sha256':timing['video_sha256'],
         'input_sha256':meta['source_sha256'],'id_namespace':f"cvat-job-{meta['job_id']}",
@@ -133,7 +136,9 @@ def export_cache(args):
             raise ValueError('cannot open source video')
         writer = CacheWriter(args.output,manifest)
         for index in range(args.end):
+            decode_start = time.perf_counter()
             ok,image = cap.read()
+            decode_seconds += time.perf_counter()-decode_start
             if not ok:
                 raise ValueError(f'decode ended at frame {index}')
             if image.shape[:2] != (manifest['height'],manifest['width']):
@@ -156,13 +161,16 @@ def export_cache(args):
                 calls.append({'source_frame':index,'person_ids':[p['person_id'] for p in eligible[offset:offset+args.pose_batch_size]],
                               'input_bboxes_xywh':[p['bbox_xywh'] for p in eligible[offset:offset+args.pose_batch_size]],
                               **predictor.last_diagnostics})
+            write_start = time.perf_counter()
             writer.append(observation_frame(index,timing['pts_ticks'][index],timing['time_base'],people,poses))
+            record_write_seconds += time.perf_counter()-write_start
         if cuda:
             torch.cuda.synchronize(args.device)
             memory.update(inference_peak_allocated_bytes=torch.cuda.max_memory_allocated(args.device),
                           inference_peak_reserved_bytes=torch.cuda.max_memory_reserved(args.device))
         metrics = {'model_loading_and_download_seconds':loading_seconds,
                    'decoded_and_pose_export_seconds':time.perf_counter()-inference_start,
+                   'video_decode_seconds':decode_seconds,'observation_record_write_seconds':record_write_seconds,
                    'cuda_memory':memory,'calls':calls,'warmup':'none; first-call latency retained',
                    'scope':'bounded real XML-box/ID pose inference, not benchmark accuracy'}
         write_new_json(Path(args.output)/'inference_metrics.json',metrics)

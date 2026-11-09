@@ -77,6 +77,10 @@ def validate_frame(row, manifest):
                 raise ValueError('reference flags must be Boolean')
         if not isinstance(p['reference']['attributes'], dict):
             raise ValueError('reference attributes required, unknown values preserved')
+        for extra in ('box_metadata','track_metadata'):
+            if extra in p['reference'] and (not isinstance(p['reference'][extra],dict) or
+                    any(not isinstance(k,str) or not isinstance(v,str) for k,v in p['reference'][extra].items())):
+                raise ValueError('raw CVAT metadata must retain string keys/values')
         outside = p['reference']['outside']
         tiny = p['bbox_xywh'][2] < 15 or p['bbox_xywh'][3] < 30
         reason = 'outside' if outside else 'tiny_bbox' if tiny else None
