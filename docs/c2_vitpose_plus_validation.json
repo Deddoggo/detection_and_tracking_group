@@ -1,0 +1,776 @@
+{
+  "schema": "c2-vitpose-plus-validation.v1",
+  "status": "bounded CUDA validation PASS; layout caveat recorded",
+  "starting_commit": "16068d3724f11d103eb821ed0db9cc0f59ed5c03",
+  "branch": "codex/c2-observation-cache",
+  "model": {
+    "model_id": "usyd-community/vitpose-plus-base",
+    "resolved_revision": "92be54d7a29e42fad47b6e2ca01dd9e685a61e0d",
+    "implementation": "transformers.VitPoseForPoseEstimation",
+    "dataset_index": 0,
+    "dataset": "COCO human pose",
+    "joint_order": "COCO17",
+    "configured_joint_labels": {
+      "0": "Nose",
+      "1": "L_Eye",
+      "2": "R_Eye",
+      "3": "L_Ear",
+      "4": "R_Ear",
+      "5": "L_Shoulder",
+      "6": "R_Shoulder",
+      "7": "L_Elbow",
+      "8": "R_Elbow",
+      "9": "L_Wrist",
+      "10": "R_Wrist",
+      "11": "L_Hip",
+      "12": "R_Hip",
+      "13": "L_Knee",
+      "14": "R_Knee",
+      "15": "L_Ankle",
+      "16": "R_Ankle"
+    },
+    "num_experts": 6,
+    "files_sha256": {
+      "config.json": "eeba7e43cd075dd9e24355b5533a128d5abc51d609784b9deb6c8646e07641d5",
+      "preprocessor_config.json": "9b11cadc98c30b968a70cc1658ce1fbd74b721b0f21402a2ff8bc1dc9d1474a0",
+      "model.safetensors": "640225e4a9dd544239f1da0ae36af865a6e76e21e5f33a12656aa7b77fa5a5fa"
+    },
+    "loading": "from_pretrained(model_id, revision=resolved_sha)",
+    "processor_class": "VitPoseImageProcessor",
+    "dtype": "torch.float32"
+  },
+  "environment": {
+    "conda_environment": "paper-research",
+    "sys_executable": "C:\\Users\\trant\\miniconda3\\envs\\paper-research\\python.exe",
+    "python": "3.13.0 | packaged by Anaconda, Inc. | (main, Oct  7 2024, 21:21:52) [MSC v.1929 64 bit (AMD64)]",
+    "packages": {
+      "torch": "2.15.0+cu134",
+      "transformers": "5.22.2",
+      "numpy": "2.5.4",
+      "opencv-python": "4.11.0.86",
+      "scikit-learn": "1.9.1"
+    },
+    "git_commit": "16068d3724f11d103eb821ed0db9cc0f59ed5c03",
+    "source_sha256": {
+      "analyze_subgroups.py": "28059b6ff54411848153f927c147b8c0fbf4ca52766a61a45ff0aa37ad2316ea",
+      "c2_pipeline.py": "8a48ae4f6fd7f16baffc10330753b0c2e6117459b8d2a85f1a35f8f9316b8c6f",
+      "annotation_io.py": "c481a6789fba6e7a01e9fa1fc03932a8778168c045c40fd10764aebf0374461c",
+      "observation_cache.py": "93f1efb36a0ea2753134075501f0ff5193480bb26d6cc7e23562533c7c466f9f",
+      "orientation_utils.py": "5934d5d4813834ca15e5912ac45e907bb5cbcc1232681ba1dfab42ff2b6a098a",
+      "grouping_contracts.py": "0c4f1853d2e7fa82830b52b8d38209d837b86760457f3a3f23d9c820bd98d97c",
+      "identify_group_social.py": "42ddd33685efdd27c1785bf49f709636fddcff1f972a66903d3d4bcd6a9836f8",
+      "orientation_gate.py": "2d4cfa3addc60997daec3c602a8247635111db17a9938f51d122f02e058647f9",
+      "group_identity.py": "6e493a3a4151950672858ad1db8041417b73e34a357fc977675a99ef92d041c4"
+    }
+  },
+  "device": {
+    "requested": "cuda:0",
+    "cuda_available": true,
+    "torch_cuda": "13.4",
+    "name": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "total_memory_bytes": 6441926656
+  },
+  "smoke": {
+    "schema": "c2-vitpose-plus-smoke.v1",
+    "status": "PASS",
+    "observation_cache": "C:\\Users\\trant\\detection_and_tracking_group\\.local\\c2\\vitpose_plus_20261109\\observations_verified",
+    "cache_manifest_sha256": "597fce30b7764d28d3be9d0b18173da143876dc4dcfb0ace0c38158bd9f1ffa8",
+    "pose_model": {
+      "model_id": "usyd-community/vitpose-plus-base",
+      "resolved_revision": "92be54d7a29e42fad47b6e2ca01dd9e685a61e0d",
+      "implementation": "transformers.VitPoseForPoseEstimation",
+      "dataset_index": 0,
+      "dataset": "COCO human pose",
+      "joint_order": "COCO17",
+      "configured_joint_labels": {
+        "0": "Nose",
+        "1": "L_Eye",
+        "2": "R_Eye",
+        "3": "L_Ear",
+        "4": "R_Ear",
+        "5": "L_Shoulder",
+        "6": "R_Shoulder",
+        "7": "L_Elbow",
+        "8": "R_Elbow",
+        "9": "L_Wrist",
+        "10": "R_Wrist",
+        "11": "L_Hip",
+        "12": "R_Hip",
+        "13": "L_Knee",
+        "14": "R_Knee",
+        "15": "L_Ankle",
+        "16": "R_Ankle"
+      },
+      "num_experts": 6,
+      "files_sha256": {
+        "config.json": "eeba7e43cd075dd9e24355b5533a128d5abc51d609784b9deb6c8646e07641d5",
+        "preprocessor_config.json": "9b11cadc98c30b968a70cc1658ce1fbd74b721b0f21402a2ff8bc1dc9d1474a0",
+        "model.safetensors": "640225e4a9dd544239f1da0ae36af865a6e76e21e5f33a12656aa7b77fa5a5fa"
+      },
+      "loading": "from_pretrained(model_id, revision=resolved_sha)",
+      "processor_class": "VitPoseImageProcessor",
+      "dtype": "torch.float32"
+    },
+    "environment": {
+      "conda_environment": "paper-research",
+      "sys_executable": "C:\\Users\\trant\\miniconda3\\envs\\paper-research\\python.exe",
+      "python": "3.13.0 | packaged by Anaconda, Inc. | (main, Oct  7 2024, 21:21:52) [MSC v.1929 64 bit (AMD64)]",
+      "packages": {
+        "torch": "2.15.0+cu134",
+        "transformers": "5.22.2",
+        "numpy": "2.5.4",
+        "opencv-python": "4.11.0.86",
+        "scikit-learn": "1.9.1"
+      },
+      "git_commit": "16068d3724f11d103eb821ed0db9cc0f59ed5c03",
+      "source_sha256": {
+        "analyze_subgroups.py": "28059b6ff54411848153f927c147b8c0fbf4ca52766a61a45ff0aa37ad2316ea",
+        "c2_pipeline.py": "8a48ae4f6fd7f16baffc10330753b0c2e6117459b8d2a85f1a35f8f9316b8c6f",
+        "annotation_io.py": "c481a6789fba6e7a01e9fa1fc03932a8778168c045c40fd10764aebf0374461c",
+        "observation_cache.py": "93f1efb36a0ea2753134075501f0ff5193480bb26d6cc7e23562533c7c466f9f",
+        "orientation_utils.py": "5934d5d4813834ca15e5912ac45e907bb5cbcc1232681ba1dfab42ff2b6a098a",
+        "grouping_contracts.py": "0c4f1853d2e7fa82830b52b8d38209d837b86760457f3a3f23d9c820bd98d97c",
+        "identify_group_social.py": "42ddd33685efdd27c1785bf49f709636fddcff1f972a66903d3d4bcd6a9836f8",
+        "orientation_gate.py": "2d4cfa3addc60997daec3c602a8247635111db17a9938f51d122f02e058647f9",
+        "group_identity.py": "6e493a3a4151950672858ad1db8041417b73e34a357fc977675a99ef92d041c4"
+      }
+    },
+    "frames": [
+      {
+        "source_frame": 0,
+        "pts_seconds": 0.0,
+        "persons": 43,
+        "pose_ok": 42,
+        "excluded": 1,
+        "missing_eligible": 0
+      },
+      {
+        "source_frame": 3,
+        "pts_seconds": 0.11206666666666666,
+        "persons": 43,
+        "pose_ok": 42,
+        "excluded": 1,
+        "missing_eligible": 0
+      },
+      {
+        "source_frame": 6,
+        "pts_seconds": 0.23996666666666666,
+        "persons": 44,
+        "pose_ok": 43,
+        "excluded": 1,
+        "missing_eligible": 0
+      },
+      {
+        "source_frame": 9,
+        "pts_seconds": 0.368,
+        "persons": 44,
+        "pose_ok": 43,
+        "excluded": 1,
+        "missing_eligible": 0
+      },
+      {
+        "source_frame": 12,
+        "pts_seconds": 0.46416666666666667,
+        "persons": 44,
+        "pose_ok": 43,
+        "excluded": 1,
+        "missing_eligible": 0
+      }
+    ],
+    "inference_calls": 213,
+    "association_validation": "each eligible XML person in source order has exactly one batch-size-1 result; IDs/boxes/reference attributes match XML exactly; native postprocessing checks ROI order separately",
+    "timing": {
+      "model_loading_seconds": 12.653870999987703,
+      "decode_and_pose_export_seconds": 12.05877080000937,
+      "forward_seconds_total": 7.926191500388086,
+      "forward_seconds_mean": 0.037212166668488665,
+      "forward_seconds_median": 0.03440459998091683,
+      "per_person_preprocess_forward_postprocess_seconds_mean": 0.05472150375408518,
+      "first_call_seconds": 0.3453231999883428
+    },
+    "cuda_memory": {
+      "model_load_peak_allocated_bytes": 501608960,
+      "after_model_load_allocated_bytes": 501608960,
+      "after_model_load_reserved_bytes": 559939584,
+      "inference_peak_allocated_bytes": 518845440,
+      "inference_peak_reserved_bytes": 589299712
+    },
+    "score_range": [
+      0.016863346099853516,
+      0.9917662739753723
+    ],
+    "joint_scores_below_0_6": 1955,
+    "missingness_note": "low scores retained as model observations, not converted to absent poses or GT; missing/excluded cases separately covered by regressions",
+    "preservation_verified": true,
+    "scope": "only 5 unique source frames; no full export, metric calibration or accuracy evaluation",
+    "replay_validation": {
+      "status": "PASS",
+      "runs": [
+        ".local\\c2\\vitpose_plus_20261109\\replay_a",
+        ".local\\c2\\vitpose_plus_20261109\\replay_b"
+      ],
+      "predictions_sha256": "f13bd78256554f69f9d160bf550449b31149b167b2ecc02f67134cf7a67604cf",
+      "identical_predictions": true,
+      "geometry_mode": "image-space-diagnostic",
+      "eps_pixels": 50,
+      "close_distance_pixels": 10,
+      "meaning": "engineering repeatability only, no metric or subgroup accuracy claim"
+    },
+    "pose_visual_review": {
+      "source_frames": [
+        0,
+        12
+      ],
+      "status": "sampled source-pixel alignment supported",
+      "note": "Overlay dots broadly follow source people for visible confident joints; distant/occluded poses often low confidence. Not a pose accuracy evaluation.",
+      "display_score_threshold": 0.6,
+      "raw_observations_filtered": false
+    },
+    "raw_cache_unchanged_by_replay": true
+  },
+  "cuda_smoke_metrics": ".local\\c2\\vitpose_plus_20261109\\observations_verified\\inference_metrics.json",
+  "smoke_model_source_hashes_still_match": true,
+  "c2_regressions": {
+    "provenance": {
+      "conda_environment": "paper-research",
+      "sys_executable": "C:\\Users\\trant\\miniconda3\\envs\\paper-research\\python.exe",
+      "python": "3.13.0 | packaged by Anaconda, Inc. | (main, Oct  7 2024, 21:21:52) [MSC v.1929 64 bit (AMD64)]",
+      "packages": {
+        "torch": "2.15.0+cu134",
+        "transformers": "5.22.2",
+        "numpy": "2.5.4",
+        "opencv-python": "4.11.0.86",
+        "scikit-learn": "1.9.1"
+      },
+      "git_commit": "16068d3724f11d103eb821ed0db9cc0f59ed5c03",
+      "source_sha256": {
+        "analyze_subgroups.py": "28059b6ff54411848153f927c147b8c0fbf4ca52766a61a45ff0aa37ad2316ea",
+        "c2_pipeline.py": "8a48ae4f6fd7f16baffc10330753b0c2e6117459b8d2a85f1a35f8f9316b8c6f",
+        "annotation_io.py": "c481a6789fba6e7a01e9fa1fc03932a8778168c045c40fd10764aebf0374461c",
+        "observation_cache.py": "93f1efb36a0ea2753134075501f0ff5193480bb26d6cc7e23562533c7c466f9f",
+        "orientation_utils.py": "5934d5d4813834ca15e5912ac45e907bb5cbcc1232681ba1dfab42ff2b6a098a",
+        "grouping_contracts.py": "0c4f1853d2e7fa82830b52b8d38209d837b86760457f3a3f23d9c820bd98d97c",
+        "identify_group_social.py": "42ddd33685efdd27c1785bf49f709636fddcff1f972a66903d3d4bcd6a9836f8",
+        "orientation_gate.py": "2d4cfa3addc60997daec3c602a8247635111db17a9938f51d122f02e058647f9",
+        "group_identity.py": "6e493a3a4151950672858ad1db8041417b73e34a357fc977675a99ef92d041c4"
+      }
+    },
+    "tests_run": 30,
+    "records": [
+      {
+        "test": "test_c2.AnnotationTests.test_bad_xml_rejected",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.AnnotationTests.test_decoder_rejects_wrong_pts",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.AnnotationTests.test_fractional_boxes_flags_not_modified",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.AnnotationTests.test_outside_interval_no_interpolation",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.AnnotationTests.test_partial_social_labels_preserved",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.AnnotationTests.test_real_xml_identity_and_coverage",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.GeometryTests.test_image_mode_requires_explicit_pixel_policy",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.GeometryTests.test_metric_missing_unverified_and_wrong_video_rejected",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.GeometryTests.test_native_chain_and_split_preserve_c1",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.GeometryTests.test_synthetic_metric_identity_and_projection",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.RealSmokeCacheTests.test_real_cache_replay_repeatability_and_immutability",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.RealSmokeCacheTests.test_real_smoke_frames_and_person_keypoint_association",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.ReplayTests.test_cache_replay_matches_same_raw_live_boundary",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.ReplayTests.test_cli_replay_does_not_import_neural_modules",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.ReplayTests.test_empty_frame_clears_heading_and_preserves_maximum",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.ReplayTests.test_repeatability_exclusions_and_observation_immutability",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.ReplayTests.test_replay_matches_original_live_ema_and_grouping_with_controlled_poses",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.ReplayTests.test_replay_rejects_frame_reordering",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.SchemaTests.test_empty_frame_is_valid",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.SchemaTests.test_excluded_and_missing_persons_retained",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.SchemaTests.test_incomplete_missing_order_and_tamper_rejected",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.SchemaTests.test_invalid_manifest_and_joint_order",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.SchemaTests.test_mismatched_pose_person_count_rejected",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.SchemaTests.test_raw_heatmap_score_not_clipped_or_treated_as_probability",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.SchemaTests.test_revision_rejects_mutable_or_local_checkpoint_inputs",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.SchemaTests.test_roundtrip_raw_scores_and_unreviewed",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.SchemaTests.test_shape_nonfinite_duplicate_and_pts_errors",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.SchemaTests.test_vitpose_plus_config_requires_coco17_and_six_experts",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.ViTPosePlusBoundaryTests.test_fixed_hub_model_pinned_processor_and_dataset_index_per_person",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.ViTPosePlusBoundaryTests.test_native_postprocess_preserves_roi_order_and_source_pixel_offsets",
+        "status": "PASS"
+      }
+    ],
+    "success": true,
+    "scope": "native CPU contracts and sklearn; explicitly synthetic poses; local XML where present"
+  },
+  "c2_full_evidence": ".local\\c2\\tests_20261109T212605_795135Z.json",
+  "c1_regressions": {
+    "tests_run": 57,
+    "records": [
+      {
+        "test_id": "c1_cases.Contracts.test_bad_bboxes_and_ids",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Contracts.test_bad_calibration_and_lengths",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Contracts.test_lists_and_numpy",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_E1_empty_previous",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_E2_empty_intervals",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_E3_all_noise",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_E4_disappearance",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_E5_new_run",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_E6_split_empty_new",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_S1_continuation",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_S2_split",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_S3_merge",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_S4_unrelated",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_S5_global_ties",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_S6_permutation",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_asymmetric_coverage_not_iou",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_ineligible_edges_and_max",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_invalid_partition",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_invalid_policy",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupingProduction.test_S7_noise_retained_and_empty_lifecycle",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+      },
+      {
+        "test_id": "c1_cases.GroupingProduction.test_b0_valid_matrix_equivalence",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+      },
+      {
+        "test_id": "c1_cases.GroupingProduction.test_full_modes_invoke_predicates",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+      },
+      {
+        "test_id": "c1_cases.GroupingProduction.test_horizon_rejected",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+      },
+      {
+        "test_id": "c1_cases.GroupingProduction.test_invalid_inputs_never_become_edges",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+      },
+      {
+        "test_id": "c1_cases.GroupingProduction.test_split_real_entrypoints",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+      },
+      {
+        "test_id": "c1_cases.NativeGrouping.test_native_chain",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native sklearn + NumPy/OpenCV production module; no substitutes"
+      },
+      {
+        "test_id": "c1_cases.NativeGrouping.test_native_split_and_noise",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native sklearn + NumPy/OpenCV production module; no substitutes"
+      },
+      {
+        "test_id": "c1_cases.Orientation.test_analytical_boundaries",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Orientation.test_angular_sweep",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Orientation.test_controls_and_configured_modes",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Orientation.test_distance_boundaries",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Orientation.test_invalid_directions",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Orientation.test_keypoints_validation",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Orientation.test_missing_and_zero",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Orientation.test_original_thresholds_strict",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Orientation.test_postprocess_zero_and_nonmutation",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Orientation.test_random_sweep",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Preservation.test_active_helper_imports_and_calls",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Preservation.test_b0_hashes",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Preservation.test_no_legacy_changes_in_active_patch",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_area_known_and_degenerate",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_empty_report",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_explicit_empty_frame_breaks_session",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_explicit_timebase_required",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_interval_half_open_and_clipping",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_json_cli_and_nonoverwrite",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_missing_frames_no_duration_bridge",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_missing_timestamp_no_fallback",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_moving_group_not_pooled_area",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_native_excel_export",
+        "status": "SKIP",
+        "detail": "native pandas/openpyxl unavailable; no substitute writer",
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_nonuniform_area_time_weighting",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_single_sample_zero_duration",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_source_fps_variants",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_split_merge_not_formation_events",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_time_gap_breaks_nominal_adjacency",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_timestamps_priority_nonuniform",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_unknowns_and_missing_geometry_retained",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      }
+    ]
+  },
+  "c1_full_evidence": ".local\\c1_validation\\run_20261109T213030_742790Z.json",
+  "layout": {
+    "tests_run": 3,
+    "passed": 2,
+    "failed": 1,
+    "cause": "pre-existing untracked draw_grid.py outside root allowlist; guard/file left unchanged"
+  },
+  "initial_attempts": [
+    {
+      "outcome": "initialization stopped",
+      "reason": "private config _commit_hash unavailable; replaced by pinned public loading and artifact hashes",
+      "frames_saved": 0
+    },
+    {
+      "outcome": "first-crop audit stopped; incomplete cache retained",
+      "reason": "returned HF bbox uses center/scale metadata; source boxes retained and association checked by crop order/count instead",
+      "path": ".local\\c2\\vitpose_plus_20261109\\observations"
+    }
+  ],
+  "preserved_user_files_sha256_or_absent": {
+    "Real_playground.png": "6d923bf2661599c6850c83dae97c666e6a3f54cc6bbc87952583f06b2c8b23d4",
+    "Real_playground_2.png": null,
+    "calibration_headless.py": "db69e7deda0da47849ecf4b95f5a0d86aa2a4f32d1738c7d606bf172e67352a2",
+    "calibration_matrix.json": null,
+    "calibration_matrix_PETS09.json": null,
+    "calibration_matrix_based_on_roof.json": null,
+    "calibration_matrix_playground.json": "cc9c644dffa43cffc647f4e02dec34e46a24003bcf7e9c2164d0def983463d90",
+    "calibration_matrix_playground_2.json": null,
+    "draw_grid.py": "cde4d1c546333d4d88b247ac28601be71e760b5138f01fcfc3a10a99226afad6"
+  },
+  "original_video_and_xml_sha256": {
+    "video": "fa1044aa1f3c9d413bdd608d39f8545c593b34457f5ecb6dc80a28beb62cb119",
+    "xml": "67addc127c07d98c17d0c160dc03d5f4025e5926dfb4d2d786aa901af37f7f08"
+  },
+  "package_operations_performed": [],
+  "remaining": {
+    "metric_calibration": "physical/camera provenance unverified; homographies untouched",
+    "full_600_sample_export": "not run",
+    "Vast.ai": "not used",
+    "H2_H3_H4_C3": "not started"
+  },
+  "historical_evidence": "docs/c2_validation.json retained unchanged; its checkpoint blocker is superseded by this authorized HF workflow",
+  "implementation_commit": "650f7229792ce2f7a3ef6076c779aab8ab303458",
+  "inference_provenance_note": "Inference ran before committing the model clarification; its immutable manifest records the parent HEAD plus exact executed source hashes, which match the implementation commit working files."
+}

@@ -1,10 +1,69 @@
-# C2 validation report
+# C2 validation report — ViTPose+ Base clarification
 
-2026-11-09. Evidence is consolidated in `c2_validation.json`; full local diagnostics remain under `.local/c2/` and `.local/c1_validation/`.
+2026-11-09. Current evidence: `c2_vitpose_plus_validation.json`. Prior C2 structural evidence remains in `c2_validation.json`; it predates this model clarification.
 
-## Environment actually used
+## Environment and single model
 
-All tests and decoding used:
+All execution used `C:\Users\trant\miniconda3\envs\paper-research\python.exe`, Python 3.13.0. PyTorch 2.15.0+cu134, CUDA 13.4, Transformers 5.22.2; local RTX 3060 Laptop GPU. NumPy 2.5.4, OpenCV distribution 4.11.0.86/runtime 4.11.0, sklearn 1.9.1. No package installation, downgrade or upgrade was performed.
+
+Only `usyd-community/vitpose-plus-base` is supported. Model and processor load directly using `from_pretrained(model_id, revision=resolved_sha)`, allowing standard Hugging Face automatic download/cache. There is no local-checkpoint mode or alternative model selector.
+
+Executed immutable revision: **`92be54d7a29e42fad47b6e2ca01dd9e685a61e0d`**. The first resolution used Hub `main`; both loads are pinned to its full SHA. The final run explicitly reused this SHA. Manifest artifacts are SHA256-hashed: config, processor config and weights. The cached weights hash is `640225e4a9dd544239f1da0ae36af865a6e76e21e5f33a12656aa7b77fa5a5fa`.
+
+The installed model signature/backbone explicitly support `dataset_index`. Every real call used a CUDA int64 tensor `[0]`, selecting the COCO human-pose expert. The six-expert/192-part-feature configuration, COCO17 label names and returned label order 0–16 were checked. This matches the [official HF ViTPose+ dataset-index documentation](https://huggingface.co/docs/transformers/model_doc/vitpose#notes) and [pinned model configuration](https://huggingface.co/usyd-community/vitpose-plus-base/blob/92be54d7a29e42fad47b6e2ca01dd9e685a61e0d/config.json). Successful native CUDA forwards establish compatibility for this bounded case.
+
+## Executed CUDA smoke
+
+Raw cache: `.local/c2/vitpose_plus_20261109/observations_verified/`.
+
+| Source frame | PTS seconds | XML records retained | Pose arrays | Explicit tiny-box exclusions | Missing eligible poses |
+|---|---:|---:|---:|---:|---:|
+| 0 | 0.000000000 | 43 | 42 | 1 | 0 |
+| 3 | 0.112066667 | 43 | 42 | 1 | 0 |
+| 6 | 0.239966667 | 44 | 43 | 1 | 0 |
+| 9 | 0.368000000 | 44 | 43 | 1 | 0 |
+| 12 | 0.464166667 | 44 | 43 | 1 | 0 |
+| Total | | 218 | 213 | 5 | 0 |
+
+Each of the 213 calls used batch size 1, `cuda:0`, FP32, input `[1,3,256,192]`, heatmaps `[1,17,64,48]` and final xy/score array `[17,3]`. Arrays were finite. Each single-person input was associated with exactly one output, and all source IDs, original float boxes, reference flags/attributes and source PTS were checked against the XML/alignment. No detection/tracking inference was used.
+
+Native postprocessing tests confirm that corresponding crops preserve their distinct source-pixel offsets and order. Pose overlays at frames 0 and 12 were visually inspected: confident visible joints broadly follow the intended people. This is not exhaustive identity or keypoint accuracy validation. The HF postprocessor's returned `bbox` field is not used for assignment: in installed Transformers 5.22.2 it is assembled from crop center/scale metadata rather than the original pixel ROI. Original XML boxes remain authoritative and unchanged.
+
+Raw scores ranged 0.0168633–0.9917663; **1,955 of 3,621 scores were below 0.6**. All scores/joints were retained. Low confidence is not silently treated as a missing person or calibrated uncertainty. The five real exclusions exercise the existing tiny-box policy; separate regressions cover absent poses, empty frames and outside intervals. Gender inference and ground-plane projection were not run in raw cache mode.
+
+### Timing and memory
+
+| Measurement | Observed |
+|---|---:|
+| Final cache-hit model initialization, including artifact hashing | 12.654 s |
+| Sequential decode + 213 pose calls + raw export preparation | 12.059 s |
+| Sum of synchronized forward wall times | 7.926 s |
+| Mean / median synchronized forward per person | 37.212 / 34.405 ms |
+| Mean preprocessing + forward + postprocessing per person | 54.722 ms |
+| First complete person call, no warm-up discarded | 345.323 ms |
+| Peak model-load allocated bytes | 501,608,960 |
+| Peak inference allocated bytes | 518,845,440 (494.81 MiB) |
+| Peak inference reserved bytes | 589,299,712 (562.00 MiB) |
+
+Times are one bounded run, not a benchmark or throughput claim. Forward times include dispatch/synchronization. Memory is the PyTorch allocator, excluding driver/context/other-process use. Initial download duration was not measured; the successful final run used HF-cached weights. No OOM occurred at batch size 1. Full per-call measurements and person/crop linkage are in `inference_metrics.json`, hashed by the observation manifest.
+
+### Preserved failure evidence
+
+The first initialization attempt downloaded/loaded the model but stopped at an audit check that relied on the removed private config `_commit_hash`. The code now pins the public loading revision and hashes the pinned cached artifacts. A second attempt stopped at an incorrect assumption that the processor's returned bbox equaled the source ROI. Its cache remains explicitly incomplete under `observations/`; no failed partial cache was relabeled complete or overwritten. The final `observations_verified/` run passed all checks. No package changes were needed.
+
+## Regression and replay results
+
+| Check | Actual result |
+|---|---|
+| C1 regression suite | **56 PASS / 1 SKIP**; optional Excel skip because openpyxl is absent. Native sklearn tests execute. |
+| C2 regression suite | **30 PASS**, including fixed Hub ID/revision loading, explicit dataset index per crop, COCO17 config validation, native crop postprocessing, missingness, cache round-trip and real-cache association/replay. |
+| Root layout checks | **2 PASS / 1 FAIL**: pre-existing untracked `draw_grid.py` is outside the allowlist. Preserved without execution/modification; the guard was not weakened. |
+| Actual five-frame cache replay | Two native CPU runs produced identical prediction hashes; original cache hashes unchanged. |
+| Metric calibration | NOT VERIFIED; remains fail-closed. No existing H was modified or used by raw inference. |
+
+Actual replay used explicit image-space diagnostic settings `eps=50 pixels`, `close_distance=10 pixels` solely to test repeatability. No accuracy or physical interpretation is claimed. Neural-free replay remains protected by a subprocess import-guard regression. C1 grouping and group-ID logic remain unchanged.
+
+Reproduce regressions:
 
 ```powershell
 $py = 'C:\Users\trant\miniconda3\envs\paper-research\python.exe'
@@ -13,39 +72,7 @@ $py = 'C:\Users\trant\miniconda3\envs\paper-research\python.exe'
 & $py -B tests/check_active_layout.py
 ```
 
-`paper-research` exists. Python is 3.13.0; no Python 3.11 environment was created. Native imports and tests establish compatibility for the tested CPU paths.
-
-Latest observed environment: NumPy 2.5.4; OpenCV distribution 4.11.0.86/runtime 4.11.0; sklearn 1.9.1; Transformers 5.22.2; PyTorch 2.15.0+cu134; torchvision 0.29.2+cu134; Pillow 13.0.0; safetensors 0.8.0. Ultralytics 8.4.208 and BoxMOT 26.0.0 were inventoried by package metadata, not inference-tested. Auxiliary `inference` and optional `openpyxl` are absent.
-
-An earlier same-session snapshot reported CPU-only torch 2.15.0. A subsequent snapshot reported CUDA 13.4 and CUDA available. The latter was verified with a one-element CUDA allocation/readback on an RTX 3060 Laptop GPU (6,441,926,656 bytes reported memory). Codex performed no package installation, removal or update. Both snapshots are recorded; no cause for the external environment change is asserted. This scalar operation is not model validation.
-
-## Tests: expected versus observed
-
-| Check | Expected | Actual / status |
-|---|---|---|
-| Active source/resource checks | Compile without models; approved helpers/resources present | 3 PASS. |
-| C1 regressions | Preserve B0/C1 semantics with explicit compatibility mode | 56 PASS, 1 SKIP among 57 methods. Native sklearn chain/split tests executed. |
-| Excel export | Native pandas/openpyxl when both available | SKIP: openpyxl absent. No substitute writer or installation. |
-| C2 XML | Zero-based IDs, float boxes, flags and raw partial labels preserved | PASS, including actual local XML coverage and label counts. |
-| Track 40 | Outside at 319; absent 320–333; returns at 334 | PASS; parser never interpolates this interval. |
-| Source timestamps | Decode and packet PTS agree throughout `[0,1800)` | PASS: 1,800 frames, maximum error 1.4210854715202004e-14 seconds. |
-| Wrong decoded PTS | Reject mismatched timestamp | PASS on a deliberately controlled decoder response. |
-| Schema round-trip | Preserve raw arrays/scores and references exactly | PASS, including scores above 1 without clipping. |
-| Missing/excluded/empty | Retain exclusions and honest missingness; allow empty frames | PASS. |
-| Invalid/tampered/incomplete cache | Reject bad shapes, NaN/Inf, duplicate IDs, ordering/count/hash/source errors | PASS. |
-| Metric provenance | Reject missing/unverified/wrong-video/wrong-H/incorrect correspondence evidence | PASS on synthetic contracts. Actual field validity NOT VERIFIED. |
-| Pixel diagnostics | Require explicit pixel close-distance and no H | PASS. |
-| Native grouping | Preserve chain merging and one-to-one split IDs | PASS with sklearn, no replacement clustering. |
-| Direct raw observations versus loaded cache | Identical replay predictions under identical recipe/state | PASS on explicitly synthetic poses. |
-| Retained live analyzer versus replay | Same EMA, projected positions and group IDs | PASS with injected controlled poses, without constructing neural models. |
-| Neural-free CLI replay | No torch/Transformers/inference/Ultralytics/BoxMOT import | PASS: subprocess import guard rejects those modules. |
-| Replay determinism/state | Identical repeats; correct reset after empty sample; reject skipped/reordered initial samples | PASS; input observations unchanged. |
-| Missing checkpoint | Fail without downloading/substituting | PASS on empty local directory. |
-| Real ViTPose smoke/cache | Use supplied identified weights | NOT EXECUTED: weights unavailable. |
-
-C2 suite: **25 PASS**, zero failures/skips with the local XML present. Together with C1/layout: **84 PASS / 1 SKIP**. These are test methods, not independent benchmark sequences.
-
-Initial validation exposed a C1 test-harness issue: `patch.dict(sys.modules)` removed newly imported OpenCV Python modules while retaining native extension state. Preloading OpenCV before substitution fixed the tests; no environment package was changed. An initial direct C2 run also hit Windows sandbox temporary-directory permissions. Its approved outside-sandbox retry passed; the final runner uses an isolated ignored workspace temporary directory and passes inside the sandbox.
+Real-cache-only tests skip if the local smoke artifact is absent; they never download weights or rerun inference. See `C2_HANDOFF_TO_C3.md` for the exact bounded inference command.
 
 ## Real data evidence
 

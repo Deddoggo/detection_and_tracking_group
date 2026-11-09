@@ -1,60 +1,55 @@
-# C2 handoff and pending prerequisites
+# C2 bounded validation handoff
 
-C2 structural paths are implemented and tested. **C3 has not begun.** Real pose-cache acceptance and trusted metric replay remain pending; this is not a full benchmarking approval.
+The ViTPose+ clarification is implemented and the authorized five-frame CUDA test passed. **C3, the 600-sample export and H2/H3/H4 have not begun.** This establishes bounded execution and observation integrity, not scientific accuracy or full benchmark readiness.
 
-## Required next inputs
+## Fixed Hugging Face workflow
 
-1. Supply a local Hugging Face-format snapshot of `usyd-community/vitpose-base-simple`, with its revision/provenance. Required files are `config.json`, `preprocessor_config.json` and `model.safetensors` (or a complete supported local weight/shard set). An original MMPose `.pth` alone is not the active Transformers format. No YOLO/BoxMOT checkpoint is needed for XML-based caching.
-2. Supply the actual-video homography, image/ground correspondences, measured dimensions/units and measurement/camera provenance. The existing edited H remains unverified for metric use. We can then assemble and check a `calibration.v1` manifest; the example in `config/` deliberately cannot pass as verified calibration.
+Only `usyd-community/vitpose-plus-base` is used. `AutoProcessor.from_pretrained()` and `VitPoseForPoseEstimation.from_pretrained()` receive that exact model ID and the same immutable revision. Hugging Face automatically downloads/caches weights. No manually prepared checkpoint directory or alternative model option is required or supported.
 
-The upstream model repository inspected at [revision a93ac0c67e0b7e2c55287d21d4c460c8f3c54d45](https://huggingface.co/usyd-community/vitpose-base-simple/tree/a93ac0c67e0b7e2c55287d21d4c460c8f3c54d45) lists approximately 344 MB of weights. Its [configuration](https://huggingface.co/usyd-community/vitpose-base-simple/blob/main/config.json) specifies the Transformers ViTPose class, simple decoder and COCO17 label order; the [processor configuration](https://huggingface.co/usyd-community/vitpose-base-simple/blob/main/preprocessor_config.json) uses a 256x192 pose input. Only metadata was inspected; no weights were downloaded. Local file hashes and supplied revision will be recorded, without falsely claiming an upstream hash match.
+Default loading resolves `main` once through the Hub API. For exact reproduction, pass the executed full revision **`92be54d7a29e42fad47b6e2ca01dd9e685a61e0d`**. Each forward uses COCO human-pose `dataset_index=0`. Architecture/joint ordering and artifact hashes are recorded in `observations.v1` provenance.
 
-## Environment/dependency plan
+## Executed bounded command
 
-Continue using `C:\Users\trant\miniconda3\envs\paper-research\python.exe` explicitly. Required C2 paths use existing Python, NumPy, OpenCV, sklearn, PyTorch, Transformers, Pillow and safetensors/HF dependencies. Tests/native imports succeeded; no package installation is currently proposed. `inference` is unnecessary with auxiliary attributes disabled; `openpyxl` is optional reporting functionality.
-
-The latest torch build supports CUDA and a scalar allocation/readback succeeded. Given the approximately 344 MB checkpoint, FP32 and **one-person batches** are a plausible bounded test on the local 6 GB GPU, but actual model/activation memory remains unverified. Start with a few source samples and batch size 1. Do not provision Vast or change torch/packages without a separate concrete plan and approval.
-
-## Bounded next execution, after checkpoint supply
-
-The following is a reproduction template, **not an already executed inference command**. Replace local checkpoint/revision with the supplied snapshot. Use a new output directory.
+Run from the repository root using the existing environment. Use a **new** output directory if repeating; the completed cache below already exists and will be refused as an output destination.
 
 ```powershell
 $py = 'C:\Users\trant\miniconda3\envs\paper-research\python.exe'
-& $py -B analyze_subgroups.py cache `
+& $py -u -B analyze_subgroups.py cache `
   --video 'WIN_20260303_10_09_56_PRO_GT_First60s/WIN_20260303_10_09_56_Pro.mp4' `
   --xml 'WIN_20260303_10_09_56_PRO_GT_First60s/annotations.xml' `
   --alignment '.local/c2/alignment_20261109/alignment.reviewed.json' `
-  --checkpoint 'LOCAL_HF_VITPOSE_DIRECTORY' `
-  --checkpoint-revision 'SUPPLIED_SNAPSHOT_REVISION' `
+  --revision 92be54d7a29e42fad47b6e2ca01dd9e685a61e0d `
   --start 0 --end 13 --stride 3 --max-pose-frames 5 --pose-batch-size 1 `
-  --device cuda:0 --output '.local/c2/pose_smoke_NEW_RUN'
+  --device cuda:0 --output '.local/c2/vitpose_plus_20261109/observations_verified'
 ```
 
-This schedules frames 0,3,6,9,12. It preserves source PTS and all explicit XML persons on those frames, including exclusions. No calibration is required for raw caching. Inspect pose layout, confidence values, person/keypoint association, missingness and bounded memory before authorizing a 600-sample export over `[0,1800)`.
+Frames 0,3,6,9,12 yielded 213 finite COCO17 pose arrays and 5 explicit tiny-box exclusions among 218 retained records. Person IDs/boxes/attributes/source PTS match the XML/alignment. Raw model scores are retained without clipping. XML identities are oracle inputs; this is not detector/tracker evaluation or complete subgroup GT.
 
-For grouping-only replay of an actual validated cache:
+Artifacts:
+
+- `observations_verified/manifest.json`, `frames.jsonl`: complete observations.v1 cache with exact model revision and model/processor/weights hashes.
+- `observations_verified/inference_metrics.json`: every crop/person call, shapes, dataset index, timing and CUDA allocator peaks.
+- `.local/c2/vitpose_plus_20261109/smoke_validation.complete.json`: assertion-based validation and repeatable replay results.
+- `pose_overlays/frame_00000.jpg`, `frame_00012.jpg`: inspected original-video overlays; 0.6 is a display threshold only.
+- `docs/c2_vitpose_plus_validation.json`: portable current evidence; `docs/c2_validation.json` remains prior structural evidence.
+
+The cache is reusable without neural inference. For example, with a new output path:
 
 ```powershell
 & $py -B analyze_subgroups.py replay `
-  --cache '.local/c2/pose_smoke_NEW_RUN' `
+  --cache '.local/c2/vitpose_plus_20261109/observations_verified' `
   --geometry-mode image-space-diagnostic --eps 50 --close-distance 10 `
   --output '.local/c2/replay_NEW_RUN'
 ```
 
-The values 50 and 10 are **illustrative explicit pixel diagnostic settings**, not calibrated/optimized research parameters. No metric substitution is allowed. `eps` must remain below the existing rejected-distance sentinel 1000. Metric replay instead requires `--geometry-mode metric`, a verified `--calibration` manifest and explicitly chosen meter thresholds.
+These pixel settings are engineering diagnostics, not tuned research thresholds. Two actual cache replay runs produced identical predictions and left raw observations unchanged. Predicted group IDs are pre-annotations, never GT. `unreviewed` references remain unknown; excluded persons have null predictions and eligible clustering noise has -1.
 
-Replay output contains source frame, PTS, person ID, bbox, predicted group ID, raw/smoothed/projected headings, heading freshness/age, positions/units and null group confidence. Predictions are pre-annotations, never GT. Excluded persons have null group IDs; eligible DBSCAN noise has -1. Raw `unreviewed` references remain unknown and are never used as negative membership or clustering input.
+## Remaining requirements and scope
 
-## Compatibility and remaining limits
+1. **Metric calibration evidence:** existing homographies were preserved. Before metric replay, verify their actual-video correspondence, physical measurements/units and camera provenance, then validate a calibration.v1 manifest. Raw CUDA caching is already independent of this verification.
+2. **Repository layout:** untracked `draw_grid.py`, present before this clarification, causes one existing root-layout check to fail. It was not edited, staged or deleted. Core C1/C2 tests pass; do not describe all repository checks as green.
+3. **Future scientific evaluation:** incomplete G1–G9 labels are not complete subgroup GT. No pose/group accuracy or benchmark gain follows from finite arrays or visual spot checks. Many distant/occluded joints have low scores.
 
-- The old live path requires explicit `--compatibility-b0 --tracks PATH`; its hardcoded video/output/model behavior remains separate. Do not run it over historical outputs. B0 unit semantics are deliberately marked unverified.
-- Existing visualization/report scripts consume their legacy JSON format, not the new replay JSONL. No conversion or final evaluation harness is claimed here.
-- Initial cache input is oracle boxes/person identities, not detector/tracker accuracy. No predicted-track adapter/identity correspondence has been validated.
-- Cache v1 export starts at source frame 0; nonzero seek/offset/resume is rejected. Replay resets at cache start rather than inventing warm-up history.
-- PTS packet mapping currently supports verified, ordered no-B-frame streams. Other videos require a proper decoded presentation index; no silent fallback.
-- Reader validation loads scheduled records before replay; this is appropriate for the present scope, not a claim of unlimited-scale streaming.
-- Complete subgroup review masks, reviewed no-group labels and independent headings/physical positions remain future reference work. Do not infer these from predictions.
-- B0 absolute-cosine tautology, DBSCAN chaining and heuristic heading/footpoint limitations remain baseline methodology. No H2/H3/H4, tracker retuning, model training, public benchmarking or final Setti F1 harness was implemented.
+No environment repair is needed for the executed case: paper-research's installed CUDA PyTorch/Transformers ran ViTPose+ successfully. No packages were changed and Vast.ai was not contacted. The failed early attempts remain distinguishable from the successful cache. Do not run the full 600-sample export without separate authorization.
 
-Stop here until the missing checkpoint and calibration evidence are supplied. Additional packages or external GPU resources require separate approval.
+Other preserved limits: cache export starts at source frame 0; other video timing/order assumptions require explicit validation. Existing legacy renderer/report scripts consume their original JSON format, not C2 replay JSONL. The B0 absolute-cosine predicate, DBSCAN chaining, heading heuristic and C1 association are unchanged.
