@@ -1,0 +1,15 @@
+# Direct imports of the active baseline; inventory, NOT a resolved/pinned lock.
+# Existing requirements.txt is retained byte-for-byte as the historical manifest.
+# Recover compatible package versions/checkpoints before runtime reproduction.
+numpy
+opencv-python
+torch
+ultralytics
+boxmot
+transformers
+inference
+tqdm
+pandas
+scipy
+openpyxl
+scikit-learn

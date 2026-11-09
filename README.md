@@ -1,93 +1,93 @@
-## Report for all in progress
-## Quick install:
-### 1. Create an enviroment.:
-```
-conda create -n tracking_env python=3.8
-conda activate tracking_env
-```
-Newer version:
-```
-conda create -n yolo_env python=3.10
-conda activate yolo_env
-```
-### 2. Install Dependencies
-```
-pip install -r requirements.txt
-```
-```
-pip install git+https://github.com/facebookresearch/detectron2.git@536dc9d527074e3b15df5f6677ffe1f4e104a4ab
-```
-Newer version:
-```
-pip install ultralytics boxmot transformers accelerate timm
-pip install opencv-python numpy scikit-learn
-```
-### 3. Download Model Weights
-* Download the folder resources and move it in folder `deep_sort` (you can ignore the detection folder and only download the networks folder):
-  👉 [Link to DeepSORT resources](https://drive.google.com/drive/folders/18fKzfqnqhqW3s9zwsCbnVJ5XF2JFeqMp)
+# Active monocular-video subgroup pipeline
 
-* Download the weights for newer YOLO, ReID, and MixSTE models. Extract the downloaded files and place them directly inside the root of this project:
-  👉 [Link to New Models](https://drive.google.com/drive/folders/1KUbfE7mWMYmqWQwFIHN_WlORQy9Dq_cg?usp=sharing)
+This repository keeps the current research pipeline at the repository root. The
+clean `master` preserves the original implementation; correctness repairs belong
+to `fix/c1-active-pipeline-only`. Cleanup alone does not validate social grouping,
+metric calibration or model accuracy.
 
-Your directory structure should look exactly like this:
-```text
-detection_and_tracking_group/
-├── yolo12x.pt
-├── osnet_ain_x1_0_msmt17.pt
-├── best_epoch_cpn_243f.bin
-├── ... (other downloaded weights)
-├── yolo_detection_vitpose_draw.py
-├── identify_group_social.py
-└── README.md
+## Pipeline and local interfaces
+
+| Stage | Source | Input / output |
+|---|---|---|
+| Person detection | `detect_yolo.py` | Video -> person xywh/confidence JSON; requests `yolo26x.pt` |
+| Tracking | `track.py` | Detection JSON + video -> ByteTrack ID/xywh JSON |
+| Optional offline stitching | `stitch_tracks.py` | Tracks + video -> remapped track JSON |
+| Pose and subgroup analysis | `analyze_subgroups.py` | Tracks + video + calibration -> sampled sociometrics JSON |
+| Active grouping | `identify_group_social.py` | Footpoints, headings, IDs -> groups and person records |
+| Heading heuristic | `orientation_utils.py` | COCO keypoints -> image-derived direction |
+| Calibration utility | `calibration_headless.py` | Reference image/correspondences/dimensions -> homography |
+| Visualization | `render_visuals.py` | Sociometrics JSON + original video -> overlay video |
+| Reporting | `generate_report.py` | Sociometrics -> descriptive tables |
+
+The analyzer directly imports the active grouping and orientation modules.
+Tracking is `track.py`; retired DeepSORT/DeepOCSORT/MixSTE experiments are not
+runtime dependencies. C1 additionally uses `group_identity.py`,
+`orientation_gate.py`, `grouping_contracts.py` and `report_metrics.py`.
+
+The staged JSON convention is zero-based `frame_00000`. Detection records contain
+`bbox=[x,y,w,h]` and `conf`; track records contain `id` and `bbox`. Analyzer records
+contain `id_p`, `id_g`, `bbox`, `gender`, `real_pos`, sampled every third source
+frame by the original configuration. Predicted groups are pre-annotations, not GT.
+
+## Dependencies, configuration and execution
+
+`requirements-active.in` inventories direct active runtime dependencies; it is
+**not a resolved environment lock**. The historical `requirements.txt` is retained
+unchanged for provenance and includes old dependencies unrelated to this active
+path. Compatible BoxMOT/Transformers/model versions still need recovery before
+claiming reproducibility. No dependencies, checkpoints or datasets are bundled or
+automatically installed by the structural/regression checks.
+
+Models requested by existing code include YOLO26x, HF
+`usyd-community/vitpose-base-simple`, and an auxiliary Roboflow attribute model.
+ByteTrack config is resolved from the installed BoxMOT package. Old local
+BoostTrack/DeepOCSORT YAMLs are not used by this active implementation and remain
+in the archive. This cleanup does not select a new detector/tracker combination.
+
+Run from the repository root. The staged scripts currently use hardcoded paths,
+not a shared CLI/config abstraction. Inspect constants before any inference:
+
+- Video: `videos/WIN_20260326_10_00_11_Pro.mp4` (must be supplied locally).
+- Stage files: `playground_results/detections.json`,
+  `tracks_bytetrack_only.json`, optional `tracks_stitched.json`,
+  `final_sociometrics_data.json`.
+- Analyzer calibration: `calibration_matrix_playground.json`.
+- Calibration utility reference: `Real_playground.png`; alternative reference
+  and five calibration JSONs are retained. Their physical scale is not certified.
+
+The normal processing order is detection -> tracking -> optional stitching ->
+analysis -> visualization/report. The analyzer currently prefers a stitched file
+if present. Most stage scripts execute work on import and can overwrite their
+configured output paths. Use explicitly isolated inputs/outputs for an authorized
+future inference run; do not import them as smoke tests. No inference is needed
+for the checks below.
+
+On clean master, reporting retains the original fixed-30-FPS behavior and other
+known B0 limitations. C1 provides an explicit timebase and versioned report schema;
+do not reinterpret old outputs under corrected semantics.
+
+## Lightweight verification
+
+```powershell
+python -B tests/check_active_layout.py
+# On the corrected C1 branch only:
+python -B tests/run_c1.py
 ```
-### 4. Run below cmd line to detection human and create folder frames:
-```
-python detection.py --input_video [Link to your video] --output_folder [Link to your output folder]
-```
-### 5. Run below cmd line to tracking people and identify groups:
-```
-python tracking_group.py --input_video [Link to your video] --frames_dir [Link to your output folder, same above output folder] --epsilon [DBSCAN epsilon sush as 50, 75, 100] --threshold_overlap [threshold overlap with old group (0.5 -> 1.0)]
-```
-### 6. You can see the results in folder output
 
-## Citation / References
-```bibtex
-@inproceedings{Wojke2017simple,
-  title={Simple Online and Realtime Tracking with a Deep Association Metric},
-  author={Wojke, Nicolai and Bewley, Alex and Paulus, Dietrich},
-  booktitle={2017 IEEE International Conference on Image Processing (ICIP)},
-  year={2017},
-  pages={3645--3649},
-  organization={IEEE},
-  doi={10.1109/ICIP.2017.8296962}
-}
+Layout checks compile source without executing imports/models. C1 tests distinguish
+native dependencies from explicitly substituted clustering and report skips.
+The C1 report CLI requires a new output path, source timing, stride and units; see
+`docs/C1_VALIDATION.md` on that branch.
 
-@inproceedings{Wojke2018deep,
-  title={Deep Cosine Metric Learning for Person Re-identification},
-  author={Wojke, Nicolai and Bewley, Alex},
-  booktitle={2018 IEEE Winter Conference on Applications of Computer Vision (WACV)},
-  year={2018},
-  pages={748--756},
-  organization={IEEE},
-  doi={10.1109/WACV.2018.00087}
-}
+## History and local data
 
-@misc{wu2019detectron2,
-  author =       {Yuxin Wu and Alexander Kirillov and Francisco Massa and
-                  Wan-Yen Lo and Ross Girshick},
-  title =        {Detectron2},
-  howpublished = {\url{https://github.com/facebookresearch/detectron2}},
-  year =         {2019}
-}
+Original master: `2db7aac2fca6f03e1a974b1c46a921ab54330160`, preserved on
+`archive/pre-cleanup-master`. Earlier C1 tips have separate archive refs. The user's
+`chore/repository-layout` branch remains independent; its directory migration and
+candidate integrations were not adopted as clean master.
 
-@article{article,
-author = {Khan, Muiz and Paul, Pias and Rashid, Mahmudur and Hossain, Mainul and Ahad, Md Atiqur Rahman},
-year = {2020},
-month = {10},
-pages = {507 - 517},
-title = {An AI-Based Visual Aid With Integrated Reading Assistant for the Completely Blind},
-volume = {50},
-journal = {IEEE Transactions on Human-Machine Systems},
-doi = {10.1109/THMS.2020.3027534}
-}
-
+Historical videos, pose caches, workbook and generated images were untracked,
+retained locally and ignored. Their original tracked content remains in archive
+history. User video/annotation directories and the untracked audit were preserved.
+Prior W1/C1 reports remain on their original/archive refs rather than copied into
+the production tree. See [repository cleanup and branch history](docs/REPOSITORY_CLEANUP.md).
