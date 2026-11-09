@@ -1,0 +1,692 @@
+{
+  "schema": "c2-validation.v1",
+  "implementation_commit": "45b1d2d7a5fe03b2766018ff72f1360c7ecaab66",
+  "branch": "codex/c2-observation-cache",
+  "starting_master": "6c641d74de5269c53ea80d0069567d05b546a398",
+  "environment": {
+    "conda_environment": "paper-research",
+    "sys_executable": "C:\\Users\\trant\\miniconda3\\envs\\paper-research\\python.exe",
+    "python": "3.13.0 | packaged by Anaconda, Inc. | (main, Oct  7 2024, 21:21:52) [MSC v.1929 64 bit (AMD64)]",
+    "packages": {
+      "torch": "2.15.0+cu134",
+      "torchvision": "0.29.2+cu134",
+      "numpy": "2.5.4",
+      "opencv-python": "4.11.0.86",
+      "scikit-learn": "1.9.1",
+      "transformers": "5.22.2",
+      "ultralytics": "8.4.208",
+      "boxmot": "26.0.0",
+      "inference": null,
+      "pandas": "2.3.3",
+      "openpyxl": null,
+      "pillow": "13.0.0",
+      "safetensors": "0.8.0",
+      "huggingface-hub": "2.4.0"
+    },
+    "native_imports_verified": {
+      "cv2": "4.11.0",
+      "numpy": "2.5.4",
+      "sklearn": "1.9.1",
+      "torch": "2.15.0+cu134",
+      "transformers": "5.22.2"
+    },
+    "cuda_available": true,
+    "torch_cuda": "13.4",
+    "vitpose_class_available": true,
+    "checkpoint_provenance": {
+      "requested_model": "usyd-community/vitpose-base-simple",
+      "local_checkpoint": null,
+      "inference_executed": false
+    },
+    "package_changes": "none",
+    "earlier_snapshot": {
+      "torch": "2.15.0",
+      "cuda_available": false,
+      "torch_cuda": null,
+      "note": "Earlier same-session inspection; packages were not changed by Codex."
+    },
+    "device": {
+      "name": "NVIDIA GeForce RTX 3060 Laptop GPU",
+      "total_memory_bytes": 6441926656,
+      "scalar_cuda_allocation_and_readback": true,
+      "model_inference_verified": false
+    }
+  },
+  "c2_tests": {
+    "provenance": {
+      "conda_environment": "paper-research",
+      "sys_executable": "C:\\Users\\trant\\miniconda3\\envs\\paper-research\\python.exe",
+      "python": "3.13.0 | packaged by Anaconda, Inc. | (main, Oct  7 2024, 21:21:52) [MSC v.1929 64 bit (AMD64)]",
+      "packages": {
+        "torch": "2.15.0+cu134",
+        "transformers": "5.22.2",
+        "numpy": "2.5.4",
+        "opencv-python": "4.11.0.86",
+        "scikit-learn": "1.9.1"
+      },
+      "git_commit": "ed28f32654d3fb4ddbf1f3846aa12e54f4c4859b",
+      "source_sha256": {
+        "analyze_subgroups.py": "7e25ce5f6e5754d9632c133fb050eec62d355fb9b3c6bc1bf72b7d135d0c7ac8",
+        "c2_pipeline.py": "80f3c148a2733ba841c25cf000f94b7447f968d34a431e1533062ac20316cb03",
+        "annotation_io.py": "c481a6789fba6e7a01e9fa1fc03932a8778168c045c40fd10764aebf0374461c",
+        "observation_cache.py": "93f1efb36a0ea2753134075501f0ff5193480bb26d6cc7e23562533c7c466f9f",
+        "orientation_utils.py": "5934d5d4813834ca15e5912ac45e907bb5cbcc1232681ba1dfab42ff2b6a098a",
+        "grouping_contracts.py": "0c4f1853d2e7fa82830b52b8d38209d837b86760457f3a3f23d9c820bd98d97c",
+        "identify_group_social.py": "42ddd33685efdd27c1785bf49f709636fddcff1f972a66903d3d4bcd6a9836f8",
+        "orientation_gate.py": "2d4cfa3addc60997daec3c602a8247635111db17a9938f51d122f02e058647f9",
+        "group_identity.py": "6e493a3a4151950672858ad1db8041417b73e34a357fc977675a99ef92d041c4"
+      }
+    },
+    "tests_run": 25,
+    "records": [
+      {
+        "test": "test_c2.AnnotationTests.test_bad_xml_rejected",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.AnnotationTests.test_decoder_rejects_wrong_pts",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.AnnotationTests.test_fractional_boxes_flags_not_modified",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.AnnotationTests.test_outside_interval_no_interpolation",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.AnnotationTests.test_partial_social_labels_preserved",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.AnnotationTests.test_real_xml_identity_and_coverage",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.GeometryTests.test_image_mode_requires_explicit_pixel_policy",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.GeometryTests.test_metric_missing_unverified_and_wrong_video_rejected",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.GeometryTests.test_native_chain_and_split_preserve_c1",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.GeometryTests.test_synthetic_metric_identity_and_projection",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.ReplayTests.test_cache_replay_matches_same_raw_live_boundary",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.ReplayTests.test_cli_replay_does_not_import_neural_modules",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.ReplayTests.test_empty_frame_clears_heading_and_preserves_maximum",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.ReplayTests.test_repeatability_exclusions_and_observation_immutability",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.ReplayTests.test_replay_matches_original_live_ema_and_grouping_with_controlled_poses",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.ReplayTests.test_replay_rejects_frame_reordering",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.SchemaTests.test_empty_frame_is_valid",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.SchemaTests.test_excluded_and_missing_persons_retained",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.SchemaTests.test_incomplete_missing_order_and_tamper_rejected",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.SchemaTests.test_invalid_manifest_and_joint_order",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.SchemaTests.test_mismatched_pose_person_count_rejected",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.SchemaTests.test_missing_checkpoint_fails_without_download",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.SchemaTests.test_raw_heatmap_score_not_clipped_or_treated_as_probability",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.SchemaTests.test_roundtrip_raw_scores_and_unreviewed",
+        "status": "PASS"
+      },
+      {
+        "test": "test_c2.SchemaTests.test_shape_nonfinite_duplicate_and_pts_errors",
+        "status": "PASS"
+      }
+    ],
+    "success": true,
+    "scope": "native CPU contracts and sklearn; explicitly synthetic poses; local XML where present"
+  },
+  "c1_tests": {
+    "tests_run": 57,
+    "full_evidence": ".local\\c1_validation\\run_20261109T184619_186651Z.json",
+    "records": [
+      {
+        "test_id": "c1_cases.Contracts.test_bad_bboxes_and_ids",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Contracts.test_bad_calibration_and_lengths",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Contracts.test_lists_and_numpy",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_E1_empty_previous",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_E2_empty_intervals",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_E3_all_noise",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_E4_disappearance",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_E5_new_run",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_E6_split_empty_new",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_S1_continuation",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_S2_split",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_S3_merge",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_S4_unrelated",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_S5_global_ties",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_S6_permutation",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_asymmetric_coverage_not_iou",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_ineligible_edges_and_max",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_invalid_partition",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupState.test_invalid_policy",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.GroupingProduction.test_S7_noise_retained_and_empty_lifecycle",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+      },
+      {
+        "test_id": "c1_cases.GroupingProduction.test_b0_valid_matrix_equivalence",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+      },
+      {
+        "test_id": "c1_cases.GroupingProduction.test_full_modes_invoke_predicates",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+      },
+      {
+        "test_id": "c1_cases.GroupingProduction.test_horizon_rejected",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+      },
+      {
+        "test_id": "c1_cases.GroupingProduction.test_invalid_inputs_never_become_edges",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+      },
+      {
+        "test_id": "c1_cases.GroupingProduction.test_split_real_entrypoints",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+      },
+      {
+        "test_id": "c1_cases.NativeGrouping.test_native_chain",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native sklearn + NumPy/OpenCV production module; no substitutes"
+      },
+      {
+        "test_id": "c1_cases.NativeGrouping.test_native_split_and_noise",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native sklearn + NumPy/OpenCV production module; no substitutes"
+      },
+      {
+        "test_id": "c1_cases.Orientation.test_analytical_boundaries",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Orientation.test_angular_sweep",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Orientation.test_controls_and_configured_modes",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Orientation.test_distance_boundaries",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Orientation.test_invalid_directions",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Orientation.test_keypoints_validation",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Orientation.test_missing_and_zero",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Orientation.test_original_thresholds_strict",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Orientation.test_postprocess_zero_and_nonmutation",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Orientation.test_random_sweep",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Preservation.test_active_helper_imports_and_calls",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Preservation.test_b0_hashes",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Preservation.test_no_legacy_changes_in_active_patch",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_area_known_and_degenerate",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_empty_report",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_explicit_empty_frame_breaks_session",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_explicit_timebase_required",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_interval_half_open_and_clipping",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_json_cli_and_nonoverwrite",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_missing_frames_no_duration_bridge",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_missing_timestamp_no_fallback",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_moving_group_not_pooled_area",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_native_excel_export",
+        "status": "SKIP",
+        "detail": "native pandas/openpyxl unavailable; no substitute writer",
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_nonuniform_area_time_weighting",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_single_sample_zero_duration",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_source_fps_variants",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_split_merge_not_formation_events",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_time_gap_breaks_nominal_adjacency",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_timestamps_priority_nonuniform",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      },
+      {
+        "test_id": "c1_cases.Reports.test_unknowns_and_missing_geometry_retained",
+        "status": "PASS",
+        "detail": null,
+        "dependency_mode": "native production helpers; no substitute"
+      }
+    ]
+  },
+  "layout_tests": {
+    "tests_run": 3,
+    "passed": 3,
+    "command": "C:\\Users\\trant\\miniconda3\\envs\\paper-research\\python.exe -B tests/check_active_layout.py"
+  },
+  "alignment": {
+    "video_sha256": "fa1044aa1f3c9d413bdd608d39f8545c593b34457f5ecb6dc80a28beb62cb119",
+    "width": 1920,
+    "height": 1080,
+    "time_base": "1/30000",
+    "frame_count": 2956,
+    "stream": {
+      "width": 1920,
+      "height": 1080,
+      "has_b_frames": 0,
+      "r_frame_rate": "60/1",
+      "avg_frame_rate": "7390000/265363",
+      "time_base": "1/30000",
+      "duration": "106.145200",
+      "nb_frames": "2956",
+      "disposition": {
+        "default": 1,
+        "dub": 0,
+        "original": 0,
+        "comment": 0,
+        "lyrics": 0,
+        "karaoke": 0,
+        "forced": 0,
+        "hearing_impaired": 0,
+        "visual_impaired": 0,
+        "clean_effects": 0,
+        "attached_pic": 0,
+        "timed_thumbnails": 0,
+        "non_diegetic": 0,
+        "captions": 0,
+        "descriptions": 0,
+        "metadata": 0,
+        "dependent": 0,
+        "still_image": 0,
+        "multilayer": 0
+      },
+      "tags": {
+        "creation_time": "2026-03-03T09:09:56.000000Z",
+        "language": "und",
+        "handler_name": "VideoHandler",
+        "encoder": "AVC Coding"
+      }
+    },
+    "mapping_basis": "ordered_packets_no_b_frames; decoder verification required",
+    "decoder_verification": {
+      "verified_start": 0,
+      "verified_end_exclusive": 1800,
+      "decoded_frames": 1800,
+      "maximum_pts_error_seconds": 1.4210854715202004e-14,
+      "samples": [
+        {
+          "source_frame": 0,
+          "pts_seconds": 0.0,
+          "image": "frame_00000.jpg"
+        },
+        {
+          "source_frame": 1,
+          "pts_seconds": 0.0321,
+          "image": "frame_00001.jpg"
+        },
+        {
+          "source_frame": 3,
+          "pts_seconds": 0.11206666666666666,
+          "image": "frame_00003.jpg"
+        },
+        {
+          "source_frame": 30,
+          "pts_seconds": 1.1040333333333334,
+          "image": "frame_00030.jpg"
+        },
+        {
+          "source_frame": 300,
+          "pts_seconds": 10.800033333333333,
+          "image": "frame_00300.jpg"
+        },
+        {
+          "source_frame": 319,
+          "pts_seconds": 11.440033333333334,
+          "image": "frame_00319.jpg"
+        },
+        {
+          "source_frame": 334,
+          "pts_seconds": 12.096,
+          "image": "frame_00334.jpg"
+        },
+        {
+          "source_frame": 899,
+          "pts_seconds": 32.432,
+          "image": "frame_00899.jpg"
+        },
+        {
+          "source_frame": 900,
+          "pts_seconds": 32.46406666666667,
+          "image": "frame_00900.jpg"
+        },
+        {
+          "source_frame": 1799,
+          "pts_seconds": 65.18396666666666,
+          "image": "frame_01799.jpg"
+        }
+      ],
+      "visual_alignment": "requires review of sample images"
+    },
+    "annotation_metadata": {
+      "schema": "cvat-1.1",
+      "job_id": "4549037",
+      "start_frame": 0,
+      "stop_frame": 2955,
+      "width": 1920,
+      "height": 1080,
+      "source_sha256": "67addc127c07d98c17d0c160dc03d5f4025e5926dfb4d2d786aa901af37f7f08"
+    },
+    "visual_review": {
+      "status": "sampled-alignment-supported",
+      "reviewer": "Codex visual inspection",
+      "reviewed_source_frames": [
+        0,
+        334,
+        1799
+      ],
+      "finding": "Visible person boxes broadly match the original-resolution scene at early, intermediate and late samples; no obvious global frame offset or resize mismatch. This does not validate every box, identity or subgroup label."
+    }
+  },
+  "alignment_evidence": ".local\\c2\\alignment_20261109\\alignment.reviewed.json",
+  "alignment_evidence_sha256": "3222aac855dc2aec568f9f6b88313a0faa83d584b9164ca2c4f19bbc9b3fc854",
+  "full_c2_test_evidence": ".local\\c2\\tests_20261109T185226_604163Z.json",
+  "preserved_preexisting_worktree": {
+    "paths_sha256_or_absent": {
+      "Real_playground.png": "6d923bf2661599c6850c83dae97c666e6a3f54cc6bbc87952583f06b2c8b23d4",
+      "Real_playground_2.png": null,
+      "calibration_headless.py": "db69e7deda0da47849ecf4b95f5a0d86aa2a4f32d1738c7d606bf172e67352a2",
+      "calibration_matrix.json": null,
+      "calibration_matrix_PETS09.json": null,
+      "calibration_matrix_based_on_roof.json": null,
+      "calibration_matrix_playground.json": "cc9c644dffa43cffc647f4e02dec34e46a24003bcf7e9c2164d0def983463d90",
+      "calibration_matrix_playground_2.json": null
+    },
+    "all_preserved": true,
+    "included_in_C2_commits": false
+  },
+  "source_video_and_xml_unchanged": true,
+  "real_pose_inference": "NOT EXECUTED: local identified checkpoint missing",
+  "metric_field_calibration": "NOT VERIFIED: physical/camera correspondence evidence pending",
+  "package_operations_performed": [],
+  "future_work_not_started": [
+    "C3",
+    "H2",
+    "H3",
+    "H4",
+    "public benchmarks",
+    "Vast.ai provisioning"
+  ],
+  "tested_source_hashes_match_final_implementation": true
+}
