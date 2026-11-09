@@ -1,0 +1,1817 @@
+{
+  "command": "\"C:\\Users\\trant\\miniconda3\\python.exe\" -B tests/run_c1.py",
+  "python": "3.13.5 | packaged by Anaconda, Inc. | (main, Jun 12 2025, 16:37:03) [MSC v.1929 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "packages": {
+    "numpy": "2.5.4",
+    "opencv-python": "5.0.0.93",
+    "scikit-learn": "not installed (distribution metadata)",
+    "pandas": "not installed (distribution metadata)",
+    "openpyxl": "not installed (distribution metadata)"
+  },
+  "tests_run": 57,
+  "records": [
+    {
+      "test_id": "c1_cases.Contracts.test_bad_bboxes_and_ids",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "([[0, 0, 1]], [1])",
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "native production helpers; no substitute",
+          "message": "bboxes must be a finite (N, 4) xywh collection"
+        },
+        {
+          "input": "([[0, 0, 0, 1]], [1])",
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "native production helpers; no substitute",
+          "message": "bbox width and height must be positive"
+        },
+        {
+          "input": "([[0, nan, 1, 1]], [1])",
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "native production helpers; no substitute",
+          "message": "bboxes must be a finite (N, 4) xywh collection"
+        },
+        {
+          "input": "([[0, 0, 1, 1]], [])",
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "native production helpers; no substitute",
+          "message": "bboxes and track_ids must have equal lengths"
+        },
+        {
+          "input": "([[0, 0, 1, 1], [1, 1, 1, 1]], [1, 1])",
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "native production helpers; no substitute",
+          "message": "track_ids must be unique within a frame"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Contracts.test_bad_calibration_and_lengths",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "{'pose_vectors': []}",
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "native production helpers; no substitute",
+          "message": "pose_vectors and bboxes must have equal lengths"
+        },
+        {
+          "input": "{'pose_vectors': 42}",
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "native production helpers; no substitute",
+          "message": "pose_vectors must be a direction collection or None"
+        },
+        {
+          "input": "{'homography_matrix': array([[0., 0., 0.],\n       [0., 0., 0.],\n       [0., 0., 0.]])}",
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "native production helpers; no substitute",
+          "message": "homography_matrix must be finite, nonsingular and (3, 3)"
+        },
+        {
+          "input": "{'homography_matrix': array([[1., 0.],\n       [0., 1.]])}",
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "native production helpers; no substitute",
+          "message": "homography_matrix must be finite, nonsingular and (3, 3)"
+        },
+        {
+          "input": "{'scale_factor': 0}",
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "native production helpers; no substitute",
+          "message": "scale_factor must be finite and positive"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Contracts.test_lists_and_numpy",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "list vs ndarray bbox/ID",
+          "expected": [
+            [
+              [
+                0.0,
+                0.0,
+                10.0,
+                20.0
+              ]
+            ],
+            [
+              1
+            ]
+          ],
+          "actual": [
+            [
+              [
+                0.0,
+                0.0,
+                10.0,
+                20.0
+              ]
+            ],
+            [
+              1
+            ]
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": "empty ndarray inputs",
+          "expected": [
+            [],
+            [],
+            null
+          ],
+          "actual": [
+            [],
+            [],
+            null
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.GroupState.test_E1_empty_previous",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "empty state max7 + new pair",
+          "expected": [
+            {
+              "42": 8
+            },
+            {
+              "8": [
+                1,
+                2
+              ]
+            },
+            8
+          ],
+          "actual": [
+            {
+              "42": 8
+            },
+            {
+              "8": [
+                1,
+                2
+              ]
+            },
+            8
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.GroupState.test_E2_empty_intervals",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "four empty frames then unrelated pair",
+          "expected": [
+            {
+              "0": 8
+            },
+            {
+              "8": [
+                9,
+                10
+              ]
+            },
+            8
+          ],
+          "actual": [
+            {
+              "0": 8
+            },
+            {
+              "8": [
+                9,
+                10
+              ]
+            },
+            8
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.GroupState.test_E3_all_noise",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "no raw non-noise groups, max7",
+          "expected": [
+            {},
+            {},
+            7
+          ],
+          "actual": [
+            {},
+            {},
+            7
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.GroupState.test_E4_disappearance",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "raw0 unrelated to prior7",
+          "expected": 8,
+          "actual": 8,
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.GroupState.test_E5_new_run",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "explicit new namespace {}, max=-1",
+          "expected": [
+            {
+              "9": 0
+            },
+            {
+              "0": [
+                5,
+                6
+              ]
+            },
+            0
+          ],
+          "actual": [
+            {
+              "9": 0
+            },
+            {
+              "0": [
+                5,
+                6
+              ]
+            },
+            0
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.GroupState.test_E6_split_empty_new",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "split then gap then two new pairs",
+          "expected": [
+            9,
+            10
+          ],
+          "actual": [
+            9,
+            10
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.GroupState.test_S1_continuation",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "old 7:[1,2,3], raw99:[1,2,3]",
+          "expected": [
+            {
+              "99": 7
+            },
+            {
+              "7": [
+                1,
+                2,
+                3
+              ]
+            },
+            7
+          ],
+          "actual": [
+            {
+              "99": 7
+            },
+            {
+              "7": [
+                1,
+                2,
+                3
+              ]
+            },
+            7
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.GroupState.test_S2_split",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "split old7 into [1,2] / [3,4]",
+          "expected": [
+            {
+              "2": 7,
+              "9": 8
+            },
+            {
+              "7": [
+                1,
+                2
+              ],
+              "8": [
+                3,
+                4
+              ]
+            },
+            8
+          ],
+          "actual": [
+            {
+              "2": 7,
+              "9": 8
+            },
+            {
+              "7": [
+                1,
+                2
+              ],
+              "8": [
+                3,
+                4
+              ]
+            },
+            8
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.GroupState.test_S3_merge",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "merge old7:[1,2],8:[3,4]",
+          "expected": [
+            {
+              "5": 7
+            },
+            {
+              "7": [
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            8
+          ],
+          "actual": [
+            {
+              "5": 7
+            },
+            {
+              "7": [
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            8
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.GroupState.test_S4_unrelated",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "max8 old[1,2] new[10,11]/[12,13]",
+          "expected": [
+            {
+              "0": 9,
+              "1": 10
+            },
+            {
+              "9": [
+                10,
+                11
+              ],
+              "10": [
+                12,
+                13
+              ]
+            },
+            10
+          ],
+          "actual": [
+            {
+              "0": 9,
+              "1": 10
+            },
+            {
+              "9": [
+                10,
+                11
+              ],
+              "10": [
+                12,
+                13
+              ]
+            },
+            10
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.GroupState.test_S5_global_ties",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "equal intersections/coverages",
+          "expected": [
+            {
+              "4": 7,
+              "5": 8
+            },
+            {
+              "7": [
+                1,
+                3
+              ],
+              "8": [
+                2,
+                4
+              ]
+            },
+            8
+          ],
+          "actual": [
+            {
+              "4": 7,
+              "5": 8
+            },
+            {
+              "7": [
+                1,
+                3
+              ],
+              "8": [
+                2,
+                4
+              ]
+            },
+            8
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.GroupState.test_S6_permutation",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "raw labels/order/member order permuted",
+          "expected": [
+            {
+              "7": [
+                1,
+                2
+              ],
+              "8": [
+                3,
+                4
+              ]
+            },
+            8
+          ],
+          "actual": [
+            {
+              "7": [
+                1,
+                2
+              ],
+              "8": [
+                3,
+                4
+              ]
+            },
+            8
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.GroupState.test_asymmetric_coverage_not_iou",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "old dyad subset of large new group",
+          "expected": 7,
+          "actual": 7,
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.GroupState.test_ineligible_edges_and_max",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "insufficient old coverage and max above active ids",
+          "expected": 101,
+          "actual": 101,
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.GroupState.test_invalid_partition",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "person in two current clusters",
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "native production helpers; no substitute",
+          "message": "current must be disjoint groups with unique members"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.GroupState.test_invalid_policy",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "unsupported IoU policy",
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "native production helpers; no substitute",
+          "message": "only explicit matching_policy='old_coverage' is supported"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.GroupingProduction.test_S7_noise_retained_and_empty_lifecycle",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "identify_group_social singleton",
+          "expected": [
+            1,
+            -1,
+            {},
+            7
+          ],
+          "actual": [
+            1,
+            -1,
+            {},
+            7
+          ],
+          "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+        },
+        {
+          "input": "identify_group_social empty",
+          "expected": [
+            [],
+            {},
+            7
+          ],
+          "actual": [
+            [],
+            {},
+            7
+          ],
+          "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+        }
+      ],
+      "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+    },
+    {
+      "test_id": "c1_cases.GroupingProduction.test_b0_valid_matrix_equivalence",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "identify_group_social valid B0 matrix",
+          "expected": [
+            [
+              0.0,
+              1.0,
+              1000.0,
+              1000.0
+            ],
+            [
+              1.0,
+              0.0,
+              0.9999999999999998,
+              1000.0
+            ],
+            [
+              1000.0,
+              0.9999999999999998,
+              0.0,
+              1000.0
+            ],
+            [
+              1000.0,
+              1000.0,
+              1000.0,
+              0.0
+            ]
+          ],
+          "actual": [
+            [
+              0.0,
+              1.0,
+              1000.0,
+              1000.0
+            ],
+            [
+              1.0,
+              0.0,
+              0.9999999999999998,
+              1000.0
+            ],
+            [
+              1000.0,
+              0.9999999999999998,
+              0.0,
+              1000.0
+            ],
+            [
+              1000.0,
+              1000.0,
+              1000.0,
+              0.0
+            ]
+          ],
+          "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+        }
+      ],
+      "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+    },
+    {
+      "test_id": "c1_cases.GroupingProduction.test_full_modes_invoke_predicates",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "B0-original dispatch",
+          "expected": "B0-original",
+          "actual": "B0-original",
+          "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+        },
+        {
+          "input": "B0-original partition",
+          "expected": true,
+          "actual": true,
+          "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+        },
+        {
+          "input": "proximity-only dispatch",
+          "expected": "proximity-only",
+          "actual": "proximity-only",
+          "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+        },
+        {
+          "input": "proximity-only partition",
+          "expected": true,
+          "actual": true,
+          "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+        },
+        {
+          "input": "signed-dyad-diagnostic dispatch",
+          "expected": "signed-dyad-diagnostic",
+          "actual": "signed-dyad-diagnostic",
+          "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+        },
+        {
+          "input": "signed-dyad-diagnostic partition",
+          "expected": false,
+          "actual": false,
+          "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+        }
+      ],
+      "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+    },
+    {
+      "test_id": "c1_cases.GroupingProduction.test_horizon_rejected",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "bbox footpoint on projective horizon",
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN",
+          "message": "points have a nonfinite projection or zero homogeneous denominator"
+        }
+      ],
+      "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+    },
+    {
+      "test_id": "c1_cases.GroupingProduction.test_invalid_inputs_never_become_edges",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "{'pose_vectors': [[nan, 0], [1, 0]]}",
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN",
+          "message": "heading must be None or a finite planar vector of shape (2,)"
+        },
+        {
+          "input": "{'pose_vectors': [[1], [0, 1]]}",
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN",
+          "message": "heading must be None or a finite planar vector of shape (2,)"
+        },
+        {
+          "input": "{'pose_vectors': []}",
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN",
+          "message": "pose_vectors and bboxes must have equal lengths"
+        },
+        {
+          "input": "{'eps': 1000}",
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN",
+          "message": "social eps must be below the B0 rejected-distance sentinel 1000"
+        }
+      ],
+      "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+    },
+    {
+      "test_id": "c1_cases.GroupingProduction.test_split_real_entrypoints",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "identify_group_social split",
+          "expected": [
+            7,
+            7,
+            8,
+            8
+          ],
+          "actual": [
+            7,
+            7,
+            8,
+            8
+          ],
+          "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+        }
+      ],
+      "dependency_mode": "production module + native NumPy/OpenCV; explicitly substituted GraphDouble DBSCAN"
+    },
+    {
+      "test_id": "c1_cases.NativeGrouping.test_native_chain",
+      "status": "SKIP",
+      "detail": "native sklearn unavailable; graph substitute is not native evidence",
+      "observations": [],
+      "dependency_mode": "native sklearn + NumPy/OpenCV production module; no substitutes"
+    },
+    {
+      "test_id": "c1_cases.NativeGrouping.test_native_split_and_noise",
+      "status": "SKIP",
+      "detail": "native sklearn unavailable; graph substitute is not native evidence",
+      "observations": [],
+      "dependency_mode": "native sklearn + NumPy/OpenCV production module; no substitutes"
+    },
+    {
+      "test_id": "c1_cases.Orientation.test_analytical_boundaries",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "both directional abs near .3; mutual >=.82",
+          "expected": true,
+          "actual": true,
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Orientation.test_angular_sweep",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "12,960,000 unit planar angular pairs; .1deg step",
+          "expected": 0,
+          "actual": 0,
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Orientation.test_controls_and_configured_modes",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "face_to_face",
+          "expected": [
+            true,
+            true,
+            true
+          ],
+          "actual": [
+            true,
+            true,
+            true
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": "back_to_back",
+          "expected": [
+            true,
+            true,
+            false
+          ],
+          "actual": [
+            true,
+            true,
+            false
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": "same_facing_away",
+          "expected": [
+            true,
+            true,
+            false
+          ],
+          "actual": [
+            true,
+            true,
+            false
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": "parallel",
+          "expected": [
+            true,
+            true,
+            false
+          ],
+          "actual": [
+            true,
+            true,
+            false
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": "side_by_side",
+          "expected": [
+            true,
+            true,
+            false
+          ],
+          "actual": [
+            true,
+            true,
+            false
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": "perpendicular",
+          "expected": [
+            true,
+            true,
+            false
+          ],
+          "actual": [
+            true,
+            true,
+            false
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Orientation.test_distance_boundaries",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": {
+            "back_to_back_distance": 0.49
+          },
+          "expected": true,
+          "actual": true,
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": {
+            "back_to_back_distance": 0.5
+          },
+          "expected": false,
+          "actual": false,
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": {
+            "back_to_back_distance": 1.75
+          },
+          "expected": false,
+          "actual": false,
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": {
+            "back_to_back_distance": 1.750001
+          },
+          "expected": false,
+          "actual": false,
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": "face-to-face exactly eps",
+          "expected": true,
+          "actual": true,
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Orientation.test_invalid_directions",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": {
+            "invalid": "[nan, 0]",
+            "close_bypass_must_not_hide_invalid": true
+          },
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "native production helpers; no substitute",
+          "message": "heading must be None or a finite planar vector of shape (2,)"
+        },
+        {
+          "input": {
+            "invalid": "[inf, 0]",
+            "close_bypass_must_not_hide_invalid": true
+          },
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "native production helpers; no substitute",
+          "message": "heading must be None or a finite planar vector of shape (2,)"
+        },
+        {
+          "input": {
+            "invalid": "[1]",
+            "close_bypass_must_not_hide_invalid": true
+          },
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "native production helpers; no substitute",
+          "message": "heading must be None or a finite planar vector of shape (2,)"
+        },
+        {
+          "input": {
+            "invalid": "[1, 2, 3]",
+            "close_bypass_must_not_hide_invalid": true
+          },
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "native production helpers; no substitute",
+          "message": "heading must be None or a finite planar vector of shape (2,)"
+        },
+        {
+          "input": {
+            "invalid": "[[1, 0]]",
+            "close_bypass_must_not_hide_invalid": true
+          },
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "native production helpers; no substitute",
+          "message": "heading must be None or a finite planar vector of shape (2,)"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Orientation.test_keypoints_validation",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "missing and empty keypoints",
+          "expected": [
+            null,
+            null
+          ],
+          "actual": [
+            null,
+            null
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": {
+            "keypoints_shape": [
+              2,
+              3
+            ]
+          },
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "native production helpers; no substitute",
+          "message": "keypoints must have shape (K>=7, 3): x, y, confidence"
+        },
+        {
+          "input": {
+            "keypoints_shape": [
+              17,
+              2
+            ]
+          },
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "native production helpers; no substitute",
+          "message": "keypoints must have shape (K>=7, 3): x, y, confidence"
+        },
+        {
+          "input": {
+            "keypoints_shape": [
+              17,
+              3
+            ]
+          },
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "native production helpers; no substitute",
+          "message": "keypoints must be finite; use None for an unavailable pose"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Orientation.test_missing_and_zero",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": {
+            "heading": null
+          },
+          "expected": [
+            true,
+            false
+          ],
+          "actual": [
+            true,
+            false
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": {
+            "heading": [
+              0,
+              0
+            ]
+          },
+          "expected": [
+            true,
+            false
+          ],
+          "actual": [
+            true,
+            false
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Orientation.test_original_thresholds_strict",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "exact cosine thresholds (not unit-planar-consistent triple)",
+          "expected": false,
+          "actual": false,
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Orientation.test_postprocess_zero_and_nonmutation",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "postprocess does not mutate source",
+          "expected": [
+            1.0,
+            1.0
+          ],
+          "actual": [
+            1.0,
+            1.0
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": "zero postprocess",
+          "expected": null,
+          "actual": null,
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": "nonfinite postprocess vector",
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "native production helpers; no substitute",
+          "message": "orientation vector must be finite and have shape (2,)"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Orientation.test_random_sweep",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "1,000,000 pairs seed20261109",
+          "expected": 0,
+          "actual": 0,
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Preservation.test_active_helper_imports_and_calls",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": {
+            "active_source": "identify_group_social.py",
+            "helper": "group_identity",
+            "function": "associate_groups"
+          },
+          "expected": [
+            true,
+            true
+          ],
+          "actual": [
+            true,
+            true
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": {
+            "active_source": "identify_group_social.py",
+            "helper": "orientation_gate",
+            "function": "pair_compatibility"
+          },
+          "expected": [
+            true,
+            true
+          ],
+          "actual": [
+            true,
+            true
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": {
+            "active_source": "identify_group_social.py",
+            "helper": "grouping_contracts",
+            "function": "validate_grouping_inputs"
+          },
+          "expected": [
+            true,
+            true
+          ],
+          "actual": [
+            true,
+            true
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": {
+            "active_source": "generate_report.py",
+            "helper": "report_metrics",
+            "function": "build_report"
+          },
+          "expected": [
+            true,
+            true
+          ],
+          "actual": [
+            true,
+            true
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Preservation.test_b0_hashes",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "all nine active B0 Git blob SHA256 hashes",
+          "expected": {
+            "detect_yolo.py": "01dd05877f4b92135bac21f6e9d07ba0da79b2cedefd94df80f8b0df13ec436e",
+            "track.py": "35985ac76b5611bc0b014484638f81902abba024563f3318899aca505490a600",
+            "stitch_tracks.py": "3ecf64fea106130a2d6eb7f6f97ef8bf889afce6eaeae52d35bbbac3ec29061d",
+            "analyze_subgroups.py": "549b4419d71e0453f122784e31e70b096c69025e71604fdd62415b3edbc40b1a",
+            "identify_group_social.py": "44ebe2f2d0fde8a50f40c049031ac37efe764104e7cca45fe720f0d2e2faf035",
+            "orientation_utils.py": "2605e02e5cedfdd2b323d606a9eb7aea454f1a920c836f4d955f14f4b3b11c0f",
+            "calibration_headless.py": "a7c1c2aabc8c2a6ae79f54a9b24652d63bdb56e1a6d4a6e7d7cdaf6f4d9410f0",
+            "render_visuals.py": "758d17657564ccb856ae58d92a0970f74ef3f1d60de48e4c8481733d953d70ae",
+            "generate_report.py": "75afa61d44802a0e4e0ea16f449ac00b8a25a765dd294a97ceaff3051b1f389f"
+          },
+          "actual": {
+            "detect_yolo.py": "01dd05877f4b92135bac21f6e9d07ba0da79b2cedefd94df80f8b0df13ec436e",
+            "track.py": "35985ac76b5611bc0b014484638f81902abba024563f3318899aca505490a600",
+            "stitch_tracks.py": "3ecf64fea106130a2d6eb7f6f97ef8bf889afce6eaeae52d35bbbac3ec29061d",
+            "analyze_subgroups.py": "549b4419d71e0453f122784e31e70b096c69025e71604fdd62415b3edbc40b1a",
+            "identify_group_social.py": "44ebe2f2d0fde8a50f40c049031ac37efe764104e7cca45fe720f0d2e2faf035",
+            "orientation_utils.py": "2605e02e5cedfdd2b323d606a9eb7aea454f1a920c836f4d955f14f4b3b11c0f",
+            "calibration_headless.py": "a7c1c2aabc8c2a6ae79f54a9b24652d63bdb56e1a6d4a6e7d7cdaf6f4d9410f0",
+            "render_visuals.py": "758d17657564ccb856ae58d92a0970f74ef3f1d60de48e4c8481733d953d70ae",
+            "generate_report.py": "75afa61d44802a0e4e0ea16f449ac00b8a25a765dd294a97ceaff3051b1f389f"
+          },
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Preservation.test_no_legacy_changes_in_active_patch",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "excluded source files relative to clean master",
+          "expected": [],
+          "actual": [],
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": "retired source absent from working tree",
+          "expected": [],
+          "actual": [],
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Reports.test_area_known_and_degenerate",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": {
+            "positions": [
+              [
+                0,
+                0
+              ],
+              [
+                1,
+                0
+              ]
+            ]
+          },
+          "expected": null,
+          "actual": null,
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": {
+            "positions": [
+              [
+                0,
+                0
+              ],
+              [
+                2,
+                0
+              ],
+              [
+                0,
+                2
+              ]
+            ]
+          },
+          "expected": 2.0,
+          "actual": 2.0,
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": {
+            "positions": [
+              [
+                0,
+                0
+              ],
+              [
+                1,
+                0
+              ],
+              [
+                2,
+                0
+              ]
+            ]
+          },
+          "expected": 0.0,
+          "actual": 0.0,
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Reports.test_empty_report",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "empty JSON",
+          "expected": {
+            "person_observations": [],
+            "frame_metrics": [],
+            "group_observations": [],
+            "group_sessions": [],
+            "interval_metrics": [],
+            "interval_group_metrics": []
+          },
+          "actual": {
+            "person_observations": [],
+            "frame_metrics": [],
+            "group_observations": [],
+            "group_sessions": [],
+            "interval_metrics": [],
+            "interval_group_metrics": []
+          },
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Reports.test_explicit_empty_frame_breaks_session",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "empty source frame between same numeric ID",
+          "expected": [
+            0.0,
+            0.0
+          ],
+          "actual": [
+            0.0,
+            0.0
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Reports.test_explicit_timebase_required",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "no default fps",
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "native production helpers; no substitute",
+          "message": "provide verified timestamps or explicit positive source fps"
+        },
+        {
+          "input": "nonincreasing timestamps",
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "native production helpers; no substitute",
+          "message": "source timestamps must be finite and strictly increasing"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Reports.test_interval_half_open_and_clipping",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "support .9->1.1 clipped at1sec",
+          "expected": [
+            0.1,
+            0.1
+          ],
+          "actual": [
+            0.1,
+            0.1
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": "t=1 belongs [1,2)",
+          "expected": 1,
+          "actual": 1,
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Reports.test_json_cli_and_nonoverwrite",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "synthetic empty CLI report",
+          "expected": "C1-report-v1",
+          "actual": "C1-report-v1",
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": "existing report path",
+          "expected": "FileExistsError",
+          "actual": "FileExistsError",
+          "dependency_mode": "native production helpers; no substitute",
+          "message": "refusing to overwrite C:\\Users\\trant\\detection_and_tracking_group\\.local\\c1_validation\\c1-test-fp94umox\\report.json"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Reports.test_missing_frames_no_duration_bridge",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "missing expected source frames6,9",
+          "expected": [
+            0.1,
+            0.0
+          ],
+          "actual": [
+            0.1,
+            0.0
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Reports.test_missing_timestamp_no_fallback",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "timestamp absent even though fps supplied",
+          "expected": "ValueError",
+          "actual": "ValueError",
+          "dependency_mode": "native production helpers; no substitute",
+          "message": "missing timestamp for source frame 3; no FPS fallback"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Reports.test_moving_group_not_pooled_area",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "triangle translates100 units",
+          "expected": [
+            2.0,
+            2.0
+          ],
+          "actual": [
+            2.0,
+            2.0
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": "time average / max / person time",
+          "expected": [
+            2.0,
+            2.0,
+            0.1
+          ],
+          "actual": [
+            2.0,
+            2.0,
+            0.1
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Reports.test_native_excel_export",
+      "status": "SKIP",
+      "detail": "native pandas/openpyxl unavailable; no substitute writer",
+      "observations": [],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Reports.test_nonuniform_area_time_weighting",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "area1*.1+area3*.3 over .4",
+          "expected": 2.5,
+          "actual": 2.5,
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Reports.test_single_sample_zero_duration",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "single frame does not imply .1 sec",
+          "expected": 0.0,
+          "actual": 0.0,
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Reports.test_source_fps_variants",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": {
+            "fps": 30,
+            "source_frames": [
+              0,
+              3
+            ],
+            "stride": 3
+          },
+          "expected": 0.1,
+          "actual": 0.1,
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": {
+            "fps": 27.848645,
+            "source_frames": [
+              0,
+              3
+            ],
+            "stride": 3
+          },
+          "expected": 0.10772516939334031,
+          "actual": 0.10772516939334031,
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": {
+            "fps": 7,
+            "source_frames": [
+              0,
+              3
+            ],
+            "stride": 3
+          },
+          "expected": 0.42857142857142855,
+          "actual": 0.42857142857142855,
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Reports.test_split_merge_not_formation_events",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "split/merge snapshots; no event annotations",
+          "expected": [
+            2,
+            4,
+            null
+          ],
+          "actual": [
+            2,
+            4,
+            null
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        },
+        {
+          "input": "no support across membership changes",
+          "expected": 0.0,
+          "actual": 0.0,
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Reports.test_time_gap_breaks_nominal_adjacency",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "adjacent source IDs but 5sec missing time",
+          "expected": 2,
+          "actual": 2,
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Reports.test_timestamps_priority_nonuniform",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "timestamps override nominal fps",
+          "expected": 0.425,
+          "actual": 0.425,
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    },
+    {
+      "test_id": "c1_cases.Reports.test_unknowns_and_missing_geometry_retained",
+      "status": "PASS",
+      "detail": null,
+      "observations": [
+        {
+          "input": "Unknown attribute does not remove members",
+          "expected": [
+            5,
+            3,
+            2,
+            null,
+            1,
+            1
+          ],
+          "actual": [
+            5,
+            3,
+            2,
+            null,
+            1,
+            1
+          ],
+          "dependency_mode": "native production helpers; no substitute"
+        }
+      ],
+      "dependency_mode": "native production helpers; no substitute"
+    }
+  ],
+  "substitute_policy": "GraphDouble rows explicitly marked; native sklearn tests skip if absent",
+  "scope": "authoritative active pipeline only; no legacy/MixSTE tests",
+  "cleanup_commit": "3b3f75ae5b7b0b69e81c1d9a49f1eb7febf5711a",
+  "baseline_commit": "2db7aac2fca6f03e1a974b1c46a921ab54330160",
+  "source_sha256": {
+    "identify_group_social.py": "1e56e000800cc3d415b587a73b9178074280e4db56f13e632c429fb212451e07",
+    "orientation_utils.py": "5934d5d4813834ca15e5912ac45e907bb5cbcc1232681ba1dfab42ff2b6a098a",
+    "generate_report.py": "02b50de27212771105a4695e24aaced6891e4f4221ad78d715420ea5619d403c",
+    "group_identity.py": "6e493a3a4151950672858ad1db8041417b73e34a357fc977675a99ef92d041c4",
+    "orientation_gate.py": "fbbbdf68d62495f3647427b7e7889edd6ff3feec2982e0a424b97fece351dd31",
+    "grouping_contracts.py": "acbc3beb7494197f6a4c1ff8f3c374c2cc82d45b97fa96b4bf698ec1cdaed363",
+    "report_metrics.py": "1ce9fc15e8c297c312842b331062ce9088c3e862f17ad2c0d9305aa7168a3cf3"
+  },
+  "selected_source_matches_broad_c1": true,
+  "layout_checks": {
+    "executed": 3,
+    "pass": 3,
+    "fail": 0
+  },
+  "selected_source_comparison": {
+    "identify_group_social.py": true,
+    "orientation_utils.py": true,
+    "generate_report.py": true,
+    "group_identity.py": true,
+    "orientation_gate.py": true,
+    "grouping_contracts.py": true,
+    "report_metrics.py": true
+  }
+}

@@ -2,6 +2,10 @@ import numpy as np
 from sklearn.cluster import DBSCAN
 from collections import defaultdict
 import cv2
+from group_identity import associate_groups
+from grouping_contracts import (validate_grouping_inputs, check_projection_points,
+                                require_finite_projection)
+from orientation_gate import MODES, heading_or_none, pair_compatibility
 
 def get_colors(n):
     if n <= 0:
@@ -23,10 +27,19 @@ def cluster_bboxes_with_ids(groups_status, bboxes, track_ids, max_group_id,
                             scale_factor=1.0,
                             eps=1.5,
                             min_samples=2,
-                            threshold_overlap=0.5):
+                            threshold_overlap=0.5, *, orientation_mode="B0-original"):
 
-    if not bboxes or not track_ids or len(bboxes) != len(track_ids):
-        return [], groups_status, max_group_id
+    bboxes, track_ids, homography_matrix = validate_grouping_inputs(
+        bboxes, track_ids, pose_vectors, homography_matrix, scale_factor, eps, min_samples)
+    if orientation_mode not in MODES:
+        raise ValueError(f"orientation_mode must be one of {MODES}")
+    if eps >= 1000:
+        raise ValueError("social eps must be below the B0 rejected-distance sentinel 1000")
+    if pose_vectors is not None:
+        pose_vectors = [heading_or_none(v) for v in pose_vectors]
+    if not bboxes:
+        _, state, maximum = associate_groups(groups_status, {}, max_group_id, threshold_overlap)
+        return [], state, maximum
 
     N = len(bboxes)
 
@@ -38,11 +51,13 @@ def cluster_bboxes_with_ids(groups_status, bboxes, track_ids, max_group_id,
     real_world_coords = [None] * N
     if homography_matrix is not None and N > 0:
         pts_src = np.array([points_to_cluster], dtype=np.float32)
+        check_projection_points(pts_src, homography_matrix)
         pts_dst = cv2.perspectiveTransform(pts_src, homography_matrix)
         X = pts_dst[0] * scale_factor
         real_world_coords = X
     else:
         X = np.array(points_to_cluster)
+    require_finite_projection(X)
 
     # 2) Project pose directions to bird's-eye-view so orientation checks happen in the same space.
     bev_poses = [None] * N
@@ -55,11 +70,14 @@ def cluster_bboxes_with_ids(groups_status, bboxes, track_ids, max_group_id,
                 # Project two points: foot point and forward direction endpoint.
                 pt1 = np.array([[[foot_x, foot_y]]], dtype=np.float32)
                 pt2 = np.array([[[foot_x + vx * 10, foot_y + vy * 10]]], dtype=np.float32)
+                check_projection_points(pt1, homography_matrix)
+                check_projection_points(pt2, homography_matrix)
 
                 bev_pt1 = cv2.perspectiveTransform(pt1, homography_matrix)[0][0]
                 bev_pt2 = cv2.perspectiveTransform(pt2, homography_matrix)[0][0]
 
                 bev_v = bev_pt2 - bev_pt1
+                require_finite_projection(bev_v)
                 norm = np.linalg.norm(bev_v)
                 if norm > 1e-6:
                     bev_poses[i] = bev_v / norm
@@ -75,37 +93,10 @@ def cluster_bboxes_with_ids(groups_status, bboxes, track_ids, max_group_id,
             if dist > eps:
                 continue
 
-            # B) Social interaction check using projected pose direction.
-            connected = False
-            pi, pj = bev_poses[i], bev_poses[j]
-
-            # Very close people are linked regardless of orientation noise.
-            if dist < 0.5:
-                connected = True
-            elif pi is None or pj is None:
-                connected = True
-            else:
-                # For medium distances, orientation consistency matters.
-                v_ij = X[j] - X[i]
-                norm_ij = np.linalg.norm(v_ij)
-
-                if norm_ij < 1e-6:
-                    connected = True
-                else:
-                    v_ij_dir = v_ij / norm_ij
-                    v_ji_dir = -v_ij_dir
-
-                    # Cosine similarities for relative facing directions.
-                    cos_i_to_j = np.dot(pi, v_ij_dir)
-                    cos_j_to_i = np.dot(pj, v_ji_dir)
-                    cos_i_j = np.dot(pi, pj)
-
-                    # abs() helps when pose model flips front/back direction.
-                    side_by_side = abs(cos_i_j) > 0.7
-                    interacting = (abs(cos_i_to_j) > 0.3) or (abs(cos_j_to_i) > 0.3)
-
-                    if side_by_side or interacting:
-                        connected = True
+            # B0 is still the default. Alternative modes are diagnostic controls.
+            connected = pair_compatibility(
+                bev_poses[i], bev_poses[j], X[j] - X[i], eps,
+                mode=orientation_mode)["compatible"]
 
             if connected:
                 dist_matrix[i, j] = dist
@@ -121,28 +112,8 @@ def cluster_bboxes_with_ids(groups_status, bboxes, track_ids, max_group_id,
         if label != -1:
             cluster_members[label].append(tid)
 
-    new_group_status = defaultdict(list)
-    if len(groups_status) > 0:
-        for id_cluster, members in cluster_members.items():
-            best_match = None
-            best_overlap = 0
-            overlap_ratio = 0
-            for group_id, old_group_members in groups_status.items():
-                overlap = len(set(members) & set(old_group_members))
-                if overlap > best_overlap:
-                    best_overlap = overlap
-                    best_match = group_id
-                    overlap_ratio = best_overlap / len(old_group_members)
-
-            if best_match is not None and overlap_ratio >= threshold_overlap:
-                new_group_status[best_match] = cluster_members[id_cluster]
-            else:
-                new_group_status[max_group_id + 1] = cluster_members[id_cluster]
-                max_group_id += 1
-    else:
-        new_group_status = cluster_members
-        if new_group_status:
-            max_group_id = max(new_group_status.keys(), default=max_group_id)
+    _, new_group_status, max_group_id = associate_groups(
+        groups_status, cluster_members, max_group_id, threshold_overlap)
 
     n_clusters = len(new_group_status)
     colors = get_colors(n_clusters)
