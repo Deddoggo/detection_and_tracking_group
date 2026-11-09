@@ -1,0 +1,16 @@
+{
+  "schema": "calibration.v1",
+  "calibration_id": "REPLACE_WITH_MEASUREMENT_IDENTIFIER",
+  "verified": false,
+  "verified_by": null,
+  "units": "m",
+  "video_sha256": null,
+  "width": 1920,
+  "height": 1080,
+  "homography_matrix": null,
+  "homography_sha256": null,
+  "correspondences": [],
+  "correspondence_tolerance_m": null,
+  "measurement_evidence": null,
+  "note": "Template only. Supply actual H, canonical_hash(H), image_xy/ground_xy correspondences, physical evidence and verification. Do not set verified=true for an unverified matrix."
+}

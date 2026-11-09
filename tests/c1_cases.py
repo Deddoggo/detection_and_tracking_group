@@ -11,6 +11,7 @@ import types
 import unittest
 from unittest.mock import patch
 import numpy as np
+import cv2  # Load native extension before patch.dict restores sys.modules.
 
 from group_identity import associate_groups
 from orientation_gate import pair_compatibility, original_absolute_predicate
@@ -286,20 +287,20 @@ class GroupingProduction(Case):
     def test_S7_noise_retained_and_empty_lifecycle(self):
         for name in ('identify_group_social',):
             with grouping_module(name) as m:
-                r,state,mx=m.cluster_bboxes_with_ids({7:[1,2]},np.array([[0,0,1,1]]),np.array([1]),7)
+                r,state,mx=m.cluster_bboxes_with_ids({7:[1,2]},np.array([[0,0,1,1]]),np.array([1]),7, geometry_mode="legacy-b0")
                 self.check(name+' singleton',(1,-1,{},7),(len(r),r[0]['id_g'],state,mx))
-                self.check(name+' empty',([],{},7),m.cluster_bboxes_with_ids({7:[1,2]},[],[],7))
+                self.check(name+' empty',([],{},7),m.cluster_bboxes_with_ids({7:[1,2]},[],[],7, geometry_mode="legacy-b0"))
     def test_split_real_entrypoints(self):
         boxes=[[0,0,.1,.1],[1,0,.1,.1],[10,0,.1,.1],[11,0,.1,.1]]
         for name in ('identify_group_social',):
             with grouping_module(name) as m:
-                r,state,mx=m.cluster_bboxes_with_ids({7:[1,2,3,4]},boxes,[1,2,3,4],7,eps=1.75)
+                r,state,mx=m.cluster_bboxes_with_ids({7:[1,2,3,4]},boxes,[1,2,3,4],7,eps=1.75, geometry_mode="legacy-b0")
                 self.check(name+' split',[7,7,8,8],[p['id_g'] for p in r])
     def test_full_modes_invoke_predicates(self):
         with grouping_module('identify_group_social') as m:
             for mode,expected in (('B0-original',True),('proximity-only',True),('signed-dyad-diagnostic',False)):
                 with patch.object(m,'pair_compatibility',wraps=m.pair_compatibility) as spy:
-                    r,_,_=m.cluster_bboxes_with_ids({},[[0,0,.1,.1],[1,0,.1,.1]],[1,2],-1,pose_vectors=[[-1,0],[1,0]],homography_matrix=np.eye(3),orientation_mode=mode)
+                    r,_,_=m.cluster_bboxes_with_ids({},[[0,0,.1,.1],[1,0,.1,.1]],[1,2],-1,pose_vectors=[[-1,0],[1,0]],homography_matrix=np.eye(3),orientation_mode=mode, geometry_mode="legacy-b0")
                     self.check(mode+' dispatch',mode,spy.call_args.kwargs['mode'])
                     self.check(mode+' partition',expected,r[0]['id_g']>=0)
     def test_b0_valid_matrix_equivalence(self):
@@ -309,16 +310,16 @@ class GroupingProduction(Case):
                 b.cluster_bboxes_with_ids(*args,eps=1.75)
                 before=GraphDouble.matrices[-1].copy()
             with grouping_module(name) as m:
-                m.cluster_bboxes_with_ids(*args,eps=1.75)
+                m.cluster_bboxes_with_ids(*args,eps=1.75, geometry_mode="legacy-b0")
                 self.check(name+' valid B0 matrix',before.tolist(),GraphDouble.matrices[-1].tolist())
     def test_invalid_inputs_never_become_edges(self):
         with grouping_module('identify_group_social') as m:
             for kwargs in ({'pose_vectors':[[np.nan,0],[1,0]]},{'pose_vectors':[[1],[0,1]]},{'pose_vectors':[]},{'eps':1000}):
-                self.raises(lambda kw=kwargs:m.cluster_bboxes_with_ids({},[[0,0,1,1],[1,0,1,1]],[1,2],-1,**kw),repr(kwargs))
+                self.raises(lambda kw=kwargs:m.cluster_bboxes_with_ids({},[[0,0,1,1],[1,0,1,1]],[1,2],-1,**kw, geometry_mode="legacy-b0"),repr(kwargs))
     def test_horizon_rejected(self):
         with grouping_module('identify_group_social') as m:
             H=np.array([[1.,0,0],[0,1,0],[0,1,-1]])
-            self.raises(lambda:m.cluster_bboxes_with_ids({},[[0,0,1,1]],[1],-1,homography_matrix=H),'bbox footpoint on projective horizon')
+            self.raises(lambda:m.cluster_bboxes_with_ids({},[[0,0,1,1]],[1],-1,homography_matrix=H, geometry_mode="legacy-b0"),'bbox footpoint on projective horizon')
 
 
 @unittest.skipUnless(importlib.util.find_spec('sklearn'),'native sklearn unavailable; graph substitute is not native evidence')
@@ -326,11 +327,11 @@ class NativeGrouping(Case):
     mode='native sklearn + NumPy/OpenCV production module; no substitutes'
     def test_native_chain(self):
         with grouping_module('identify_group_social',native=True) as m:
-            r,_,_=m.cluster_bboxes_with_ids({},[[x,0,.1,.1] for x in (0,1,2)],[1,2,3],-1,eps=1.75)
+            r,_,_=m.cluster_bboxes_with_ids({},[[x,0,.1,.1] for x in (0,1,2)],[1,2,3],-1,eps=1.75, geometry_mode="legacy-b0")
             self.check('A-B/B-C within radius, A-C outside',[0,0,0],[p['id_g'] for p in r])
     def test_native_split_and_noise(self):
         with grouping_module('identify_group_social',native=True) as m:
-            r,state,mx=m.cluster_bboxes_with_ids({7:[1,2,3,4]},[[x,0,.1,.1] for x in (0,1,10,11,50)],[1,2,3,4,5],7,eps=1.75)
+            r,state,mx=m.cluster_bboxes_with_ids({7:[1,2,3,4]},[[x,0,.1,.1] for x in (0,1,10,11,50)],[1,2,3,4,5],7,eps=1.75, geometry_mode="legacy-b0")
             self.check('native split plus noise',[7,7,8,8,-1],[p['id_g'] for p in r])
 
 
@@ -352,7 +353,7 @@ class Preservation(Case):
                 self.check({'active_source':file,'helper':helper,'function':call},[True,True],
                     [helper in imports,call in calls])
     def test_no_legacy_changes_in_active_patch(self):
-        baseline='master'
+        baseline='6c641d74de5269c53ea80d0069567d05b546a398'
         excluded=['identify_group.py','tracking_group.py','run_mixste_offline.py',
             'tracking_yolov12.py','run_all_detectron2.py','run_all_yolov12.py',
             'yolo_detection_poseformer.py','test_combine_with_pose_estimation.py']

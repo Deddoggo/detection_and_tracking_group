@@ -35,7 +35,7 @@ def signed_direction_dyad(cos_i_to_j, cos_j_to_i):
     return bool(cos_i_to_j > 0.3 and cos_j_to_i > 0.3)
 
 
-def pair_compatibility(pi, pj, displacement, eps, mode="B0-original"):
+def pair_compatibility(pi, pj, displacement, eps, mode="B0-original", *, close_distance=0.5):
     """Directions entering here are BEV directions; preserve B0 valid-input dots.
 
     All modes retain distance gate and <.5 close bypass. B0 retains missing
@@ -44,6 +44,8 @@ def pair_compatibility(pi, pj, displacement, eps, mode="B0-original"):
     """
     if mode not in MODES:
         raise ValueError(f"orientation mode must be one of {MODES}")
+    if not np.isfinite(close_distance) or close_distance <= 0:
+        raise ValueError('close_distance must be finite and positive')
     pi, pj = heading_or_none(pi), heading_or_none(pj)
     delta = np.asarray(displacement, dtype=float)
     if delta.shape != (2,) or not np.isfinite(delta).all():
@@ -53,7 +55,7 @@ def pair_compatibility(pi, pj, displacement, eps, mode="B0-original"):
         return {"compatible": False, "reason": "outside_radius"}
     if mode == "proximity-only":
         return {"compatible": True, "reason": "proximity_only"}
-    if distance < 0.5:
+    if distance < close_distance:
         return {"compatible": True, "reason": "close_bypass"}
     if pi is None or pj is None:
         return {"compatible": mode == "B0-original", "reason": "missing_direction"}

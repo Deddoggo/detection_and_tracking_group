@@ -4,22 +4,13 @@ import numpy as np
 import math
 import json
 from collections import deque, Counter
-import torch
 
-from transformers import AutoProcessor, VitPoseForPoseEstimation
-from inference import get_model
-
-from identify_group_social import cluster_bboxes_with_ids
 from orientation_utils import get_pose_vector
 
 # =====================================================================
 # CONFIGURATION
 # =====================================================================
 INPUT_VIDEO = "videos/WIN_20260326_10_00_11_Pro.mp4"
-INPUT_JSON_CANDIDATES = [
-    "playground_results/tracks_stitched.json",
-    "playground_results/tracks_bytetrack_only.json",
-]
 OUTPUT_FOLDER = "playground_results"
 OUTPUT_JSON_FINAL = os.path.join(OUTPUT_FOLDER, "final_sociometrics_data.json")
 CALIBRATION_FILE = "calibration_matrix_playground.json"
@@ -37,21 +28,26 @@ FRAME_STRIDE = 3
 # 1) MODEL WRAPPERS
 # =====================================================================
 class HFViTPosePredictor:
-    def __init__(self, model_name=VITPOSE_MODEL, device='cuda:0'):
+    def __init__(self, model_name=VITPOSE_MODEL, device='cuda:0', *, strict=False, local_files_only=False):
+        self.strict = strict
         print(f"Initializing HF ViTPose ({model_name})...")
         try:
+            from transformers import AutoProcessor, VitPoseForPoseEstimation
             self.device = device
-            self.processor = AutoProcessor.from_pretrained(model_name, trust_remote_code=True)
-            self.model = VitPoseForPoseEstimation.from_pretrained(model_name, trust_remote_code=True).to(self.device)
+            self.processor = AutoProcessor.from_pretrained(model_name, trust_remote_code=not local_files_only, local_files_only=local_files_only)
+            self.model = VitPoseForPoseEstimation.from_pretrained(model_name, trust_remote_code=not local_files_only, local_files_only=local_files_only).to(self.device)
             self.model.eval()
             print("✅ HF ViTPose initialized successfully.")
         except Exception as e:
+            if strict:
+                raise RuntimeError("ViTPose initialization failed; cache export stopped") from e
             print(f"❌ Error ViTPose: {e}")
             self.model = None
 
     def predict(self, img_rgb, bboxes_xyxy):
         if self.model is None or len(bboxes_xyxy) == 0: return [None] * len(bboxes_xyxy)
         try:
+            import torch
             boxes_coco = [[x1, y1, x2 - x1, y2 - y1] for (x1, y1, x2, y2) in bboxes_xyxy]
             inputs = self.processor(img_rgb, boxes=[boxes_coco], return_tensors="pt").to(self.device)
             with torch.no_grad():
@@ -66,14 +62,19 @@ class HFViTPosePredictor:
                 kpts_with_conf[:, :2] = kpts
                 kpts_with_conf[:, 2] = scores
                 final_keypoints.append(kpts_with_conf)
+            if self.strict and len(final_keypoints) != len(bboxes_xyxy):
+                raise ValueError("ViTPose output/person count mismatch")
             return final_keypoints
         except Exception as e:
+            if self.strict:
+                raise RuntimeError("ViTPose inference failed; cache remains incomplete") from e
             return [None] * len(bboxes_xyxy)
 
 class RoboflowGenderPredictor:
     def __init__(self, model_id=GENDER_MODEL, api_key=ROBOFLOW_API_KEY):
         print(f"Initializing Roboflow Gender Classification ({model_id})...")
         try:
+            from inference import get_model
             self.model = get_model(model_id=model_id, api_key=api_key)
             print("✅ Roboflow Gender Classification initialized successfully.")
         except Exception as e:
@@ -110,7 +111,11 @@ class RoboflowGenderPredictor:
 # 2) CORE PIPELINE (HEADLESS)
 # =====================================================================
 class SubgroupAnalyzerPipeline:
-    def __init__(self):
+    def __init__(self, tracks_path, *, compatibility_b0=False):
+        if not compatibility_b0:
+            raise ValueError("live path requires explicit compatibility_b0=True; use C2 replay for verified units")
+        import torch
+        self.tracks_path = tracks_path
         self.device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
         self.track_history = {}
         self.pose_history_smooth = {}
@@ -133,16 +138,12 @@ class SubgroupAnalyzerPipeline:
         return None
 
     def _load_tracks_json(self):
-        for candidate in INPUT_JSON_CANDIDATES:
-            if os.path.exists(candidate):
-                print(f"Using tracking input: {candidate}")
-                with open(candidate, 'r') as f:
-                    return json.load(f)
-        raise FileNotFoundError(
-            f"No tracking file found. Checked: {', '.join(INPUT_JSON_CANDIDATES)}"
-        )
+        # C2 requires explicit raw/stitched selection. Inference behavior is unchanged.
+        with open(self.tracks_path, 'r', encoding='utf8') as f:
+            return json.load(f)
 
     def process_frame(self, frame, frame_idx):
+        from identify_group_social import cluster_bboxes_with_ids
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame_key = f"frame_{frame_idx:05d}"
         frame_tracks = self.tracks_data.get(frame_key, [])
@@ -220,7 +221,8 @@ class SubgroupAnalyzerPipeline:
         cluster_results, self.groups_status, self.max_group_id = cluster_bboxes_with_ids(
             self.groups_status, boxes_xywh, ids, self.max_group_id, 
             pose_vectors=pose_vectors_list, homography_matrix=self.homography_matrix, 
-            scale_factor=SCALE_FACTOR, eps=EPSILON, min_samples=MIN_SAMPLES
+            scale_factor=SCALE_FACTOR, eps=EPSILON, min_samples=MIN_SAMPLES,
+            geometry_mode="legacy-b0"
         )
 
         return cluster_results, active_tracks_info
@@ -272,5 +274,20 @@ class SubgroupAnalyzerPipeline:
             json.dump(all_frames_data, f, indent=4)
         print(f"\nDone. Sociometrics output saved to: {OUTPUT_JSON_FINAL}")
 
+def main(argv=None):
+    import sys
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0] in ('validate-data', 'cache', 'replay'):
+        from c2_pipeline import main as c2_main
+        return c2_main(argv)
+    import argparse
+    parser = argparse.ArgumentParser(description='Live B0 compatibility or C2 validate-data/cache/replay')
+    parser.add_argument('--compatibility-b0', action='store_true', required=True,
+                        help='Explicitly retain unverified historical calibration/unit semantics')
+    parser.add_argument('--tracks', required=True, help='Explicit raw or stitched tracks JSON')
+    args = parser.parse_args(argv)
+    SubgroupAnalyzerPipeline(args.tracks, compatibility_b0=args.compatibility_b0).run()
+
+
 if __name__ == "__main__":
-    SubgroupAnalyzerPipeline().run()
+    main()

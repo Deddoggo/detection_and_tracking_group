@@ -7,7 +7,8 @@ ROOT = Path(__file__).resolve().parent.parent
 ACTIVE = {'detect_yolo.py', 'track.py', 'stitch_tracks.py', 'analyze_subgroups.py',
           'identify_group_social.py', 'orientation_utils.py', 'calibration_headless.py',
           'render_visuals.py', 'generate_report.py'}
-HELPERS = {'group_identity.py', 'orientation_gate.py', 'grouping_contracts.py', 'report_metrics.py'}
+HELPERS = {'group_identity.py', 'orientation_gate.py', 'grouping_contracts.py', 'report_metrics.py',
+           'annotation_io.py', 'observation_cache.py', 'c2_pipeline.py'}
 
 
 class ActiveLayout(unittest.TestCase):
