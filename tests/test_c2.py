@@ -284,6 +284,8 @@ runpy.run_path('analyze_subgroups.py',run_name='__main__')
             completed=json.loads((out/'manifest.json').read_text())
             self.assertEqual(completed['state'],'complete')
             self.assertEqual(completed['frame_records'],1)
+            self.assertEqual(completed['observation_inference_kind'],'synthetic-test')
+            self.assertEqual(completed['id_namespace'],'synthetic-test')
 
 
 if __name__=='__main__':

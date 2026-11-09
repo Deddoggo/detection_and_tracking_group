@@ -246,6 +246,9 @@ def replay_cache(args):
     out.mkdir(parents=True,exist_ok=False)
     run = {'schema':'grouping-replay.v1','state':'incomplete','observation_manifest_sha256':file_sha256(Path(args.cache)/'manifest.json'),
         'observations_sha256':manifest['frames_sha256'],'recipe':runner.config,'geometry':runner.geometry,
+        'observation_cache':str(Path(args.cache).resolve()),'observation_inference_kind':manifest['inference_kind'],
+        'video_sha256':manifest['video_sha256'],'id_namespace':manifest['id_namespace'],
+        'source_range':{k:manifest[k] for k in ('start_frame','end_frame_exclusive','stride')},
         'calibration':calibration,'provenance':provenance(),'labels_are':'predictions/pre-annotations, not ground truth',
         'reference_input_kind':manifest.get('input_kind'),'source_time_base':manifest['time_base']}
     write_new_json(out/'manifest.json',run)
