@@ -74,28 +74,6 @@ def observation_frame(index, ticks, time_base, people, pose_results):
             'decode_status':'ok','persons':persons}
 
 
-def checkpoint_identity(path):
-    """Local HF export only; never initiate a checkpoint download."""
-    path = Path(path)
-    if not path.is_dir() or not (path/'config.json').is_file() or not (path/'preprocessor_config.json').is_file():
-        raise ValueError('supply a local HF ViTPose directory with config.json and preprocessor_config.json')
-    files = sorted(p for p in path.rglob('*') if p.is_file() and p.suffix in ('.json','.safetensors','.bin'))
-    if not any(p.suffix in ('.safetensors','.bin') for p in files):
-        raise ValueError('local ViTPose weights are missing')
-    config = json.loads((path/'config.json').read_text(encoding='utf8'))
-    if config.get('model_type') != 'vitpose' or len(config.get('id2label',{})) != 17:
-        raise ValueError('expected the current 17-joint HF ViTPose implementation')
-    def normalize_label(label):
-        label = label.lower().replace(' ', '_')
-        return 'left_'+label[2:] if label.startswith('l_') else 'right_'+label[2:] if label.startswith('r_') else label
-    if [normalize_label(config['id2label'].get(str(i),'')) for i in range(17)] != COCO17:
-        raise ValueError('checkpoint joint order differs from COCO17')
-    return {'requested_model':'usyd-community/vitpose-base-simple','implementation':'transformers.VitPoseForPoseEstimation',
-            'local_directory':str(path.resolve()),'files_sha256':{str(p.relative_to(path)):file_sha256(p) for p in files},
-            'configured_joint_labels':config['id2label'],
-            'identity_verification':'local bytes hashed; upstream snapshot equivalence not asserted'}
-
-
 def export_cache(args):
     if Path(args.output).exists():
         raise FileExistsError(f'refusing to overwrite {args.output}')
@@ -111,14 +89,32 @@ def export_cache(args):
         raise ValueError('source timing has not been verified through requested range')
     if timing['visual_review']['status'] != 'sampled-alignment-supported':
         raise ValueError('sampled XML/video visual review is pending')
-    model = checkpoint_identity(args.checkpoint)
-    model['supplied_revision'] = args.checkpoint_revision
     if args.pose_batch_size < 1:
         raise ValueError('pose batch size must be positive')
     from analyze_subgroups import HFViTPosePredictor
-    predictor = HFViTPosePredictor(args.checkpoint,args.device,strict=True,local_files_only=True)
     import cv2
     import torch
+    import time
+    if Path(sys.prefix).name != 'paper-research':
+        raise RuntimeError('cache inference requires the paper-research interpreter')
+    cuda = str(args.device).startswith('cuda')
+    if cuda and not torch.cuda.is_available():
+        raise RuntimeError('requested CUDA is unavailable; no CPU fallback')
+    if cuda:
+        torch.cuda.synchronize(args.device)
+        torch.cuda.reset_peak_memory_stats(args.device)
+    loading_start = time.perf_counter()
+    predictor = HFViTPosePredictor(device=args.device,strict=True,revision=args.revision)
+    loading_seconds = time.perf_counter()-loading_start
+    model = predictor.identity
+    memory = {}
+    if cuda:
+        memory = {'model_load_peak_allocated_bytes':torch.cuda.max_memory_allocated(args.device),
+                  'after_model_load_allocated_bytes':torch.cuda.memory_allocated(args.device),
+                  'after_model_load_reserved_bytes':torch.cuda.memory_reserved(args.device)}
+        torch.cuda.reset_peak_memory_stats(args.device)
+    calls = []
+    inference_start = time.perf_counter()
     manifest = {'schema':SCHEMA,'joint_order':COCO17,'video_sha256':timing['video_sha256'],
         'input_sha256':meta['source_sha256'],'id_namespace':f"cvat-job-{meta['job_id']}",
         'input_kind':'oracle-cvat-boxes-and-identities','width':timing['width'],'height':timing['height'],
@@ -127,6 +123,7 @@ def export_cache(args):
         'pose_model':model,'provenance':provenance(), 'alignment_sha256':file_sha256(args.alignment),
         'device':{'requested':args.device,'cuda_available':torch.cuda.is_available(),'torch_cuda':torch.version.cuda},
         'pose_batch_size':args.pose_batch_size,
+        'numerics':{'tf32_matmul':torch.backends.cuda.matmul.allow_tf32,'cudnn_benchmark':torch.backends.cudnn.benchmark},
         'calibration':None,'eligibility':{'min_width_pixels':15,'min_height_pixels':30,'outside_excluded':True},
         'reference_policy':'partial social_group attributes retained verbatim; unreviewed is unknown'}
     cap = cv2.VideoCapture(str(args.video))
@@ -146,13 +143,30 @@ def export_cache(args):
             if index % args.stride:
                 continue
             people = frames.get(index,[])
-            boxes = [[x,y,x+w,y+h] for p in people if not p['outside']
-                     for x,y,w,h in [p['bbox_xywh']] if w >= 15 and h >= 30]
+            eligible = [p for p in people if not p['outside'] and p['bbox_xywh'][2]>=15 and p['bbox_xywh'][3]>=30]
+            boxes = [[x,y,x+w,y+h] for p in eligible for x,y,w,h in [p['bbox_xywh']]]
             rgb = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
             poses = []
             for offset in range(0,len(boxes),args.pose_batch_size):
-                poses.extend(predictor.predict(rgb,boxes[offset:offset+args.pose_batch_size]))
+                batch_boxes = boxes[offset:offset+args.pose_batch_size]
+                predictions = predictor.predict(rgb,batch_boxes)
+                if len(predictions) != len(batch_boxes):
+                    raise ValueError('batch output count mismatch; refusing positional association')
+                poses.extend(predictions)
+                calls.append({'source_frame':index,'person_ids':[p['person_id'] for p in eligible[offset:offset+args.pose_batch_size]],
+                              'input_bboxes_xywh':[p['bbox_xywh'] for p in eligible[offset:offset+args.pose_batch_size]],
+                              **predictor.last_diagnostics})
             writer.append(observation_frame(index,timing['pts_ticks'][index],timing['time_base'],people,poses))
+        if cuda:
+            torch.cuda.synchronize(args.device)
+            memory.update(inference_peak_allocated_bytes=torch.cuda.max_memory_allocated(args.device),
+                          inference_peak_reserved_bytes=torch.cuda.max_memory_reserved(args.device))
+        metrics = {'model_loading_and_download_seconds':loading_seconds,
+                   'decoded_and_pose_export_seconds':time.perf_counter()-inference_start,
+                   'cuda_memory':memory,'calls':calls,'warmup':'none; first-call latency retained',
+                   'scope':'bounded real XML-box/ID pose inference, not benchmark accuracy'}
+        write_new_json(Path(args.output)/'inference_metrics.json',metrics)
+        writer.manifest['inference_metrics_sha256'] = file_sha256(Path(args.output)/'inference_metrics.json')
         writer.close(complete=True)
     finally:
         cap.release()
@@ -269,15 +283,15 @@ def main(argv=None):
     align.add_argument('--end',type=int,default=1800)
     align.add_argument('--output',required=True)
     cache = sub.add_parser('cache')
-    for name in ('video','xml','alignment','checkpoint','output'):
+    for name in ('video','xml','alignment','output'):
         cache.add_argument('--'+name,required=True)
     cache.add_argument('--start',type=int,default=0)
     cache.add_argument('--end',type=int,required=True)
     cache.add_argument('--stride',type=int,default=3)
     cache.add_argument('--max-pose-frames',type=int,default=5,help='Explicit safety bound; initial smoke test only')
-    cache.add_argument('--device',default='cpu')
+    cache.add_argument('--device',default='cuda:0')
     cache.add_argument('--pose-batch-size',type=int,default=1)
-    cache.add_argument('--checkpoint-revision',required=True,help='Provenance of the supplied local snapshot; never downloaded')
+    cache.add_argument('--revision',help='Exact HF commit SHA; by default resolve main once and pin it')
     replay = sub.add_parser('replay')
     for name in ('cache','output'):
         replay.add_argument('--'+name,required=True)

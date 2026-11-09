@@ -16,7 +16,7 @@ import cv2
 from annotation_io import read_cvat, verify_decode
 from observation_cache import (SCHEMA,COCO17,CacheWriter,canonical_hash,read_cache,
                                validate_frame,validate_manifest)
-from c2_pipeline import GroupingReplay,observation_frame,checkpoint_identity
+from c2_pipeline import GroupingReplay,observation_frame
 from grouping_contracts import geometry_contract,project_geometry
 
 
@@ -152,9 +152,21 @@ class SchemaTests(unittest.TestCase):
     def test_mismatched_pose_person_count_rejected(self):
         with self.assertRaises(ValueError):frame(poses=[])
 
-    def test_missing_checkpoint_fails_without_download(self):
-        with tempfile.TemporaryDirectory() as d:
-            with self.assertRaises(ValueError):checkpoint_identity(d)
+    def test_vitpose_plus_config_requires_coco17_and_six_experts(self):
+        from types import SimpleNamespace
+        from analyze_subgroups import validate_vitpose_plus_config
+        config=SimpleNamespace(model_type='vitpose',id2label=dict(enumerate(COCO17)),num_labels=17,
+            backbone_config=SimpleNamespace(num_experts=6,part_features=192),use_simple_decoder=False)
+        validate_vitpose_plus_config(config)
+        config.id2label[0]='wrong_joint'
+        with self.assertRaises(ValueError):validate_vitpose_plus_config(config)
+        config.id2label[0]='nose';config.backbone_config.num_experts=1
+        with self.assertRaises(ValueError):validate_vitpose_plus_config(config)
+
+    def test_revision_rejects_mutable_or_local_checkpoint_inputs(self):
+        from analyze_subgroups import HFViTPosePredictor
+        for revision in ('main','LOCAL_CHECKPOINT_DIRECTORY'):
+            with self.assertRaises(RuntimeError):HFViTPosePredictor(device='cpu',strict=True,revision=revision)
 
     def test_raw_heatmap_score_not_clipped_or_treated_as_probability(self):
         k=keypoints();k[0][2]=1.25
@@ -286,6 +298,109 @@ runpy.run_path('analyze_subgroups.py',run_name='__main__')
             self.assertEqual(completed['frame_records'],1)
             self.assertEqual(completed['observation_inference_kind'],'synthetic-test')
             self.assertEqual(completed['id_namespace'],'synthetic-test')
+
+
+
+
+class RealSmokeCacheTests(unittest.TestCase):
+    cache=ROOT/'.local/c2/vitpose_plus_20261109/observations_verified'
+
+    def setUp(self):
+        if not self.cache.exists():self.skipTest('bounded real smoke cache not present; no inference/download in regressions')
+
+    def test_real_smoke_frames_and_person_keypoint_association(self):
+        m,rows=read_cache(self.cache)
+        _,xml=read_cvat(ROOT/'WIN_20260303_10_09_56_PRO_GT_First60s/annotations.xml')
+        self.assertEqual([r['source_frame'] for r in rows],[0,3,6,9,12])
+        self.assertEqual(m['pose_model']['model_id'],'usyd-community/vitpose-plus-base')
+        self.assertEqual(m['pose_model']['dataset_index'],0)
+        self.assertEqual(len(m['pose_model']['resolved_revision']),40)
+        self.assertEqual(m['pose_batch_size'],1)
+        self.assertEqual(m['device']['requested'],'cuda:0')
+        for row in rows:
+            expected=xml[row['source_frame']]
+            self.assertEqual([p['person_id'] for p in row['persons']],[p['person_id'] for p in expected])
+            for p,q in zip(row['persons'],expected):
+                self.assertEqual(p['bbox_xywh'],q['bbox_xywh'])
+                self.assertEqual(p['reference']['attributes'],q['attributes'])
+                self.assertEqual(p['pose_status'],'ok' if p['eligible'] else 'excluded')
+
+    def test_real_cache_replay_repeatability_and_immutability(self):
+        from annotation_io import file_sha256
+        before={f:file_sha256(self.cache/f) for f in ('manifest.json','frames.jsonl')}
+        m,rows=read_cache(self.cache)
+        a=GroupingReplay(m,geometry_mode='image-space-diagnostic',eps=50,close_distance=10)
+        b=GroupingReplay(m,geometry_mode='image-space-diagnostic',eps=50,close_distance=10)
+        self.assertEqual([a.process(r) for r in rows],[b.process(r) for r in rows])
+        self.assertEqual(before,{f:file_sha256(self.cache/f) for f in before})
+
+
+class ViTPosePlusBoundaryTests(unittest.TestCase):
+    def test_native_postprocess_preserves_roi_order_and_source_pixel_offsets(self):
+        from types import SimpleNamespace
+        import torch
+        from transformers.models.vitpose.image_processing_vitpose import VitPoseImageProcessor
+        processor=VitPoseImageProcessor()
+        y,x=np.mgrid[:64,:48]
+        gaussian=np.exp(-((x-24)**2+(y-32)**2)/8).astype(np.float32)
+        maps=torch.tensor(np.tile(gaussian,(2,17,1,1)))
+        poses=processor.post_process_pose_estimation(SimpleNamespace(heatmaps=maps),boxes=[[[10,10,20,40],[110,30,20,40]]])[0]
+        self.assertEqual(len(poses),2)
+        delta=(poses[1]['keypoints']-poses[0]['keypoints']).numpy()
+        np.testing.assert_allclose(delta,np.tile([100.,20.],(17,1)),atol=1e-4)
+        # This metadata is not the input pixel ROI in the installed implementation.
+        self.assertFalse(np.allclose(poses[0]['bbox'].numpy(),[10,10,29,49]))
+
+    def test_fixed_hub_model_pinned_processor_and_dataset_index_per_person(self):
+        from types import SimpleNamespace
+        import torch
+        from transformers import BatchFeature
+        from analyze_subgroups import HFViTPosePredictor,VITPOSE_MODEL
+        sha='c'*40
+        config=SimpleNamespace(model_type='vitpose',id2label=dict(enumerate(COCO17)),num_labels=17,
+            backbone_config=SimpleNamespace(num_experts=6,part_features=192),use_simple_decoder=False)
+        class Model:
+            dtype=torch.float32
+            def __init__(self):self.config=config;self.dataset_indices=[]
+            def to(self,device):return self
+            def eval(self):return self
+            def __call__(self,pixel_values,dataset_index):
+                self.dataset_indices.append(dataset_index.clone())
+                return SimpleNamespace(heatmaps=torch.zeros(len(pixel_values),17,64,48))
+        class Processor:
+            def __call__(self,image,boxes,return_tensors):
+                return BatchFeature({'pixel_values':torch.zeros(len(boxes[0]),3,256,192)})
+            def post_process_pose_estimation(self,outputs,boxes):
+                result=[]
+                for x,y,w,h in boxes[0]:
+                    result.append({'keypoints':torch.tensor([[x,y]]*17),'scores':torch.ones(17),
+                                   'labels':torch.arange(17),'bbox':torch.tensor([x,y,x+w-1,y+h-1])})
+                return [result]
+        model=Model();processor=Processor()
+        with tempfile.TemporaryDirectory() as d:
+            artifact=Path(d)/'synthetic-artifact';artifact.write_bytes(b'SYNTHETIC TEST ONLY')
+            with patch('huggingface_hub.HfApi') as api, patch('huggingface_hub.try_to_load_from_cache',return_value=str(artifact)), \
+                 patch('transformers.AutoConfig.from_pretrained',return_value=config), \
+                 patch('transformers.AutoProcessor.from_pretrained',return_value=processor) as load_processor, \
+                 patch('transformers.VitPoseForPoseEstimation.from_pretrained',return_value=model) as load_model:
+                api.return_value.model_info.return_value.sha=sha
+                predictor=HFViTPosePredictor(device='cpu',strict=True)
+                poses=predictor.predict(np.zeros((100,100,3),dtype=np.uint8),[[0,0,20,40],[30,0,50,40]])
+                self.assertEqual(VITPOSE_MODEL,'usyd-community/vitpose-plus-base')
+                self.assertEqual(load_processor.call_args.args,(VITPOSE_MODEL,))
+                self.assertEqual(load_model.call_args.args,(VITPOSE_MODEL,))
+                self.assertEqual(load_processor.call_args.kwargs['revision'],sha)
+                self.assertEqual(load_model.call_args.kwargs['revision'],sha)
+                self.assertEqual(predictor.identity['resolved_revision'],sha)
+                self.assertEqual(model.dataset_indices[0].tolist(),[0,0])
+                self.assertEqual(model.dataset_indices[0].dtype,torch.long)
+                self.assertEqual([p.shape for p in poses],[(17,3),(17,3)])
+                self.assertEqual([float(p[0,0]) for p in poses],[0,30])
+                self.assertEqual(predictor.predict(np.zeros((1,1,3)),[]),[])
+                with patch.object(processor,'post_process_pose_estimation') as post:
+                    post.return_value=[[{'keypoints':torch.zeros(17,2),'scores':torch.ones(17),
+                                         'labels':torch.arange(16,-1,-1),'bbox':torch.tensor([0,0,19,39])}]]
+                    with self.assertRaises(RuntimeError):predictor.predict(np.zeros((100,100,3)),[[0,0,20,40]])
 
 
 if __name__=='__main__':

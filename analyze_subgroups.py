@@ -15,7 +15,7 @@ OUTPUT_FOLDER = "playground_results"
 OUTPUT_JSON_FINAL = os.path.join(OUTPUT_FOLDER, "final_sociometrics_data.json")
 CALIBRATION_FILE = "calibration_matrix_playground.json"
 
-VITPOSE_MODEL = "usyd-community/vitpose-base-simple"
+VITPOSE_MODEL = "usyd-community/vitpose-plus-base"
 GENDER_MODEL = "gender-classification-rz62r/3"
 ROBOFLOW_API_KEY = "1W6S79RDYF5icaq9dh5i"
 
@@ -27,47 +27,126 @@ FRAME_STRIDE = 3
 # =====================================================================
 # 1) MODEL WRAPPERS
 # =====================================================================
+def validate_vitpose_plus_config(config):
+    """Reject a different architecture or joint order rather than mislabeling a cache."""
+    from observation_cache import COCO17
+    def normalize(label):
+        label = label.lower().replace(' ', '_')
+        return 'left_'+label[2:] if label.startswith('l_') else 'right_'+label[2:] if label.startswith('r_') else label
+    labels = [normalize(config.id2label.get(i, '')) for i in range(17)]
+    if (config.model_type != 'vitpose' or labels != COCO17 or config.num_labels != 17
+            or config.backbone_config.num_experts != 6 or config.backbone_config.part_features != 192
+            or config.use_simple_decoder):
+        raise ValueError('expected ViTPose+ Base with six experts and COCO17 ordering')
+
+
 class HFViTPosePredictor:
-    def __init__(self, model_name=VITPOSE_MODEL, device='cuda:0', *, strict=False, local_files_only=False):
+    """The single authorized HF model, resolved once to an immutable Hub commit."""
+    def __init__(self, device='cuda:0', *, strict=False, revision=None):
         self.strict = strict
-        print(f"Initializing HF ViTPose ({model_name})...")
+        self.last_diagnostics = None
+        print(f"Initializing {VITPOSE_MODEL} on {device}...")
         try:
-            from transformers import AutoProcessor, VitPoseForPoseEstimation
+            import inspect
+            import re
+            from huggingface_hub import HfApi, try_to_load_from_cache
+            from transformers import AutoConfig, AutoProcessor, VitPoseForPoseEstimation
+            from annotation_io import file_sha256
+            if 'dataset_index' not in inspect.signature(VitPoseForPoseEstimation.forward).parameters:
+                raise RuntimeError('installed Transformers lacks ViTPose+ dataset_index support')
+            if revision is not None and not re.fullmatch(r'[0-9a-f]{40}', revision):
+                raise ValueError('revision must be an exact 40-character HF commit SHA')
+            resolved = revision or HfApi().model_info(VITPOSE_MODEL, revision='main').sha
+            if not re.fullmatch(r'[0-9a-f]{40}', resolved):
+                raise ValueError('Hub did not resolve an immutable commit')
             self.device = device
-            self.processor = AutoProcessor.from_pretrained(model_name, trust_remote_code=not local_files_only, local_files_only=local_files_only)
-            self.model = VitPoseForPoseEstimation.from_pretrained(model_name, trust_remote_code=not local_files_only, local_files_only=local_files_only).to(self.device)
+            config = AutoConfig.from_pretrained(VITPOSE_MODEL, revision=resolved, trust_remote_code=False)
+            validate_vitpose_plus_config(config)
+            self.processor = AutoProcessor.from_pretrained(VITPOSE_MODEL, revision=resolved, trust_remote_code=False)
+            self.model = VitPoseForPoseEstimation.from_pretrained(
+                VITPOSE_MODEL, revision=resolved, trust_remote_code=False, use_safetensors=True).to(device)
             self.model.eval()
-            print("✅ HF ViTPose initialized successfully.")
+            # Transformers versions differ in private config attributes. Pin the
+            # public from_pretrained revision and audit the artifacts at that SHA.
+            validate_vitpose_plus_config(self.model.config)
+            files = {}
+            for name in ('config.json','preprocessor_config.json','model.safetensors'):
+                cached = try_to_load_from_cache(VITPOSE_MODEL,name,revision=resolved)
+                if not isinstance(cached,str):
+                    raise ValueError(f'loaded Hub artifact missing from cache: {name}')
+                files[name] = file_sha256(cached)
+            self.identity = {'model_id':VITPOSE_MODEL,'resolved_revision':resolved,
+                'implementation':'transformers.VitPoseForPoseEstimation','dataset_index':0,
+                'dataset':'COCO human pose','joint_order':'COCO17',
+                'configured_joint_labels':config.id2label,'num_experts':config.backbone_config.num_experts,
+                'files_sha256':files,'loading':'from_pretrained(model_id, revision=resolved_sha)',
+                'processor_class':type(self.processor).__name__,'dtype':str(self.model.dtype)}
+            print(f'Loaded {VITPOSE_MODEL}@{resolved}')
         except Exception as e:
             if strict:
-                raise RuntimeError("ViTPose initialization failed; cache export stopped") from e
-            print(f"❌ Error ViTPose: {e}")
+                raise RuntimeError('ViTPose+ initialization failed; cache export stopped') from e
+            print(f'ViTPose+ initialization failed: {e}')
             self.model = None
 
     def predict(self, img_rgb, bboxes_xyxy):
-        if self.model is None or len(bboxes_xyxy) == 0: return [None] * len(bboxes_xyxy)
+        if len(bboxes_xyxy) == 0:
+            return []
+        if self.model is None:
+            if self.strict:
+                raise RuntimeError('ViTPose+ model unavailable')
+            return [None] * len(bboxes_xyxy)
         try:
+            import time
             import torch
-            boxes_coco = [[x1, y1, x2 - x1, y2 - y1] for (x1, y1, x2, y2) in bboxes_xyxy]
-            inputs = self.processor(img_rgb, boxes=[boxes_coco], return_tensors="pt").to(self.device)
-            with torch.no_grad():
-                outputs = self.model(**inputs)
-            pose_results = self.processor.post_process_pose_estimation(outputs, boxes=[boxes_coco])[0]
-            
+            boxes_coco = [[x1,y1,x2-x1,y2-y1] for x1,y1,x2,y2 in bboxes_xyxy]
+            started = time.perf_counter()
+            inputs = self.processor(img_rgb, boxes=[boxes_coco], return_tensors='pt').to(self.device)
+            batch = inputs['pixel_values'].shape[0]
+            if batch != len(boxes_coco):
+                raise ValueError('processor/person count mismatch')
+            dataset_index = torch.zeros(batch,dtype=torch.long,device=self.device)
+            if str(self.device).startswith('cuda'):
+                torch.cuda.synchronize(self.device)
+            forward_start = time.perf_counter()
+            with torch.inference_mode():
+                outputs = self.model(**inputs,dataset_index=dataset_index)
+            if str(self.device).startswith('cuda'):
+                torch.cuda.synchronize(self.device)
+            forward_end = time.perf_counter()
+            if tuple(outputs.heatmaps.shape[:2]) != (batch,17) or not torch.isfinite(outputs.heatmaps).all().item():
+                raise ValueError('invalid ViTPose+ heatmap shape/values')
+            pose_results = self.processor.post_process_pose_estimation(outputs,boxes=[boxes_coco])[0]
+            if len(pose_results) != len(boxes_coco):
+                raise ValueError('pose/person count mismatch')
             final_keypoints = []
+            returned_bboxes = []
             for res in pose_results:
                 kpts = res['keypoints'].cpu().numpy()
                 scores = res['scores'].cpu().numpy()
-                kpts_with_conf = np.zeros((len(kpts), 3))
-                kpts_with_conf[:, :2] = kpts
-                kpts_with_conf[:, 2] = scores
+                labels = res['labels'].cpu().numpy()
+                returned_bbox = res['bbox'].cpu().numpy()
+                if (kpts.shape != (17,2) or scores.shape != (17,)
+                        or not np.array_equal(labels,np.arange(17))
+                        or returned_bbox.shape != (4,) or not np.isfinite(returned_bbox).all()):
+                    raise ValueError('keypoint order/shape or returned metadata mismatch')
+                # In installed Transformers 5.22.2 this bbox is built from center/scale,
+                # not the original ROI. Preserve source boxes; associate by input crop
+                # order/count (one person per call in the real smoke test).
+                returned_bboxes.append(returned_bbox.tolist())
+                kpts_with_conf = np.column_stack([kpts,scores])
+                if not np.isfinite(kpts_with_conf).all():
+                    raise ValueError('nonfinite ViTPose+ result')
                 final_keypoints.append(kpts_with_conf)
-            if self.strict and len(final_keypoints) != len(bboxes_xyxy):
-                raise ValueError("ViTPose output/person count mismatch")
+            self.last_diagnostics = {'input_shape':list(inputs['pixel_values'].shape),
+                'heatmap_shape':list(outputs.heatmaps.shape),'output_shape':[batch,17,3],
+                'dataset_index':dataset_index.cpu().tolist(),'labels_and_positional_association_verified':True,
+                'hf_returned_bboxes':returned_bboxes,'hf_returned_bbox_used_for_association':False,
+                'preprocess_seconds':forward_start-started,'forward_seconds':forward_end-forward_start,
+                'postprocess_seconds':time.perf_counter()-forward_end}
             return final_keypoints
         except Exception as e:
             if self.strict:
-                raise RuntimeError("ViTPose inference failed; cache remains incomplete") from e
+                raise RuntimeError('ViTPose+ inference failed; cache remains incomplete') from e
             return [None] * len(bboxes_xyxy)
 
 class RoboflowGenderPredictor:
@@ -128,7 +207,7 @@ class SubgroupAnalyzerPipeline:
         self.homography_matrix = self._load_calibration()
         self.tracks_data = self._load_tracks_json()
 
-        self.vitpose = HFViTPosePredictor(model_name=VITPOSE_MODEL, device=self.device)
+        self.vitpose = HFViTPosePredictor(device=self.device)
         self.gender_predictor = RoboflowGenderPredictor(model_id=GENDER_MODEL, api_key=ROBOFLOW_API_KEY)
 
     def _load_calibration(self):
