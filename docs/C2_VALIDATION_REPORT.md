@@ -135,4 +135,3 @@ Both complete runs use the same recorded recipe: image-space-diagnostic, eps=50 
 - Every source frame, PTS, person ID, bbox and eligibility/exclusion state checked; complete byte equality also verifies group IDs, heading values and heading freshness/missingness agree.
 - Subprocess import guards blocked torch, transformers, ultralytics, boxmot, inference, huggingface_hub and timm throughout each run. No neural model construction/import/download occurred.
 - All original cache file hashes were identical before/after replay. unreviewed remains only an unknown reference attribute, never a negative membership input.
-
