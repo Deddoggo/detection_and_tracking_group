@@ -1,4 +1,12 @@
 {
+  "latest_state": {
+    "date_europe_paris": "2026-11-10",
+    "authoritative_section": "closure",
+    "C2_closed": true,
+    "master_integrated": true,
+    "source_implementation_commit": "9469fbb03fcd8947830e114aa633af8a366a2552",
+    "metric_replay": "executed with user-confirmed scale; independent accuracy not verified"
+  },
   "schema": "c2-final-acceptance.v1",
   "date_europe_paris": "2026-11-09",
   "branch": "codex/c2-observation-cache",
@@ -37,7 +45,7 @@
   },
   "observation_cache_engineering_complete": true,
   "trusted_metric_grouping_complete": false,
-  "ready_for_master_integration": "YES for curated tracked C2 observation/replay changes, with documented geometry/workspace limitations; no merge performed",
+  "ready_for_master_integration": "INTEGRATED into local master by fast-forward; see closure for 2026-11-10 verification; no push performed",
   "full_cache": {
     "schema": "c2-full-cache-acceptance.v1",
     "status": "PASS",
@@ -1125,5 +1133,662 @@
     "If a different homography_matrix.json is intended, provide its path; the located exported H is calibration_matrix_playground.json.",
     "Separate authorization for any master merge or relocation of the preserved user grid utility."
   ],
-  "validator_source_sha256": "32e14880687cc951538fdce3ffe95acb98595d59cc33f69ff3f52538dd422227"
+  "validator_source_sha256": "32e14880687cc951538fdce3ffe95acb98595d59cc33f69ff3f52538dd422227",
+  "closure": {
+    "date_europe_paris": "2026-11-10",
+    "status": "C2 CLOSED; integrated into local master; ready for separately authorized C3",
+    "starting_branch": "codex/c2-observation-cache",
+    "starting_head": "2f705c32f21195c58d72829732397550fd198382",
+    "starting_worktree": " M Real_playground.png\n D Real_playground_2.png\n M calibration_headless.py\n D calibration_matrix.json\n D calibration_matrix_PETS09.json\n D calibration_matrix_based_on_roof.json\n M calibration_matrix_playground.json\n D calibration_matrix_playground_2.json\n",
+    "integration": {
+      "master_before": "6c641d74de5269c53ea80d0069567d05b546a398",
+      "feature_target": "9469fbb03fcd8947830e114aa633af8a366a2552",
+      "changed_tracked_files": [
+        "README.md",
+        "analyze_subgroups.py",
+        "annotation_io.py",
+        "c2_pipeline.py",
+        "config/calibration.v1.example.json",
+        "docs/C2_HANDOFF_TO_C3.md",
+        "docs/C2_IMPLEMENTATION_SUMMARY.md",
+        "docs/C2_VALIDATION_REPORT.md",
+        "docs/c2_full_acceptance.json",
+        "docs/c2_validation.json",
+        "docs/c2_vitpose_plus_validation.json",
+        "grouping_contracts.py",
+        "identify_group_social.py",
+        "observation_cache.py",
+        "orientation_gate.py",
+        "tests/c1_cases.py",
+        "tests/check_active_layout.py",
+        "tests/run_c2.py",
+        "tests/test_c2.py",
+        "tests/validate_c2_full.py"
+      ],
+      "commits": [
+        "ed28f32654d3fb4ddbf1f3846aa12e54f4c4859b feat: add C2 observation caching and deterministic grouping replay",
+        "45b1d2d7a5fe03b2766018ff72f1360c7ecaab66 fix: retain observation lineage in grouping replay manifests",
+        "16068d3724f11d103eb821ed0db9cc0f59ed5c03 docs: record C2 validation and pending inference prerequisites",
+        "650f7229792ce2f7a3ef6076c779aab8ab303458 fix: pin ViTPose+ Base Hub loading and validate COCO CUDA observations",
+        "0e29b47c51b19841aea97ba28cb8cc5a695aeced docs: record bounded ViTPose+ CUDA validation and remaining limits",
+        "3cac838ec1aab4c04f1b6bc96469fd2aa8c3239e fix: retain CVAT reference metadata and audit full C2 exports",
+        "2f705c32f21195c58d72829732397550fd198382 test: close full C2 observation and replay acceptance with measured evidence",
+        "9469fbb03fcd8947830e114aa633af8a366a2552 fix: represent user-confirmed calibration and bounded metric replay"
+      ],
+      "safety": "user dirty paths disjoint from integration diff; committed blobs identical on both branches; content/absence hashes checked; no stash/relocation/staging of user files",
+      "status": "FAST_FORWARD_INTEGRATED",
+      "master_after": "9469fbb03fcd8947830e114aa633af8a366a2552",
+      "current_branch": "master",
+      "user_hashes_preserved": true,
+      "feature_branch_retained": true,
+      "no_stash_reset_clean_or_relocation": true,
+      "no_push": true,
+      "steps": [
+        {
+          "args": [
+            "git",
+            "switch",
+            "master"
+          ],
+          "exit_code": 0,
+          "stdout": "M\tReal_playground.png\nD\tReal_playground_2.png\nM\tcalibration_headless.py\nD\tcalibration_matrix.json\nD\tcalibration_matrix_PETS09.json\nD\tcalibration_matrix_based_on_roof.json\nM\tcalibration_matrix_playground.json\nD\tcalibration_matrix_playground_2.json\nYour branch is up to date with 'origin/master'.\n",
+          "stderr": "Switched to branch 'master'\n"
+        },
+        {
+          "args": [
+            "git",
+            "-c",
+            "merge.autoStash=false",
+            "merge",
+            "--ff-only",
+            "codex/c2-observation-cache"
+          ],
+          "exit_code": 0,
+          "stdout": "Updating 6c641d7..9469fbb\nFast-forward\n README.md                            |  103 +---\n analyze_subgroups.py                 |  172 ++++--\n annotation_io.py                     |  144 +++++\n c2_pipeline.py                       |  328 ++++++++++\n config/calibration.v1.example.json   |   22 +\n docs/C2_HANDOFF_TO_C3.md             |   72 +++\n docs/C2_IMPLEMENTATION_SUMMARY.md    |   57 ++\n docs/C2_VALIDATION_REPORT.md         |   91 +++\n docs/c2_full_acceptance.json         | 1129 ++++++++++++++++++++++++++++++++++\n docs/c2_validation.json              |  692 +++++++++++++++++++++\n docs/c2_vitpose_plus_validation.json |  776 +++++++++++++++++++++++\n grouping_contracts.py                |  126 ++++\n identify_group_social.py             |   53 +-\n observation_cache.py                 |  166 +++++\n orientation_gate.py                  |    6 +-\n tests/c1_cases.py                    |   21 +-\n tests/check_active_layout.py         |    3 +-\n tests/run_c2.py                      |   55 ++\n tests/test_c2.py                     |  476 ++++++++++++++\n tests/validate_c2_full.py            |  137 +++++\n 20 files changed, 4459 insertions(+), 170 deletions(-)\n create mode 100644 annotation_io.py\n create mode 100644 c2_pipeline.py\n create mode 100644 config/calibration.v1.example.json\n create mode 100644 docs/C2_HANDOFF_TO_C3.md\n create mode 100644 docs/C2_IMPLEMENTATION_SUMMARY.md\n create mode 100644 docs/C2_VALIDATION_REPORT.md\n create mode 100644 docs/c2_full_acceptance.json\n create mode 100644 docs/c2_validation.json\n create mode 100644 docs/c2_vitpose_plus_validation.json\n create mode 100644 observation_cache.py\n create mode 100644 tests/run_c2.py\n create mode 100644 tests/test_c2.py\n create mode 100644 tests/validate_c2_full.py\n",
+          "stderr": ""
+        }
+      ]
+    },
+    "calibration": {
+      "schema": "c2-closure-calibration.v1",
+      "matrix_file": "calibration_matrix_playground.json",
+      "matrix_file_sha256": "cc9c644dffa43cffc647f4e02dec34e46a24003bcf7e9c2164d0def983463d90",
+      "matrix_values_unchanged": true,
+      "rank": 3,
+      "determinant": -0.00044660684443182226,
+      "source_image_sha256": "6d923bf2661599c6850c83dae97c666e6a3f54cc6bbc87952583f06b2c8b23d4",
+      "source_video_sha256": "fa1044aa1f3c9d413bdd608d39f8545c593b34457f5ecb6dc80a28beb62cb119",
+      "correspondences": [
+        {
+          "image_xy": [
+            1049.0,
+            595.0
+          ],
+          "ground_xy": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "image_xy": [
+            1184.0,
+            533.0
+          ],
+          "ground_xy": [
+            10.42,
+            0.0
+          ]
+        },
+        {
+          "image_xy": [
+            1666.0,
+            554.0
+          ],
+          "ground_xy": [
+            10.42,
+            11.54
+          ]
+        },
+        {
+          "image_xy": [
+            1674.0,
+            651.0
+          ],
+          "ground_xy": [
+            0.0,
+            11.54
+          ]
+        }
+      ],
+      "level1": "PASS",
+      "level2": "PASS; current image/video hashes equal previously registered scene",
+      "level3": "USER-CONFIRMED SCALE ACCEPTED; independent physical projection accuracy NOT VERIFIED",
+      "geometry_contract": {
+        "mode": "metric",
+        "units": "m",
+        "close_distance": 0.5,
+        "calibration_evidence_level": "user-confirmed",
+        "numerical_fit": {
+          "max_residual_declared_units": 8.529920937804015e-08,
+          "numeric_limit_declared_units": 1.8534955370031657e-06,
+          "basis": "construction floating-point precision",
+          "physical_error_bound": false
+        },
+        "independent_physical_accuracy_verified": false
+      },
+      "manifest_path": ".local\\c2\\closure_20261110\\calibration.user-confirmed.v1.json",
+      "manifest_sha256": "2091e17a9670e2271c3843500d88092cb42b9b084d05073bfb3ad3506077218e",
+      "precision_basis": "calibration_headless.py constructs both source/destination arrays as float32; numeric limit derives from epsilon_float32 times target-coordinate norm, not physical measurements"
+    },
+    "calibration_manifest": {
+      "schema": "calibration.v1",
+      "calibration_id": "playground-user-confirmed-20261110",
+      "verified": false,
+      "verified_by": null,
+      "units": "m",
+      "units_status": "metres; real-world dimensions and landmark relationship confirmed by project owner; no independent physical error measurement",
+      "video_sha256": "fa1044aa1f3c9d413bdd608d39f8545c593b34457f5ecb6dc80a28beb62cb119",
+      "width": 1920,
+      "height": 1080,
+      "source_dimension_basis": "referenced Real_playground.png decoded dimensions",
+      "homography_matrix": [
+        [
+          -0.005251555619201967,
+          0.05861111182145056,
+          -29.36472968922022
+        ],
+        [
+          -0.011842959075642067,
+          -0.02578708830986581,
+          27.766581614718685
+        ],
+        [
+          -0.00015844562800541097,
+          -0.002306154788245617,
+          1.0
+        ]
+      ],
+      "homography_sha256": "811a924be10cc3e214d69ee80d8524bcc1e2f4b40c28741ab0e2a05fed3c53a8",
+      "source_matrix_file": "C:\\Users\\trant\\detection_and_tracking_group\\calibration_matrix_playground.json",
+      "source_matrix_file_sha256": "cc9c644dffa43cffc647f4e02dec34e46a24003bcf7e9c2164d0def983463d90",
+      "source_image": {
+        "path": "C:\\Users\\trant\\detection_and_tracking_group\\Real_playground.png",
+        "sha256": "6d923bf2661599c6850c83dae97c666e6a3f54cc6bbc87952583f06b2c8b23d4"
+      },
+      "correspondences": [
+        {
+          "image_xy": [
+            1049.0,
+            595.0
+          ],
+          "ground_xy": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "image_xy": [
+            1184.0,
+            533.0
+          ],
+          "ground_xy": [
+            10.42,
+            0.0
+          ]
+        },
+        {
+          "image_xy": [
+            1666.0,
+            554.0
+          ],
+          "ground_xy": [
+            10.42,
+            11.54
+          ]
+        },
+        {
+          "image_xy": [
+            1674.0,
+            651.0
+          ],
+          "ground_xy": [
+            0.0,
+            11.54
+          ]
+        }
+      ],
+      "correspondence_provenance": {
+        "file": "calibration_headless.py",
+        "sha256": "db69e7deda0da47849ecf4b95f5a0d86aa2a4f32d1738c7d606bf172e67352a2",
+        "variables": [
+          "MY_POINTS",
+          "REAL_W",
+          "REAL_H"
+        ],
+        "status": "program declarations recovered statically; no independent survey evidence"
+      },
+      "correspondence_tolerance_m": null,
+      "measurement_evidence": {
+        "user_confirmation": {
+          "confirmed_by": "project owner via explicit user instruction",
+          "confirmed_on": "2026-11-10",
+          "source": "C:\\Users\\trant\\.codex\\attachments\\55a4ea2b-aad7-4694-9824-4b320cea5b26\\V\u0103n b\u1ea3n \u0111\u00e3 d\u00e1n.txt",
+          "source_sha256": "db1eb6dbe1be39c32e64d7d303ba96cd2e779bdd7c2842cd399d0de43e77f855",
+          "dimensions_m": [
+            10.42,
+            11.54
+          ],
+          "correspondence_relationship_confirmed": true,
+          "assumption": "the four coded source points correspond in stored order to corners (0,0),(10.42,0),(10.42,11.54),(0,11.54) of the measured coplanar playground rectangle",
+          "localization_accuracy": "not independently measured; landmark identities supplied by their selected code coordinates, not survey certificates"
+        },
+        "prior_draft_claim": {
+          "path": "C:\\Users\\trant\\Downloads\\SCIA Paper Publication\\research_assessment_2026-11-08\\evidence\\samplepaper.txt",
+          "sha256": "e795de5e74cee944c1c949decbb514ac6d1134f304e29bc2119ff1401ede1e9d",
+          "lines": [
+            328,
+            332
+          ],
+          "claim": "Draft section 3.4 describes directly measured coplanar reference points and a 10.42 m by 11.54 m rectangle.",
+          "verification_status": "documented author claim; field point identities, measurement record/confirmation and physical error tolerance not independently established"
+        }
+      },
+      "source_video_compatibility": "supported by dimensions, referenced source image, near-identity static-scene registration; no explicit source-video hash in original export",
+      "video_binding_basis": "C2 source-image dimensions and inspected static-scene registration; not a declaration from the original matrix export",
+      "verification_level": "user-confirmed",
+      "independently_surveyed": false,
+      "physical_projection_error_measured": false,
+      "physical_projection_error_m": null,
+      "correspondence_numeric_dtype": "float32",
+      "measurement_confirmation": {
+        "confirmed_by": "project owner via explicit user instruction",
+        "confirmed_on": "2026-11-10",
+        "source": "C:\\Users\\trant\\.codex\\attachments\\55a4ea2b-aad7-4694-9824-4b320cea5b26\\V\u0103n b\u1ea3n \u0111\u00e3 d\u00e1n.txt",
+        "source_sha256": "db1eb6dbe1be39c32e64d7d303ba96cd2e779bdd7c2842cd399d0de43e77f855",
+        "dimensions_m": [
+          10.42,
+          11.54
+        ],
+        "correspondence_relationship_confirmed": true,
+        "assumption": "the four coded source points correspond in stored order to corners (0,0),(10.42,0),(10.42,11.54),(0,11.54) of the measured coplanar playground rectangle",
+        "localization_accuracy": "not independently measured; landmark identities supplied by their selected code coordinates, not survey certificates"
+      },
+      "numeric_fit_validation": {
+        "max_residual_declared_units": 8.529920937804015e-08,
+        "numeric_limit_declared_units": 1.8534955370031657e-06,
+        "basis": "construction floating-point precision",
+        "physical_error_bound": false
+      }
+    },
+    "metric_and_image_replay_on_master": {
+      "status": "PASS",
+      "metric": {
+        "status": "PASS",
+        "source_frames": [
+          0,
+          3,
+          6,
+          9,
+          12
+        ],
+        "positions_finite": 213,
+        "available_projected_headings_finite_and_unit_length": 148,
+        "excluded_preserved": 5,
+        "maximum_position_numeric_delta_from_independent_matrix_calculation": 9.156272895438633e-07,
+        "numeric_delta_is_physical_error": false,
+        "manifest": "C:\\Users\\trant\\detection_and_tracking_group\\.local\\c2\\closure_20261110\\metric_replay_master\\manifest.json",
+        "manifest_sha256": "f730b4f752f09c3ce33765b8aafedbaeee70d19a22a28ddd741c17abd2a99e5d",
+        "prediction_sha256": "572fa2321730d0cb4f37eefe10991a071d2c858071ef446d8f796b4251a8ae41",
+        "thresholds": {
+          "geometry_mode": "metric",
+          "eps": 1.75,
+          "close_distance": 0.5,
+          "orientation_mode": "B0-original",
+          "alpha": 0.7,
+          "confidence_threshold": 0.6,
+          "min_samples": 2,
+          "threshold_overlap": 0.5,
+          "state_initialization": "reset_at_cache_start"
+        },
+        "geometry": {
+          "mode": "metric",
+          "units": "m",
+          "close_distance": 0.5,
+          "calibration_evidence_level": "user-confirmed",
+          "numerical_fit": {
+            "max_residual_declared_units": 8.529920937804015e-08,
+            "numeric_limit_declared_units": 1.8534955370031657e-06,
+            "basis": "construction floating-point precision",
+            "physical_error_bound": false
+          },
+          "independent_physical_accuracy_verified": false
+        },
+        "calibration_manifest_sha256": "2091e17a9670e2271c3843500d88092cb42b9b084d05073bfb3ad3506077218e"
+      },
+      "fresh_full_image_replay": "C:\\Users\\trant\\detection_and_tracking_group\\.local\\c2\\closure_20261110\\image_replay_master",
+      "fresh_full_image_replay_wall_seconds": 10.671612100035418,
+      "neural_import_guard": "PASS",
+      "fresh_and_two_accepted_prediction_sha256": "49235da70d967a40b2f18ddb7ad8256e0de307eacf6ae7c16cea1d85bcabda6f",
+      "accepted_replays_verified": [
+        ".local\\c2\\full_acceptance_20261109\\replay_a",
+        ".local\\c2\\full_acceptance_20261109\\replay_b"
+      ],
+      "meaning": "default B0/C1 image replay predictions unchanged; metric run uses confirmed scale without physical-accuracy certification"
+    },
+    "preintegration_tests": {
+      "phase": "preintegration",
+      "all_pass": true,
+      "suites": [
+        {
+          "suite": "C1",
+          "argv": [
+            "C:\\Users\\trant\\miniconda3\\envs\\paper-research\\python.exe",
+            "-B",
+            "tests/run_c1.py"
+          ],
+          "exit_code": 0,
+          "wall_seconds": 4.408737699966878,
+          "log": "C:\\Users\\trant\\detection_and_tracking_group\\.local\\c2\\closure_20261110\\preintegration_C1.log",
+          "evidence": "C:\\Users\\trant\\detection_and_tracking_group\\.local\\c1_validation\\run_20261110T095629_277758Z.json",
+          "tests_run": 57,
+          "counts": {
+            "PASS": 56,
+            "SKIP": 1,
+            "FAIL": 0,
+            "ERROR": 0
+          }
+        },
+        {
+          "suite": "C2",
+          "argv": [
+            "C:\\Users\\trant\\miniconda3\\envs\\paper-research\\python.exe",
+            "-B",
+            "tests/run_c2.py"
+          ],
+          "exit_code": 0,
+          "wall_seconds": 25.960472300008405,
+          "log": "C:\\Users\\trant\\detection_and_tracking_group\\.local\\c2\\closure_20261110\\preintegration_C2.log",
+          "evidence": "C:\\Users\\trant\\detection_and_tracking_group\\.local\\c2\\tests_20261110T095654_378325Z.json",
+          "tests_run": 35,
+          "counts": {
+            "PASS": 35,
+            "SKIP": 0,
+            "FAIL": 0,
+            "ERROR": 0
+          }
+        },
+        {
+          "suite": "layout",
+          "argv": [
+            "C:\\Users\\trant\\miniconda3\\envs\\paper-research\\python.exe",
+            "-B",
+            "tests/check_active_layout.py"
+          ],
+          "exit_code": 0,
+          "wall_seconds": 0.2446059999638237,
+          "log": "C:\\Users\\trant\\detection_and_tracking_group\\.local\\c2\\closure_20261110\\preintegration_layout.log",
+          "stdout": "",
+          "stderr": "test_active_sources_compile_without_import_side_effects (__main__.ActiveLayout.test_active_sources_compile_without_import_side_effects) ... ok\ntest_required_calibration_resources (__main__.ActiveLayout.test_required_calibration_resources) ... ok\ntest_root_source_boundary_and_local_imports (__main__.ActiveLayout.test_root_source_boundary_and_local_imports) ... ok\n\n----------------------------------------------------------------------\nRan 3 tests in 0.076s\n\nOK\n"
+        }
+      ]
+    },
+    "postintegration_tests": {
+      "phase": "postintegration",
+      "all_pass": true,
+      "suites": [
+        {
+          "suite": "C1",
+          "argv": [
+            "C:\\Users\\trant\\miniconda3\\envs\\paper-research\\python.exe",
+            "-B",
+            "tests/run_c1.py"
+          ],
+          "exit_code": 0,
+          "wall_seconds": 4.46993919997476,
+          "log": "C:\\Users\\trant\\detection_and_tracking_group\\.local\\c2\\closure_20261110\\postintegration_C1.log",
+          "evidence": "C:\\Users\\trant\\detection_and_tracking_group\\.local\\c1_validation\\run_20261110T100117_715731Z.json",
+          "tests_run": 57,
+          "counts": {
+            "PASS": 56,
+            "SKIP": 1,
+            "FAIL": 0,
+            "ERROR": 0
+          }
+        },
+        {
+          "suite": "C2",
+          "argv": [
+            "C:\\Users\\trant\\miniconda3\\envs\\paper-research\\python.exe",
+            "-B",
+            "tests/run_c2.py"
+          ],
+          "exit_code": 0,
+          "wall_seconds": 27.51559000002453,
+          "log": "C:\\Users\\trant\\detection_and_tracking_group\\.local\\c2\\closure_20261110\\postintegration_C2.log",
+          "evidence": "C:\\Users\\trant\\detection_and_tracking_group\\.local\\c2\\tests_20261110T100144_408108Z.json",
+          "tests_run": 35,
+          "counts": {
+            "PASS": 35,
+            "SKIP": 0,
+            "FAIL": 0,
+            "ERROR": 0
+          }
+        },
+        {
+          "suite": "layout",
+          "argv": [
+            "C:\\Users\\trant\\miniconda3\\envs\\paper-research\\python.exe",
+            "-B",
+            "tests/check_active_layout.py"
+          ],
+          "exit_code": 0,
+          "wall_seconds": 0.2326735999668017,
+          "log": "C:\\Users\\trant\\detection_and_tracking_group\\.local\\c2\\closure_20261110\\postintegration_layout.log",
+          "stdout": "",
+          "stderr": "test_active_sources_compile_without_import_side_effects (__main__.ActiveLayout.test_active_sources_compile_without_import_side_effects) ... ok\ntest_required_calibration_resources (__main__.ActiveLayout.test_required_calibration_resources) ... ok\ntest_root_source_boundary_and_local_imports (__main__.ActiveLayout.test_root_source_boundary_and_local_imports) ... ok\n\n----------------------------------------------------------------------\nRan 3 tests in 0.065s\n\nOK\n"
+        }
+      ]
+    },
+    "full_cache_integrity": {
+      "schema": "c2-full-cache-acceptance.v1",
+      "status": "PASS",
+      "cache": "C:\\Users\\trant\\detection_and_tracking_group\\.local\\c2\\full_acceptance_20261109\\observations",
+      "frames": 600,
+      "source_range": [
+        0,
+        1800
+      ],
+      "stride": 3,
+      "json_value_roundtrip_verified": true,
+      "accounting": {
+        "input_records": 23734,
+        "eligible": 23426,
+        "outside": 12,
+        "occluded": 5316,
+        "successful": 23426,
+        "missing_eligible": 0,
+        "excluded": 308
+      },
+      "exclusions": {
+        "tiny_bbox": 296,
+        "outside": 12
+      },
+      "social_group_reference_counts": {
+        "unreviewed": 22077,
+        "G3": 211,
+        "G4": 102,
+        "G1": 28,
+        "G2": 1200,
+        "G8": 14,
+        "G5": 4,
+        "G7": 8,
+        "G9": 56,
+        "G6": 34
+      },
+      "model": {
+        "model_id": "usyd-community/vitpose-plus-base",
+        "resolved_revision": "92be54d7a29e42fad47b6e2ca01dd9e685a61e0d",
+        "implementation": "transformers.VitPoseForPoseEstimation",
+        "dataset_index": 0,
+        "dataset": "COCO human pose",
+        "joint_order": "COCO17",
+        "configured_joint_labels": {
+          "0": "Nose",
+          "1": "L_Eye",
+          "2": "R_Eye",
+          "3": "L_Ear",
+          "4": "R_Ear",
+          "5": "L_Shoulder",
+          "6": "R_Shoulder",
+          "7": "L_Elbow",
+          "8": "R_Elbow",
+          "9": "L_Wrist",
+          "10": "R_Wrist",
+          "11": "L_Hip",
+          "12": "R_Hip",
+          "13": "L_Knee",
+          "14": "R_Knee",
+          "15": "L_Ankle",
+          "16": "R_Ankle"
+        },
+        "num_experts": 6,
+        "files_sha256": {
+          "config.json": "eeba7e43cd075dd9e24355b5533a128d5abc51d609784b9deb6c8646e07641d5",
+          "preprocessor_config.json": "9b11cadc98c30b968a70cc1658ce1fbd74b721b0f21402a2ff8bc1dc9d1474a0",
+          "model.safetensors": "640225e4a9dd544239f1da0ae36af865a6e76e21e5f33a12656aa7b77fa5a5fa"
+        },
+        "loading": "from_pretrained(model_id, revision=resolved_sha)",
+        "processor_class": "VitPoseImageProcessor",
+        "dtype": "torch.float32"
+      },
+      "model_artifacts_match_reviewed_smoke": true,
+      "smoke_prefix_comparison": {
+        "max_coordinate_delta_pixels": 0.0,
+        "max_score_delta": 0.0
+      },
+      "environment": {
+        "conda_environment": "paper-research",
+        "sys_executable": "C:\\Users\\trant\\miniconda3\\envs\\paper-research\\python.exe",
+        "python": "3.13.0 | packaged by Anaconda, Inc. | (main, Oct  7 2024, 21:21:52) [MSC v.1929 64 bit (AMD64)]",
+        "packages": {
+          "torch": "2.15.0+cu134",
+          "transformers": "5.22.2",
+          "numpy": "2.5.4",
+          "opencv-python": "4.11.0.86",
+          "scikit-learn": "1.9.1"
+        },
+        "git_commit": "0e29b47c51b19841aea97ba28cb8cc5a695aeced",
+        "source_sha256": {
+          "analyze_subgroups.py": "28059b6ff54411848153f927c147b8c0fbf4ca52766a61a45ff0aa37ad2316ea",
+          "c2_pipeline.py": "516b3235afbb6b2163b737ff6a0e6a654a19c92fa85c3b92186287a7f1b8501f",
+          "annotation_io.py": "60fc646acd79b747d4bca4f9c61864f6b101b4d8f39550af5c96865e8e78a60e",
+          "observation_cache.py": "3758b464014773c6302a36870c4454cd1bde7c4b8d290a165e332a27a48ac279",
+          "orientation_utils.py": "5934d5d4813834ca15e5912ac45e907bb5cbcc1232681ba1dfab42ff2b6a098a",
+          "grouping_contracts.py": "0c4f1853d2e7fa82830b52b8d38209d837b86760457f3a3f23d9c820bd98d97c",
+          "identify_group_social.py": "42ddd33685efdd27c1785bf49f709636fddcff1f972a66903d3d4bcd6a9836f8",
+          "orientation_gate.py": "2d4cfa3addc60997daec3c602a8247635111db17a9938f51d122f02e058647f9",
+          "group_identity.py": "6e493a3a4151950672858ad1db8041417b73e34a357fc977675a99ef92d041c4"
+        }
+      },
+      "device": {
+        "requested": "cuda:0",
+        "cuda_available": true,
+        "torch_cuda": "13.4"
+      },
+      "artifacts": {
+        "frames.jsonl": {
+          "bytes": 32886377,
+          "sha256": "7a8efcbc164f6980409e8b3d57a250365152ca44188a3bf463366601a66975b6"
+        },
+        "inference_metrics.json": {
+          "bytes": 22954191,
+          "sha256": "999a2613131e9ce27abcb923aa87ef63522edd725d8e97f2baeb5fafb3743c72"
+        },
+        "manifest.json": {
+          "bytes": 4328,
+          "sha256": "fda85542696711cd50567a20be216ef4d903416423cf4c0b8cec3eb4bcf67366"
+        }
+      },
+      "total_cache_file_bytes": 55844896,
+      "source_sha256": {
+        "video": "fa1044aa1f3c9d413bdd608d39f8545c593b34457f5ecb6dc80a28beb62cb119",
+        "xml": "67addc127c07d98c17d0c160dc03d5f4025e5926dfb4d2d786aa901af37f7f08"
+      },
+      "score_diagnostics": {
+        "range": [
+          0.002183633390814066,
+          1.032530426979065
+        ],
+        "scores_below_0_6": 205626,
+        "scores_are_calibrated_probabilities": false
+      },
+      "performance": {
+        "model_initialization_seconds": 10.263586599961855,
+        "process_wall_seconds": 996.1546337999753,
+        "decoding_and_export_stage_seconds": 977.4031980999862,
+        "decode_seconds": 9.192619599518366,
+        "observation_write_seconds": 2.364569600147661,
+        "model_forward_seconds_total": 677.3545149985002,
+        "forward_seconds_mean": 0.028914646759946223,
+        "forward_seconds_median": 0.026966449979227036,
+        "person_call_seconds_mean": 0.04114753036782663,
+        "person_call_seconds_median": 0.038898250000784174,
+        "preprocess_seconds_total": 212.33937479992164,
+        "postprocess_seconds_total": 74.22815659828484,
+        "persons_per_second_processing_stage": 23.96759090367082,
+        "source_frames_per_second_processing_stage": 1.8416146002991327,
+        "sampled_frames_per_second_processing_stage": 0.6138715334330442,
+        "persons_per_second_including_startup": 23.516429282307456,
+        "source_frames_per_second_including_startup": 1.806948378218792,
+        "sampled_frames_per_second_including_startup": 0.6023161260729307,
+        "cuda_memory": {
+          "model_load_peak_allocated_bytes": 501608960,
+          "after_model_load_allocated_bytes": 501608960,
+          "after_model_load_reserved_bytes": 559939584,
+          "inference_peak_allocated_bytes": 518845440,
+          "inference_peak_reserved_bytes": 589299712
+        },
+        "scope": "single measured oracle-box/oracle-identity run, not a robust benchmark"
+      }
+    },
+    "preservation": {
+      "all_previously_accepted_artifact_files_unchanged": true,
+      "artifact_files_checked": 77,
+      "user_paths_sha256_or_absent": {
+        "Real_playground.png": "6d923bf2661599c6850c83dae97c666e6a3f54cc6bbc87952583f06b2c8b23d4",
+        "Real_playground_2.png": null,
+        "calibration_headless.py": "db69e7deda0da47849ecf4b95f5a0d86aa2a4f32d1738c7d606bf172e67352a2",
+        "calibration_matrix.json": null,
+        "calibration_matrix_PETS09.json": null,
+        "calibration_matrix_based_on_roof.json": null,
+        "calibration_matrix_playground.json": "cc9c644dffa43cffc647f4e02dec34e46a24003bcf7e9c2164d0def983463d90",
+        "calibration_matrix_playground_2.json": null
+      },
+      "packages_unchanged": true,
+      "draw_grid_present_on_arrival": false,
+      "draw_grid_deleted_or_relocated_by_agent": false,
+      "evidence": ".local\\c2\\closure_20261110\\preservation.json",
+      "evidence_sha256": "2a6316ab94025c7a680f552d07f79891cb66778ce772b243c4f1e2f6ea64d45f"
+    },
+    "no_raw_inference_or_cache_regeneration": true,
+    "no_push": true,
+    "push_command_for_user_review": "git push origin master",
+    "current_phase_modified_files": [
+      "grouping_contracts.py",
+      "c2_pipeline.py",
+      "config/calibration.v1.example.json",
+      "tests/test_c2.py",
+      "docs/C2_IMPLEMENTATION_SUMMARY.md",
+      "docs/C2_VALIDATION_REPORT.md",
+      "docs/C2_HANDOFF_TO_C3.md",
+      "docs/c2_full_acceptance.json"
+    ],
+    "limitations": [
+      "user-confirmed physical dimensions and correspondence relationship, not an independent survey",
+      "no independent physical projection-error bound or landmark localization accuracy",
+      "B0 scientific limitations unchanged; incomplete subgroup reference labels are not GT"
+    ],
+    "C3_W3_W4_not_started": true,
+    "previous_master_readiness": "YES for curated tracked C2 observation/replay changes, with documented geometry/workspace limitations; no merge performed"
+  }
 }

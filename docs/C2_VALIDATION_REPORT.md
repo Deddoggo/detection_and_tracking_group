@@ -1,6 +1,75 @@
-# C2 final validation report
+# C2 closure validation — 10 November 2026
 
-2026-11-09 (Europe/Paris). **Executed full-run evidence**, not an extrapolation from the smoke test. Complete machine record: `c2_full_acceptance.json`. Prior records `c2_validation.json` and `c2_vitpose_plus_validation.json` remain historical evidence.
+**C2 closure passes on local master**, implementation `9469fbb03fcd8947830e114aa633af8a366a2552`. Current evidence is `closure` in `docs/c2_full_acceptance.json`; the existing Nov09 full-export data/receipts remain historical and unchanged. No ViTPose inference or observation-cache generation was rerun in this closure.
+
+## Post-integration tests and artifact integrity
+
+Using `C:/Users/trant/miniconda3/envs/paper-research/python.exe` explicitly, both before and after integration:
+
+| Suite/check | Actual result |
+|---|---|
+| C1 | 56 PASS, 1 optional Excel SKIP (openpyxl absent), 57 methods |
+| C2 | 35 PASS; includes user-confirmed scale, identity/hash/unit rejection, no unsupported accuracy claims, precision fit and bounded replay selection |
+| Workspace layout | 3 PASS under the unchanged source-boundary rules |
+| Full accepted cache validation | PASS: all 600 scheduled source frames, 23,426 successful poses, 308 exclusions, no missing eligible poses; original model/source/XML/PTS provenance retained |
+| Prior artifact preservation | PASS: every file captured under the accepted full-run/smoke artifact directories remains byte-identical |
+| Fresh full image replay | PASS with forbidden neural imports guarded; same predictions as both accepted runs |
+| Bounded metric replay | PASS before and after integration, with identical metric prediction hashes |
+| Packages/user files/archive | PASS: package versions, eight user-owned content/absence states and archived original master ref unchanged |
+
+`draw_grid.py` was already absent when this task started. The agent did not delete, move, restore, execute or stage it. Its prior layout failure is historical; current actual-workspace checks all pass without changing the allowlist.
+
+## Calibration: confirmed scale versus independent accuracy
+
+Original file: `calibration_matrix_playground.json`, SHA256 `cc9c644dffa43cffc647f4e02dec34e46a24003bcf7e9c2164d0def983463d90`. Original matrix values and JSON bytes are unchanged. Reference image/source-video compatibility is rechecked through unchanged hashes of the scene previously registered at 1920x1080. Source constants are recovered statically, without executing calibration generation.
+
+| Source point, pixels | Ground point, m |
+|---|---|
+| (1049,595) | (0,0) |
+| (1184,533) | (10.42,0) |
+| (1666,554) | (10.42,11.54) |
+| (1674,651) | (0,11.54) |
+
+The owner confirmed the physical dimensions and their intended relationship to these four selected playground landmarks in the closure instruction. The additive `.local/c2/closure_20261110/calibration.user-confirmed.v1.json` stores the confirmation reference/hash and assumptions; it does not claim named survey markers or independently measured localization error.
+
+- Numerical validity: PASS, rank 3, determinant approximately -0.0004466068444.
+- Source compatibility: PASS with documented scene/hash/correspondence basis; original export had no video identity field, so the additive manifest records its derived binding explicitly.
+- Scale/landmark provenance: accepted as **user-confirmed**; `verified=false` is retained.
+- Independent physical accuracy: **NOT VERIFIED**. No empirical error bound or independent survey is asserted.
+
+Observed four-correspondence residual is approximately 8.5299e-8 declared coordinate units. The numeric limit 1.8535e-6 is computed as float32 machine epsilon times the maximum target-coordinate norm, because calibration_headless.py constructs its correspondence arrays as float32. This checks equation agreement at construction precision; it is not an arbitrarily chosen physical-error tolerance, a measured generalization error, or evidence that other world points have micrometre accuracy. The actual manifest leaves correspondence_tolerance_m null. No H was regenerated.
+
+## Executed bounded metric replay on master
+
+```powershell
+$py = 'C:/Users/trant/miniconda3/envs/paper-research/python.exe'
+& $py -B analyze_subgroups.py replay `
+  --cache '.local/c2/full_acceptance_20261109/observations' `
+  --geometry-mode metric `
+  --calibration '.local/c2/closure_20261110/calibration.user-confirmed.v1.json' `
+  --eps 1.75 --close-distance 0.5 --max-frames 5 `
+  --output '.local/c2/closure_20261110/metric_replay_master'
+```
+
+This already-existing output must not be reused for a new run. The full input cache remains 600 records; replay_selection explicitly records the five selected records at frames 0,3,6,9,12. A first-N limit is validated without mutating/truncating the source cache. State initializes at source frame 0 as before.
+
+Actual results: 213 finite positions; 148 available projected headings are finite and unit length; five ineligible records retain null group predictions and their exclusions. Positions agree with a separate homogeneous-matrix calculation within float32 numerical precision (maximum observed numeric difference 9.1563e-7 declared units, not a physical projection error measurement).
+
+Recipe: eps=1.75 m, close_distance=0.5 m, min_samples=2, B0-original predicate, alpha=0.7, confidence threshold=0.6, overlap threshold=0.5. These preserve current B0/C1 settings, not a retuning for attractive groups. Metric and image-space runs remain separate and their group IDs are not compared as equivalent thresholds.
+
+Metric output: `.local/c2/closure_20261110/metric_replay_master/`; prediction SHA256 `572fa2321730d0cb4f37eefe10991a071d2c858071ef446d8f796b4251a8ae41`. The before-integration metric run has the same prediction SHA. Its manifest records calibration ID, file hash, H hash, units, recipe, user-confirmed evidence level, numerical-fit metadata and independent_physical_accuracy_verified=false.
+
+Fresh post-integration image replay: `.local/c2/closure_20261110/image_replay_master/`; all 600 predictions match SHA256 `49235da70d967a40b2f18ddb7ad8256e0de307eacf6ae7c16cea1d85bcabda6f`, the accepted image diagnostic hash. The import guard blocked torch, transformers, ultralytics, boxmot, inference, huggingface_hub and timm. B0/C1 prediction behavior and accepted raw artifacts remain unchanged.
+
+## Safe integration proof
+
+The C2 source lineage is based on the expected C1 master. All eight unrelated user-modified/deleted paths have identical committed blobs on C1 master and the C2 tip and are disjoint from the curated C2 diff. The guard checked initial staged state, ancestry, exact user hashes/absence and status, then switched to master and ran git -c merge.autoStash=false merge --ff-only codex/c2-observation-cache. It rechecked preservation after both operations. No stash, reset, clean, forced merge, personal-file staging, file relocation, history rewrite or push occurred.
+
+Master integrated at `9469fbb03fcd8947830e114aa633af8a366a2552`; the final closure documentation commit follows verified tests without changing executable source. Feature and archived master refs remain available. Exact commit/file list and command outputs are in `.local/c2/closure_20261110/integration.json`; pre/post tests and preservation are under that directory and embedded/referenced by the existing machine evidence.
+
+## Historical full-export validation — 9 November 2026
+
+The following configuration, person counts, performance and initial image-replay measurements describe the accepted Nov09 full run. They were revalidated from immutable artifacts; inference was not rerun for closure.
 
 ## Configuration and provenance
 
@@ -67,25 +136,3 @@ Both complete runs use the same recorded recipe: image-space-diagnostic, eps=50 
 - Subprocess import guards blocked torch, transformers, ultralytics, boxmot, inference, huggingface_hub and timm throughout each run. No neural model construction/import/download occurred.
 - All original cache file hashes were identical before/after replay. unreviewed remains only an unknown reference attribute, never a negative membership input.
 
-## Existing H: separate validation levels
-
-Actual exported file: `calibration_matrix_playground.json`, nested homography_matrix key, finite 3x3 H, rank 3, determinant -0.0004466068444. Exact requested filename homography_matrix.json was not found in the searched roots; a matrix does exist and was not regenerated or replaced.
-
-| Level | Result | Evidence |
-|---|---|---|
-| 1 Numerical | PASS | Nonsingular/finite; 23,722 visible sampled bbox footpoints project finitely; maximum error reproducing source-declared correspondences 8.53e-8 destination units. |
-| 2 Source-video compatibility | PASS with limited provenance | Referenced image and target video both 1920x1080; source-code points reproduce H; static top-of-image registration against reviewed frame 0 yields 1,223 inliers, near-identity affine and median displacement 0 pixels. Original JSON has no explicit video-hash binding; the additive manifest labels its derived binding. |
-| 3 Physical metric validity | BLOCKED | Draft section 3.4 declares directly measured 10.42x11.54 m dimensions, but the four physical landmark identities, measurement confirmation/record and accepted physical tolerance/verifier are not established. |
-
-The draft statement is recorded with its file hash in calibration_validation.json; it is not silently promoted to independently verified scale. `.local/c2/full_acceptance_20261109/calibration.existing-H.v1.json` preserves H numerically, references original files/hashes and declares verified=false. The metric contract rejected it with 'unverified metric calibration'. No metric grouping replay was labeled successful. Image registration above was a source-compatibility diagnostic, not a new ground calibration.
-
-## Regressions and hygiene after full replay
-
-- C1: **56 PASS / 1 optional Excel SKIP** (openpyxl absent), 57 methods. Native sklearn chain/split tests executed; explicitly substituted C1 cases remain labeled in their receipts.
-- C2: **31 PASS**, including optional old-cache compatibility, z_order preservation, raw schema/round-trip/missingness, geometry rejection, neural-free replay and model/expert contracts.
-- Full artifact acceptance command: PASS on all 600 real records and all 23,426 actual pose calls.
-- Actual workspace layout: **2 PASS / 1 FAIL**, solely the preserved untracked draw_grid.py outside the unchanged root allowlist.
-- Isolated git-archive snapshot of the tracked implementation: **3 PASS** under the exact same layout test. It excludes user-owned untracked/uncommitted work and does not repair/delete that work.
-- User inputs/images/matrices/scripts, source video/XML, old smoke artifacts and package versions were verified unchanged. Master/archive refs were not moved; no merge was run.
-
-See C2_HANDOFF_TO_C3.md for exact commands and remaining inputs. Complete logs/receipts are under `.local/c2/full_acceptance_20261109/`; no prior run or report artifact was overwritten. Existing primary reports were updated as requested.
