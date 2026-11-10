@@ -68,14 +68,34 @@ def geometry_contract(mode, H=None, *, calibration=None, video=None, close_dista
     """
     if mode not in ('metric', 'image-space-diagnostic', 'legacy-b0'):
         raise ValueError('explicit geometry mode required')
+    evidence_level = None
+    numerical_fit = None
     if mode == 'metric':
         from observation_cache import canonical_hash
         if H is None or calibration is None or video is None:
             raise ValueError('metric grouping requires verified calibration provenance and video identity')
-        if (calibration.get('schema') != 'calibration.v1' or calibration.get('verified') is not True
-                or calibration.get('units') != 'm' or not calibration.get('calibration_id')
-                or not calibration.get('verified_by') or not calibration.get('measurement_evidence')):
+        _,_,H = validate_grouping_inputs([],[],homography_matrix=H)
+        user_confirmed = calibration.get('verification_level') == 'user-confirmed'
+        if (calibration.get('schema') != 'calibration.v1' or calibration.get('units') != 'm'
+                or not calibration.get('calibration_id') or not calibration.get('measurement_evidence')):
             raise ValueError('unverified metric calibration')
+        if user_confirmed:
+            confirmation = calibration.get('measurement_confirmation', {})
+            if (not isinstance(confirmation,dict) or calibration.get('verified') is not False
+                    or confirmation.get('correspondence_relationship_confirmed') is not True
+                    or not all(confirmation.get(k) for k in ('confirmed_by','confirmed_on','source','source_sha256'))
+                    or calibration.get('independently_surveyed') is not False
+                    or calibration.get('physical_projection_error_measured') is not False
+                    or calibration.get('physical_projection_error_m') is not None
+                    or calibration.get('correspondence_tolerance_m') is not None):
+                raise ValueError('user-confirmed scale must not claim independent physical verification/error bounds')
+            evidence_level = 'user-confirmed'
+        else:
+            # Backward-compatible assertion contract. This flag alone is not a
+            # certificate of independent survey or measured projection accuracy.
+            if calibration.get('verified') is not True or not calibration.get('verified_by'):
+                raise ValueError('unverified metric calibration')
+            evidence_level = 'legacy-verified-assertion'
         for key in ('video_sha256', 'width', 'height'):
             if calibration.get(key) != video.get(key):
                 raise ValueError(f'calibration/video identity mismatch: {key}')
@@ -90,14 +110,32 @@ def geometry_contract(mode, H=None, *, calibration=None, video=None, close_dista
         ground_points = np.asarray([p['ground_xy'] for p in points],dtype=float)
         if not np.isfinite(image_points).all() or not np.isfinite(ground_points).all():
             raise ValueError('nonfinite calibration correspondence')
-        tolerance = calibration.get('correspondence_tolerance_m')
-        if tolerance is None or not np.isfinite(tolerance) or tolerance <= 0:
-            raise ValueError('explicit positive correspondence_tolerance_m required')
+        if user_confirmed:
+            dimensions = np.asarray(confirmation.get('dimensions_m'),dtype=float)
+            if dimensions.shape != (2,) or not np.isfinite(dimensions).all() or np.any(dimensions <= 0):
+                raise ValueError('confirmed positive rectangle dimensions required')
+            w,h = dimensions
+            if not np.array_equal(ground_points,[[0,0],[w,0],[w,h],[0,h]]):
+                raise ValueError('ground correspondences differ from confirmed rectangle/order')
+            precision = calibration.get('correspondence_numeric_dtype')
+            if precision not in ('float32','float64'):
+                raise ValueError('documented construction precision required for numerical fit check')
+            # A representation-precision check only: source construction explicitly
+            # used float32 targets. This is NOT a physical projection error bound.
+            tolerance = float(np.finfo(precision).eps * max(1.,np.linalg.norm(ground_points,axis=1).max()))
+        else:
+            tolerance = calibration.get('correspondence_tolerance_m')
+            if tolerance is None or not np.isfinite(tolerance) or tolerance <= 0:
+                raise ValueError('explicit positive correspondence_tolerance_m required')
         check_projection_points(image_points,H)
         homogeneous = np.column_stack([image_points,np.ones(len(image_points))]) @ H.T
         projected = homogeneous[:,:2]/homogeneous[:,2:]
-        if np.max(np.linalg.norm(projected-ground_points,axis=1)) > tolerance:
+        residual = float(np.max(np.linalg.norm(projected-ground_points,axis=1)))
+        if residual > tolerance:
             raise ValueError('homography does not reproduce supplied ground correspondences')
+        numerical_fit = {'max_residual_declared_units':residual,'numeric_limit_declared_units':tolerance,
+                         'basis':'construction floating-point precision' if user_confirmed else 'supplied legacy fit tolerance',
+                         'physical_error_bound':False}
         units = 'm'
     elif mode == 'image-space-diagnostic':
         if H is not None or close_distance is None:
@@ -108,7 +146,11 @@ def geometry_contract(mode, H=None, *, calibration=None, video=None, close_dista
     close_distance = .5 if close_distance is None else close_distance
     if not np.isfinite(close_distance) or close_distance <= 0:
         raise ValueError('close_distance must be finite and positive')
-    return {'mode': mode, 'units': units, 'close_distance': float(close_distance)}
+    result = {'mode': mode, 'units': units, 'close_distance': float(close_distance)}
+    if mode == 'metric':
+        result.update(calibration_evidence_level=evidence_level,numerical_fit=numerical_fit,
+                      independent_physical_accuracy_verified=False)
+    return result
 
 
 def project_geometry(bboxes, pose_vectors, H, scale_factor=1.0, *, image_directions=False):

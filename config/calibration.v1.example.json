@@ -3,6 +3,12 @@
   "calibration_id": "REPLACE_WITH_MEASUREMENT_IDENTIFIER",
   "verified": false,
   "verified_by": null,
+  "verification_level": "unverified",
+  "measurement_confirmation": null,
+  "correspondence_numeric_dtype": null,
+  "independently_surveyed": false,
+  "physical_projection_error_measured": false,
+  "physical_projection_error_m": null,
   "units": "m",
   "video_sha256": null,
   "width": 1920,
@@ -12,5 +18,5 @@
   "correspondences": [],
   "correspondence_tolerance_m": null,
   "measurement_evidence": null,
-  "note": "Template only. Supply actual H, canonical_hash(H), image_xy/ground_xy correspondences, physical evidence and verification. Do not set verified=true for an unverified matrix."
+  "note": "Template only. User-confirmed scale requires explicit owner confirmation, dimensions/correspondence relationship and documented construction precision; retain verified=false and no empirical error bound. Existing legacy verified-assertion manifests remain supported. Numerical fit tolerance is not physical accuracy."
 }

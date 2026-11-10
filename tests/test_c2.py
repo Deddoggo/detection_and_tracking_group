@@ -209,6 +209,42 @@ class GeometryTests(unittest.TestCase):
         np.testing.assert_array_equal(X,[[10,40]])
         np.testing.assert_array_equal(v,[[1,0]])
 
+    def user_calibration(self,m,H):
+        c=self.calibration(m,H)
+        c.update(verified=False,verified_by=None,verification_level='user-confirmed',
+                 correspondence_tolerance_m=None,correspondence_numeric_dtype='float32',
+                 independently_surveyed=False,physical_projection_error_measured=False,
+                 physical_projection_error_m=None,
+                 measurement_confirmation={'confirmed_by':'SYNTHETIC TEST ONLY','confirmed_on':'2026-11-10',
+                    'source':'synthetic fixture','source_sha256':'c'*64,'dimensions_m':[1.,1.],
+                    'correspondence_relationship_confirmed':True})
+        return c
+
+    def test_user_confirmed_scale_without_independent_error_claim(self):
+        m=manifest();H=np.eye(3);c=self.user_calibration(m,H)
+        result=geometry_contract('metric',H,calibration=c,video=m)
+        self.assertEqual(result['calibration_evidence_level'],'user-confirmed')
+        self.assertFalse(result['independent_physical_accuracy_verified'])
+        self.assertFalse(result['numerical_fit']['physical_error_bound'])
+        self.assertAlmostEqual(result['numerical_fit']['numeric_limit_declared_units'],np.finfo('float32').eps*np.sqrt(2))
+
+    def test_user_confirmation_does_not_bypass_identity_or_accuracy_safety(self):
+        m=manifest();H=np.eye(3);c=self.user_calibration(m,H)
+        changes=[{'verified':True},{'measurement_confirmation':{}},{'independently_surveyed':True},
+                 {'physical_projection_error_measured':True},{'physical_projection_error_m':.01},
+                 {'correspondence_tolerance_m':.1},{'correspondence_numeric_dtype':None},
+                 {'video_sha256':'d'*64},{'homography_sha256':'bad'},{'units':'pixels'}]
+        for change in changes:
+            with self.subTest(change=change),self.assertRaises(ValueError):
+                geometry_contract('metric',H,calibration=dict(c,**change),video=m)
+        wrong=copy.deepcopy(c);wrong['measurement_confirmation']['dimensions_m']=[2.,2.]
+        with self.assertRaises(ValueError):geometry_contract('metric',H,calibration=wrong,video=m)
+
+    def test_numeric_user_confirmed_fit_rejects_wrong_homography(self):
+        m=manifest();H=np.eye(3);H[0,2]=.001;c=self.user_calibration(m,H)
+        with self.assertRaisesRegex(ValueError,'ground correspondences'):
+            geometry_contract('metric',H,calibration=c,video=m)
+
     def test_image_mode_requires_explicit_pixel_policy(self):
         with self.assertRaises(ValueError):geometry_contract('image-space-diagnostic')
         with self.assertRaises(ValueError):geometry_contract('image-space-diagnostic',np.eye(3),close_distance=10)
@@ -287,6 +323,30 @@ class ReplayTests(unittest.TestCase):
         r=self.runner(manifest());r.process(frame(0))
         with self.assertRaises(ValueError):r.process(frame(6))
         with self.assertRaises(ValueError):self.runner(manifest()).process(frame(3))
+
+    def test_bounded_replay_selection_keeps_source_cache_immutable(self):
+        from types import SimpleNamespace
+        from c2_pipeline import replay_cache
+        from annotation_io import file_sha256
+        with tempfile.TemporaryDirectory() as d:
+            cache=Path(d)/'cache';out=Path(d)/'bounded'
+            writer=CacheWriter(cache,manifest())
+            for i in (0,3,6):writer.append(frame(i))
+            writer.close(complete=True)
+            before={f:file_sha256(cache/f) for f in ('manifest.json','frames.jsonl')}
+            args=SimpleNamespace(cache=str(cache),output=str(out),calibration=None,
+                geometry_mode='image-space-diagnostic',eps=50,close_distance=10,
+                orientation_mode='B0-original',max_frames=2)
+            replay_cache(args)
+            result=json.loads((out/'manifest.json').read_text())
+            self.assertEqual(result['frame_records'],2)
+            self.assertEqual(result['replay_selection']['source_cache_records'],3)
+            self.assertEqual(result['replay_selection']['last_source_frame'],3)
+            self.assertEqual(before,{f:file_sha256(cache/f) for f in before})
+            for limit in (0,4):
+                args.max_frames=limit;args.output=str(Path(d)/('bad'+str(limit)))
+                with self.assertRaises(ValueError):replay_cache(args)
+                self.assertFalse(Path(args.output).exists())
 
     def test_cli_replay_does_not_import_neural_modules(self):
         with tempfile.TemporaryDirectory() as d:

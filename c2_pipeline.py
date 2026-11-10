@@ -261,6 +261,12 @@ class GroupingReplay:
 
 def replay_cache(args):
     manifest,rows = read_cache(args.cache)
+    source_count = len(rows)
+    limit = getattr(args,'max_frames',None)
+    if limit is not None:
+        if isinstance(limit,bool) or not isinstance(limit,int) or limit < 1 or limit > source_count:
+            raise ValueError('max_frames must be within the validated cache record count')
+        rows = rows[:limit]
     calibration = json.loads(Path(args.calibration).read_text(encoding='utf8')) if args.calibration else None
     runner = GroupingReplay(manifest,geometry_mode=args.geometry_mode,eps=args.eps,
         close_distance=args.close_distance,calibration=calibration,orientation_mode=args.orientation_mode)
@@ -271,7 +277,12 @@ def replay_cache(args):
         'observation_cache':str(Path(args.cache).resolve()),'observation_inference_kind':manifest['inference_kind'],
         'video_sha256':manifest['video_sha256'],'id_namespace':manifest['id_namespace'],
         'source_range':{k:manifest[k] for k in ('start_frame','end_frame_exclusive','stride')},
-        'calibration':calibration,'provenance':provenance(),'labels_are':'predictions/pre-annotations, not ground truth',
+        'replay_selection':{'source_cache_records':source_count,'selected_records':len(rows),
+                            'max_frames':limit,'first_source_frame':rows[0]['source_frame'],
+                            'last_source_frame':rows[-1]['source_frame']},
+        'calibration':calibration,
+        'calibration_manifest_sha256':file_sha256(args.calibration) if args.calibration else None,
+        'provenance':provenance(),'labels_are':'predictions/pre-annotations, not ground truth',
         'reference_input_kind':manifest.get('input_kind'),'source_time_base':manifest['time_base']}
     write_new_json(out/'manifest.json',run)
     with (out/'predictions.jsonl').open('x',encoding='utf8') as handle:
@@ -306,7 +317,8 @@ def main(argv=None):
     replay.add_argument('--geometry-mode',choices=['metric','image-space-diagnostic','legacy-b0'],required=True)
     replay.add_argument('--eps',type=float,required=True,help='In explicitly selected coordinate units')
     replay.add_argument('--close-distance',type=float)
-    replay.add_argument('--calibration',help='Verified calibration.v1 including homography_matrix')
+    replay.add_argument('--calibration',help='calibration.v1 with accepted metric-scale provenance and homography_matrix')
+    replay.add_argument('--max-frames',type=int,help='Replay only the first N validated sampled records; input remains immutable')
     replay.add_argument('--orientation-mode',choices=['B0-original','proximity-only','signed-dyad-diagnostic'],default='B0-original')
     args = parser.parse_args(argv)
     {'validate-data':validate_data,'cache':export_cache,'replay':replay_cache}[args.command](args)
