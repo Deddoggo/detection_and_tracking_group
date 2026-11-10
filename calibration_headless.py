@@ -79,10 +79,10 @@ if __name__ == "__main__":
         # For example: These are the assumed coordinates of the 4 legs of the red-roofed gazebo (You must edit these numbers yourself)
         # Order: Top-Left -> Top-Right -> Bottom-Right -> Bottom-Left
         MY_POINTS = [
-            (854, 633),  # Point 1 (x, y)
-            (1007, 553),  # Point 2
-            (1454, 552),  # Point 3
-            (1462, 639)   # Point 4
+            (1049, 595),  # Point 1 (x, y)
+            (1184, 533),  # Point 2
+            (1666, 554),  # Point 3
+            (1674, 651)   # Point 4
         ]
         
         # 1. Enter points
